@@ -16,12 +16,8 @@ Når et spil er slut vil spilleren blive givet en endelig score, og få mulighed
 Statisk Web-Side bygget med HTML, CSS & JavaScript m. WebComponents
 
 ### Backend Webserver
-C# .NET HttpListener baseret webserver
+C# [System.Net.HttpListener](https://learn.microsoft.com/en-us/dotnet/api/system.net.httplistener) baseret webserver
 
 ### Database
 SQLite
-.NET bibliotek System.Data.SqlClient benyttes til at kommunikere med databasen
-
-
-
-
+.NET bibliotek [Microsoft.Data.Sqlite](https://www.nuget.org/packages/Microsoft.Data.Sqlite) benyttes til at kommunikere med databasen
