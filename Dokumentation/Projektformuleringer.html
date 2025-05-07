@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Projektformuleringer.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<style>body{width: 210mm;}</style>
+<h1 id="problemformulering">Problemformulering</h1>
+<p>I min familie har vi over de sidste par år haft en hygge-konkurence kørrende i hvem der kan få den højeste score i spillet Woodoku. Min mor desværre udelukket fra kunkorrencen da Woodoku ikke er cross-platform og kun virker på Android.
+Spillet er derudover fyldt med abrydelser og lange ventetider i form af reklame-bombadament, pop-ups, irriterende forsøg på &quot;Engagement Farming&quot; og et hav af Performance problemer, som tilsammen resultere i en unødvændigt frusterende spiloplevelse.
+Den interne hygge-konkurence er også forværret af at Woodoku, uden at informere brugeren, justere sværhedsgraden. Hvilket gør at high-scores ikke er sammenlignelige</p>
+<p>Mit projekt går derfor ud på at bygge et cross-platform alternativ, fri for de frustrationspunkter som findes i Woodoku:</p>
+<ul>
+<li>Kan det lade sig gøre, via. simple web-teknologier, at bygge et cross-platform alternativ til Woodoku?</li>
+<li>Kan jeg levere en bedre spiloplevelse, fri for abrydelser og lange ventetider?</li>
+<li>Er det muligt at levere en mere tilgængelig og sammenlignelig konkurrence?</li>
+</ul>
+<h1 id="kravspecifikation">Kravspecifikation</h1>
+<h2 id="performance-krav">Performance Krav</h2>
+<p>En vigtig del af spiloplevelsen er performance. Hvis performance halter og brugeren f.eks skal vente længe på at spillet loader eller kommunikere med serveren, så er spillet simpelthen mindre sjovt.
+Der stilles derfor følgende krav til performance:</p>
+<ul>
+<li>Der må ikke forkomme ventetider for brugeren på over <code>1000 ms</code>, og skal i gennemsnit være under <code>20ms</code></li>
+<li>Web-Responstid må ikke overstige <code>ping + 1000ms</code>, og skal i gennemsnit være under <code>ping + 20ms</code></li>
+</ul>
+<h2 id="krav-til-gameplay">Krav til gameplay</h2>
+<ul>
+<li>Det skal være muligt at starte et nyt spil, også selvom du har gang i et eksisterende</li>
+<li>Brikkerne skal kunne trækkes ud på brættet, både på mobil og desktop</li>
+<li>Før en brik placeres skal det tydeligt fremgå præcist hvilke celler som brikken kommer til at fylde, samt hvorvidt en række/kolonne/gruppe vil blive ryddet som resultat</li>
+<li>Den nuværende score skal tydeligt fremgå af brugerfladen</li>
+<li>Det skal fremgå af ikke placerede brikker hvorvidt de kan placeres på brættet eller ej</li>
+<li>Spilleren præsenteres for 3 brikker af gangen, som alle sammen skal placeres på brættet før 3 nye brikker præsenteres. Kan splilleren ikke placere en brik ikke placeres er spillet slut</li>
+<li>Når nye brikker generes skal mindst 1 af de 3 nye brikker kunne placeres på brættet</li>
+<li>Når en bruge slår sin personlige highscore skal de have mulighed for at uploade den til leaderboard</li>
+<li>Det skal være muligt at genoptage ikke-færdiggjorte spil</li>
+<li>Spillet skal huske brugerens high-score</li>
+<li>Det skal være muligt for brugeren at vælge et username / tag, som vises på leaderboard.</li>
+</ul>
+<h2 id="krav-til-teknologi">Krav til teknologi</h2>
+<ul>
+<li>Spil-siden skal kunne hentes i sin helhed, så der ikke kræves internet i løbet af spillet</li>
+<li>Tilfældigheden i spillet skal være baseret på et seed</li>
+<li>Når en ny high-score uploades skal WebServeren kunne validere at alle træk taget i løbet af spillets gang var tilladte.</li>
+<li>Spillet skal kunne encodes på en deterministisk måde, så det kan genspilles og valideres. <em>(Replay Encoding)</em></li>
+<li>Databasen skal opbevarer leaderboards over high-scores</li>
+<li>Databasen skal opbevarer replays af spil, med tilknyttet username og tidspunkt</li>
+<li>Replay Encoding formatet skal som minimum indeholde information omkring følgende:
+<ul>
+<li>Format Version</li>
+<li>Tilfældigheds Seed</li>
+<li>Tilfældigheds Algoritme</li>
+<li>De træk som brugeren har taget, i den rækkefølge de tog dem</li>
+</ul>
+</li>
+</ul>
+<h2 id="must-have">Must Have</h2>
+<ul>
+<li>
+<p>Brugerne skal kunne &quot;drag n drop&quot; brikkerne på brættet</p>
+</li>
+<li>
+<p>Spillet skal give brugeren point for hver blok placeret og ryddet</p>
+</li>
+<li>
+<p>Når spilleren gives nye brikker, skal mindst èn af disse brikker kunne placeres på brættet, så det altid er en brugerhandlig som resultere i at et spil slutter</p>
+</li>
+<li>
+<p>Applikationen skal kun sende netværkstrafik hvor nødvændigt for at kommunikere med servere</p>
+</li>
+<li>
+<p>Skal kunne virke i følgende browsere: Chrome til Android, Chrome til Windows, Safari på iOS</p>
+</li>
+<li>
+<p>Spillet skal ikke justere sværhedsgraden, så high-scores altid forbliver sammenlignelige</p>
+</li>
+<li></li>
+<li>
+<p>En brugers score skal kunne rankeres og vises på leaderboard</p>
+</li>
+<li></li>
+<li>
+<p>Spillet skal slutte når en bruger løber tør for placer-bare brikker.</p>
+</li>
+<li>
+<p>Brugeren skal præsenteres for 3 brikker hver runde, hvoraf mindst èn kan placeres.</p>
+</li>
+</ul>
+<h2 id="should-have">Should have</h2>
+<ul>
+<li>Maks responstid på alle handlinger skal være under 1 sekund</li>
+<li>Mulighed for at uploade spil til serveren, og få dem vist på et leaderboard</li>
+</ul>
+<h2 id="could-have">Could have</h2>
+<ul>
+<li>Mulighed for at logge ind og beholde sin highscore på tværs af enheder</li>
+<li>Mulighed for at brugeren customize tema og farver</li>
+</ul>
+<h2 id="wont-have">Won't have</h2>
+<ul>
+<li>Al funktionalitet skal kunne tilgås &quot;anonymt&quot;. Altså uden at logge ind.</li>
+</ul>
+
+</body>
+</html>
