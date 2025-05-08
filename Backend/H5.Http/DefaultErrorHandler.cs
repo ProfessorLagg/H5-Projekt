@@ -10,9 +10,20 @@ public class DefaultErrorHandler : IRequestErrorHandler {
 
     public DefaultErrorHandler() { }
 
+    private void Empty(HttpListenerContext context, HttpStatusCode statusCode) {
+        context.Response.SetStatus(statusCode);
+    }
+
+    private void Html(HttpListenerContext context, HttpStatusCode statusCode) {
+        context.Response.SetStatus(statusCode);
+        context.Response.Html($"<h3>Error: {((int)statusCode).ToString("0")} - {statusCode.ToString()}</h3>");
+    }
+
     public void Handle(HttpListenerContext context, HttpStatusCode statusCode) {
-        // TODO Should handle differently based on request content type
-        throw new NotImplementedException();
+        switch (context.Request.ContentType) {
+            case "text/html": Html(context, statusCode); break;
+            default: Empty(context, statusCode); break;
+        }
     }
 }
 
