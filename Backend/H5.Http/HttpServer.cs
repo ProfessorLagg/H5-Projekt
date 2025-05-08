@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using System;
 using System.Collections.Concurrent;
@@ -13,19 +14,17 @@ public sealed class HttpServer {
     private readonly Dictionary<HttpRoute, IRequestHandler> Handlers = new();
     private readonly IRequestErrorHandler ErrorHandler;
     private object DefitionLock = new();
-    private ILogger? Logger = null;
+    private ILogger Logger;
     public bool Running { get; private set; } = false;
 
 
     public HttpServer(IRequestErrorHandler errorHandler, ILogger? logger) {
         this.ErrorHandler = errorHandler;
-        this.Logger = logger;
-    }
 
-    private void WriteLog(LogLevel level, string message) {
-        if (this.Logger is null) return;
-        this.Logger.Log(level, message);
+        this.Logger = logger ?? NullLogger.Instance;
     }
+    public HttpServer() : this(new DefaultErrorHandler(), null) { }
+    public HttpServer(ILogger logger) : this(new DefaultErrorHandler(), logger) { }
 
     /// <summary>
     /// Adds a request handler to the <see cref="HttpServer"/>, and binds it to a specific route.
@@ -43,6 +42,15 @@ public sealed class HttpServer {
             }
         }
     }
+    /// <summary>
+    /// Adds a request handler to the <see cref="HttpServer"/>, and binds it to a specific route.
+    /// Fails if the route is already mapped, or if the server is running
+    /// </summary>
+    /// <param name="route">The route to handle</param>
+    /// <param name="handler">The handler to add</param>
+    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    public void AddHandler(string route, IRequestHandler handler) { this.AddHandler(new HttpRoute(route), handler); }
 
     // TODO Summary
     public void AddIncomingMiddleWare(IMiddleware middleware) {
@@ -70,8 +78,12 @@ public sealed class HttpServer {
 
         return null;
     }
-
+    private void LogRequest(HttpListenerRequest request) {
+        // TODO Gotta have settings for this
+        this.Logger.LogInformation($"Recieved request on {request.RawUrl ?? "unkown route"}");
+    }
     private void HandleRequest(HttpListenerContext context) {
+        LogRequest(context.Request);
         for (int i = 0; i < this.IncomingMiddleware.Count; i++) {
             if (!this.IncomingMiddleware[i].Handle(context)) return;
         }
@@ -96,6 +108,7 @@ public sealed class HttpServer {
         this.Running = true;
         lock (DefitionLock) {
             HttpListener listener = new();
+            listener.Prefixes.Add("http://localhost:80/");
             listener.Start();
             while (listener.IsListening) {
                 HttpListenerContext context = listener.GetContext();
@@ -103,12 +116,14 @@ public sealed class HttpServer {
                     HandleRequest(context);
                 }
                 catch (Exception e) {
-                    this.WriteLog(LogLevel.Warning, e.ToString());
+                    this.Logger.LogWarning(e.ToString());
                     this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
                 }
 
                 context.Response.Close();
             }
+            if (listener.IsListening) { listener.Stop(); }
+            listener.Close();
         }
     }
 }

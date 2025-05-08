@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.Swift;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,9 +22,10 @@ public sealed record class HttpRoute {
     public HttpRoute(string url) : this(ParsedUri.Parse(url)) { }
 
 
+
     public bool Match(string url) {
-        // TODO
-        throw new NotImplementedException();
+        ParsedUri uri = ParsedUri.Parse(url);
+        return this.Uri.Path == uri.Path;
     }
 
     public override string ToString() {

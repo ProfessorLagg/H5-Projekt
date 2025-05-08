@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H5.API.RequestHandlers {
+namespace H5.Http {
     public class DefaultErrorHandler : IRequestErrorHandler {
         public void Handle(HttpListenerContext context, HttpStatusCode statusCode) {
             // TODO

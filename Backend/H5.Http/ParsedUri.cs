@@ -1,4 +1,5 @@
 ﻿using System.Security;
+using System.Text;
 
 namespace H5.Http;
 
@@ -112,36 +113,36 @@ public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string>
     public override string ToString() {
         StringBuilder sb = new StringBuilder();
         // Scheme
-        if (this._Scheme.Length > 0) {
+        if (this.Scheme.Length > 0) {
             sb.Append(this.Scheme);
             sb.Append("://");
         }
         // UserInfo
-        if (this._UserInfo.Length > 0) {
+        if (this.UserInfo.Length > 0) {
             sb.Append(this.UserInfo);
             sb.Append('@');
         }
         // Host
-        sb.Append(this._Host);
+        sb.Append(this.Host);
         // Port
-        if (this._Port.Length > 0) {
+        if (this.Port.Length > 0) {
             sb.Append(':');
             sb.Append(this.Port);
         }
         // Path
-        if (this._Path.Length > 0) {
+        if (this.Path.Length > 0) {
             sb.Append('/');
             sb.Append(this.Path);
         }
         // Query
-        if (this._Query.Length > 0) {
+        if (this.Query.Length > 0) {
             sb.Append("?");
             sb.Append(this.Query);
         }
         // Fragment
-        if (this._Fragment.Length > 0) {
+        if (this.Fragment.Length > 0) {
             sb.Append('#');
-            sb.Append(this._Fragment);
+            sb.Append(this.Fragment);
         }
         return sb.ToString();
     }
