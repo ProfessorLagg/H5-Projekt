@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Primitives;
 
 using System;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Text;
 using System.Xml;
 
 namespace H5.Http;
@@ -82,6 +84,24 @@ public sealed class HttpServer {
         // TODO Gotta have settings for this
         this.Logger.LogInformation($"Recieved request on {request.RawUrl ?? "unkown route"}");
     }
+    private void LogResponse(HttpListenerResponse response) {
+        const string spacer = "  ";
+        LogLevel level = LogLevel.Information;
+        if (response.StatusCode < 200 || response.StatusCode > 299) {
+            level = LogLevel.Error;
+        }
+        StringBuilder msgbuilder = new();
+        msgbuilder.AppendLine("HTTP Response:");
+        msgbuilder.Append(spacer);
+        msgbuilder.AppendLine($"{response.GetHTTPVersionString()} {((int)response.StatusCode).ToString()} {response.StatusDescription}");
+        for (int i = 0; i < response.Headers.Count; i++) {
+            msgbuilder.Append(spacer);
+            msgbuilder.Append(response.Headers.Keys[i] ?? "");
+            msgbuilder.Append(": ");
+            msgbuilder.AppendLine(response.Headers[i] ?? "");
+        }
+        this.Logger.Log(level, msgbuilder.ToString());
+    }
     private void HandleRequest(HttpListenerContext context) {
         LogRequest(context.Request);
         for (int i = 0; i < this.IncomingMiddleware.Count; i++) {
@@ -101,6 +121,7 @@ public sealed class HttpServer {
         }
     }
 
+
     /// <summary>
     /// Blocks the calling thread to run the WebServer
     /// </summary>
@@ -119,7 +140,7 @@ public sealed class HttpServer {
                     this.Logger.LogWarning(e.ToString());
                     this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
                 }
-
+                LogResponse(context.Response);
                 context.Response.Close();
             }
             if (listener.IsListening) { listener.Stop(); }
