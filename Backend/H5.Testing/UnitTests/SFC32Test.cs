@@ -47,9 +47,5 @@ internal class SFC32 : IUnitTest {
         this.TestInt();
         this.TestFloat();
         this.TestJavaScriptCompat();
-
-
-
-
     }
 }
