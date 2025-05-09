@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H5.DB", "H5.DB\H5.DB.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H5.Http", "H5.Http\H5.Http.csproj", "{569C1B70-4DC6-4B98-A487-F7F70511383A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H5.PRNG", "H5.PRNG\H5.PRNG.csproj", "{37819996-47DB-407A-A975-D7E6C9483A2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,8 +29,15 @@ Global
 		{569C1B70-4DC6-4B98-A487-F7F70511383A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{569C1B70-4DC6-4B98-A487-F7F70511383A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{569C1B70-4DC6-4B98-A487-F7F70511383A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37819996-47DB-407A-A975-D7E6C9483A2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37819996-47DB-407A-A975-D7E6C9483A2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37819996-47DB-407A-A975-D7E6C9483A2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37819996-47DB-407A-A975-D7E6C9483A2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C11441B-C7F9-4C02-B648-C9648D98D813}
 	EndGlobalSection
 EndGlobal

@@ -22,7 +22,7 @@ class sfc32 {
      * 
      * @returns Random integer between 0 and 2^32
      */
-    int() {
+    nextInt() {
         let t = (this.state[0] + this.state[1]) + this.state[3];
         this.state[3] = this.state[3] + 1;
         this.state[0] = this.state[1] ^ (this.state[1] >>> 9);
@@ -39,7 +39,7 @@ class sfc32 {
      * 
      * @returns Random float between 0.0 and 1.0
      */
-    float() {
-        return this.int() / 4294967296;
+    nextFloat() {
+        return this.nextInt() / 4294967296;
     }
 }

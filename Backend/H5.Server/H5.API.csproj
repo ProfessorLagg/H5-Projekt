@@ -17,6 +17,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\H5.DB\H5.DB.csproj" />
 		<ProjectReference Include="..\H5.Http\H5.Http.csproj" />
+		<ProjectReference Include="..\H5.PRNG\H5.PRNG.csproj" />
 	</ItemGroup>
 
 </Project>
