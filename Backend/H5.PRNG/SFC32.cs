@@ -24,7 +24,7 @@ public unsafe class SFC32 {
         State.u32[2] = State.u32[2] << 21 | State.u32[2] >>> 11;
         State.u32[2] = State.u32[2] + t;
         this.Count += 1;
-        return t >>> 0;
+        return t;
     }
 
     /// <returns>Random float between 0.0 and 1.0</returns>

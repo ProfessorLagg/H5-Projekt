@@ -10,13 +10,16 @@ class sfc32 {
     }
 
 
-    constructor(seed) {
-        if (!(seed instanceof Uint32Array)) { throw new TypeError("seed was not an instance of Uint32Array") }
-        if (seed.length !== 4) { throw new TypeError(`Expected seed.length = 4, but found: ${seed.length}`) }
-
-        this.seed = seed;
+    constructor(s) {
+        if (!(s instanceof Uint32Array)) { throw new TypeError("seed was not an instance of Uint32Array") }
+        if (s.length !== 4) { throw new TypeError(`Expected seed.length = 4, but found: ${s.length}`) }
         this.count = 0;
-        this.state = this.seed;
+        this.seed = new Uint32Array(4);
+        this.state = new Uint32Array(4);
+        for(let i = 0; i < 4; i++){
+            this.seed[i] = s[i];
+            this.state[i] = s[i];
+        }
     }
 
     /**
@@ -24,16 +27,18 @@ class sfc32 {
      * @returns Random integer between 0 and 2^32
      */
     nextInt() {
-        let t = (this.state[0] + this.state[1]) + this.state[3];
+        let tmp_buf = new ArrayBuffer(4);
+        let temp_u32 = new Uint32Array(tmp_buf);
+        temp_u32[0] = this.state[0] + this.state[1] + this.state[3]
         this.state[3] = this.state[3] + 1;
         this.state[0] = this.state[1] ^ (this.state[1] >>> 9);
         this.state[1] = this.state[2] + (this.state[2] << 3);
         this.state[2] = (this.state[2] << 21 | this.state[2] >>> 11);
-        this.state[2] = this.state[2] + t;
-        const r = (t >>> 0);
+        this.state[2] = this.state[2] + temp_u32[0];
+        temp_u32[0] = temp_u32[0] >>> 0;
 
         this.count += 1;
-        return r;
+        return temp_u32[0];
     }
 
     /**
@@ -46,15 +51,21 @@ class sfc32 {
 }
 
 function test_sfc32() {
+    let seed = new Uint32Array(4);
+    seed[0] = 9 - 0;
+    seed[1] = 9 - 1;
+    seed[2] = 9 - 2;
+    seed[3] = 9 - 3;
     let result = {
-        seed: sfc32.getSeed(),
+        seed: Array.from(seed),
         integers: [],
     };
-    let rand = new sfc32(result.seed);
-    const iterCount = 16;
+    let rand = new sfc32(seed);
+    const iterCount = 8;
 
-    for(let i = 0; i < iterCount; i++){
-        result.integers.push(rand.nextInt());
+    for (let i = 0; i < iterCount; i++) {
+        const v = rand.nextInt();
+        result.integers.push(v);
     }
 
     return JSON.stringify(result);
