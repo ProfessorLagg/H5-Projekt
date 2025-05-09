@@ -9,6 +9,7 @@ class sfc32 {
         return view;
     }
 
+
     constructor(seed) {
         if (!(seed instanceof Uint32Array)) { throw new TypeError("seed was not an instance of Uint32Array") }
         if (seed.length !== 4) { throw new TypeError(`Expected seed.length = 4, but found: ${seed.length}`) }
@@ -42,4 +43,19 @@ class sfc32 {
     nextFloat() {
         return this.nextInt() / 4294967296;
     }
+}
+
+function test_sfc32() {
+    let result = {
+        seed: sfc32.getSeed(),
+        integers: [],
+    };
+    let rand = new sfc32(result.seed);
+    const iterCount = 16;
+
+    for(let i = 0; i < iterCount; i++){
+        result.integers.push(rand.nextInt());
+    }
+
+    return JSON.stringify(result);
 }

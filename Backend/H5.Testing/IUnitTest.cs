@@ -6,5 +6,6 @@ using System.Threading.Tasks;
 
 namespace H5.Testing;
 internal interface IUnitTest {
-    bool Run();
+    void Run();
+    string GetName();
 }

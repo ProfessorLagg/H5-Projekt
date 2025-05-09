@@ -4,9 +4,16 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\H5.DB\H5.DB.csproj" />
+    <ProjectReference Include="..\H5.Http\H5.Http.csproj" />
+    <ProjectReference Include="..\H5.PRNG\H5.PRNG.csproj" />
+    <ProjectReference Include="..\H5.Server\H5.API.csproj" />
+  </ItemGroup>
 
 </Project>

@@ -10,7 +10,11 @@ public unsafe class SFC32 {
         this.State = seed;
     }
     public SFC32() : this(State128.GetSeed()) { }
-
+    public SFC32(UInt128 seed) {
+        this.Count = 0;
+        this.Seed = new State128(BitConverter.GetBytes(seed));
+        this.State = this.Seed;
+    }
     /// <returns>Random integer between 0 and 2^32</returns>
     public uint NextInt() {
         uint t = (State.u32[0] + State.u32[1]) + State.u32[3];
