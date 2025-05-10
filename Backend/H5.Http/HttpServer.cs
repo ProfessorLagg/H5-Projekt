@@ -10,11 +10,15 @@ using System.Xml;
 
 namespace H5.Http;
 public sealed class HttpServer {
+    private const string DebugHttpPrefix = "http://localhost:4728/";
+    private const string DebugHttpsPrefix = "http://localhost:7723/";
 
     private readonly List<IMiddleware> IncomingMiddleware = new();
     private readonly List<IMiddleware> OutgoingMiddleware = new();
     private readonly Dictionary<HttpRoute, IRequestHandler> Handlers = new();
     private readonly IRequestErrorHandler ErrorHandler;
+    private readonly HttpListener Listener = new();
+
     private object DefitionLock = new();
     private ILogger Logger;
     public bool Running { get; private set; } = false;
@@ -22,8 +26,11 @@ public sealed class HttpServer {
 
     public HttpServer(IRequestErrorHandler errorHandler, ILogger? logger) {
         this.ErrorHandler = errorHandler;
-
         this.Logger = logger ?? NullLogger.Instance;
+#if DEBUG
+        this.Listener.Prefixes.Add(DebugHttpPrefix);
+        this.Listener.Prefixes.Add(DebugHttpsPrefix);
+#endif
     }
     public HttpServer() : this(new DefaultErrorHandler(), null) { }
     public HttpServer(ILogger logger) : this(new DefaultErrorHandler(), logger) { }
@@ -52,7 +59,8 @@ public sealed class HttpServer {
     /// <param name="handler">The handler to add</param>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="ArgumentException"></exception>
-    public void AddHandler(string route, IRequestHandler handler) { this.AddHandler(new HttpRoute(route), handler); }
+    public void AddHandler(string route, IRequestHandler handler) { this.AddHandler(route, HttpStdMethodExt.ANY, handler); }
+    public void AddHandler(string route, HttpStdMethod method, IRequestHandler handler) { this.AddHandler(new HttpRoute(route, method), handler); }
 
     // TODO Summary
     public void AddIncomingMiddleWare(IMiddleware middleware) {
@@ -69,13 +77,12 @@ public sealed class HttpServer {
             this.OutgoingMiddleware.Append(middleware);
         }
     }
-
-
     private IRequestHandler? MapRoute(HttpListenerRequest request) {
+        string url = request.RawUrl ?? "";
+        HttpStdMethod method = HttpStdMethodExt.Parse(request.HttpMethod);
+        HttpRoute requestRoute = new HttpRoute(url, method);
         foreach (HttpRoute route in this.Handlers.Keys) {
-            if (route.Match(request.RawUrl ?? "")) {
-                return this.Handlers[route];
-            }
+            if (route.Match(requestRoute)) return this.Handlers[route];
         }
 
         return null;
@@ -120,7 +127,13 @@ public sealed class HttpServer {
             if (!this.OutgoingMiddleware[i].Handle(context)) return;
         }
     }
-
+    public void AddPrefix(string uriPrefix) {
+#if DEBUG
+        this.Listener.Prefixes.Remove(DebugHttpPrefix);
+        this.Listener.Prefixes.Remove(DebugHttpsPrefix);
+#endif
+        this.Listener.Prefixes.Add(uriPrefix);
+    }
 
     /// <summary>
     /// Blocks the calling thread to run the WebServer
@@ -128,11 +141,13 @@ public sealed class HttpServer {
     public void Run() {
         this.Running = true;
         lock (DefitionLock) {
-            HttpListener listener = new();
-            listener.Prefixes.Add("http://localhost:80/");
-            listener.Start();
-            while (listener.IsListening) {
-                HttpListenerContext context = listener.GetContext();
+            this.Listener.Start();
+            string listening_msg = "Listening on:";
+            foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
+            this.Logger.LogInformation(listening_msg);
+
+            while (Listener.IsListening) {
+                HttpListenerContext context = Listener.GetContext();
                 try {
                     HandleRequest(context);
                 }
@@ -143,8 +158,8 @@ public sealed class HttpServer {
                 LogResponse(context.Response);
                 context.Response.Close();
             }
-            if (listener.IsListening) { listener.Stop(); }
-            listener.Close();
+            if (Listener.IsListening) { Listener.Stop(); }
+            Listener.Close();
         }
     }
 }

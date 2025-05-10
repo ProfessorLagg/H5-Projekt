@@ -14,9 +14,10 @@ internal class UnitTestRunner {
         this.UnitTests = new();
     }
 
-    public void AddTest(IUnitTest test) {
-        this.UnitTests.Add(test);
+    public void AddTest<T>() where T : IUnitTest, new() {
+        this.UnitTests.Add(new T());
     }
+
 
     private static void WriteColor(string message, ConsoleColor foreground, ConsoleColor background) {
 

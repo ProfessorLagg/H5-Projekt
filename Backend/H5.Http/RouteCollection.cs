@@ -10,8 +10,19 @@ public sealed class RouteMatcher {
         public string RouteFragment = string.Empty;
         public IRequestHandler? Handler { get; private set; } = null;
         public readonly List<RouteNode> ChildNodes = new();
+
+        public void AddChild(HttpRoute route, IRequestHandler handler) {
+            throw new NotImplementedException();
+        }
     }
 
     private RouteNode RootNode = new();
 
+    public IRequestHandler? MatchRoute(HttpRoute route) {
+        throw new NotImplementedException();
+    }
+
+    public void AddRoute(HttpRoute route, IRequestHandler handler) {
+        RootNode.AddChild(route, handler);
+    }
 }

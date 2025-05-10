@@ -9,7 +9,7 @@ internal class API_Program {
 #if DEBUG
         minLogLevel = LogLevel.Debug;
 #endif
-        using ILoggerFactory factory = LoggerFactory.Create(builder => 
+        using ILoggerFactory factory = LoggerFactory.Create(builder =>
             builder
             .AddConsole()
             .SetMinimumLevel(minLogLevel)
@@ -17,7 +17,7 @@ internal class API_Program {
         );
 
         HttpServer server = new(factory.CreateLogger<HttpServer>());
-        server.AddHandler("/", new HelloWorldHandler());
+        server.AddHandler("/", HttpStdMethod.GET, new HelloWorldHandler());
 
         server.Run();
     }

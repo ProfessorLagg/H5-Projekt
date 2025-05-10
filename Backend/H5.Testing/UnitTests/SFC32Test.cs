@@ -9,7 +9,7 @@ using H5.PRNG;
 namespace H5.Testing.UnitTests;
 internal class SFC32 : IUnitTest {
 
-    public string GetName() { return this.GetType().FullName; }
+    public string GetName() { return typeof(PRNG.SFC32).FullName; }
     const int IterCount = ushort.MaxValue;
     private void TestInt() {
         PRNG.SFC32 rand = new();

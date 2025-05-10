@@ -6,8 +6,6 @@ namespace H5.Http;
 /// <summary>Represents a uri in the standard format scheme ":" ["//" authority] path ["?" query] ["#" fragment]</summary>
 public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string> {
     // https://da.wikipedia.org/wiki/Uniform_Resource_Identifier
-
-
     private string _Scheme = string.Empty;
     private string _UserName = string.Empty;
     private string _UserPassword = string.Empty; // TODO This should be some form of secure string
@@ -62,6 +60,39 @@ public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string>
         set { _Fragment = value.ToLowerInvariant(); }
     }
 
+    public ParsedUri() { }
+    public ParsedUri(string url) : this() {
+        // TODO Handle URL Encoding
+        int scheme_end = url.IndexOf(':');
+        if (scheme_end >= 0) {
+            this.Scheme = url.Substring(0, scheme_end);
+            url = url.Substring(scheme_end + 1);
+        }
+
+        /// Authority component
+        if (url.StartsWith("//")) {
+            url = url.Substring(2);
+            int authority_end = url.IndexOf('/');
+            string authority_string = url.Substring(0, authority_end);
+            url = url.Substring(authority_end);
+            this.ParseAuthorityString(authority_string);
+        }
+
+        int fragment_start = url.IndexOf('#');
+        if (fragment_start >= 0) {
+            this.Fragment = url.Substring(fragment_start + 1);
+            url = url.Substring(0, fragment_start);
+        }
+
+        int query_start = url.IndexOf('?');
+        if (query_start >= 0) {
+            this.Query = url.Substring(query_start + 1);
+            url = url.Substring(0, query_start);
+        }
+
+        this.Path = url.Trim('/');
+    }
+
     private void ParseAuthorityString(string authstr) {
         authstr = authstr.TrimStart('/').TrimStart('/');
         int userinfo_end = authstr.IndexOf('@');
@@ -75,40 +106,7 @@ public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string>
         if (hostport_split.Length > 1) { this.Port = hostport_split[1]; }
     }
 
-    public static ParsedUri Parse(string url) {
-        ParsedUri result = new ParsedUri();
-
-        int scheme_end = url.IndexOf(':');
-        if (scheme_end >= 0) {
-            result.Scheme = url.Substring(0, scheme_end);
-            url = url.Substring(scheme_end + 1);
-        }
-
-        /// Authority component
-        if (url.StartsWith("//")) {
-            url = url.Substring(2);
-            int authority_end = url.IndexOf('/');
-            string authority_string = url.Substring(0, authority_end);
-            url = url.Substring(authority_end);
-            result.ParseAuthorityString(authority_string);
-        }
-
-        int fragment_start = url.IndexOf('#');
-        if (fragment_start >= 0) {
-            result.Fragment = url.Substring(fragment_start + 1);
-            url = url.Substring(0, fragment_start);
-        }
-
-        int query_start = url.IndexOf('?');
-        if (query_start >= 0) {
-            result.Query = url.Substring(query_start + 1);
-            url = url.Substring(0, query_start);
-        }
-
-        result.Path = url.Trim('/');
-
-        return result;
-    }
+    public static ParsedUri Parse(string url) { return new ParsedUri(url); }
 
     public override string ToString() {
         StringBuilder sb = new StringBuilder();

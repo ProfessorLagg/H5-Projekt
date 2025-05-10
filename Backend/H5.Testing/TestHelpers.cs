@@ -9,22 +9,22 @@ internal static class TestHelpers {
     internal class ExpectEqualException : Exception {
         public ExpectEqualException(string message) : base(message) { }
         public ExpectEqualException() : base() { }
-        public static ExpectEqualException Throw<T>(T expect, T found) where T : IEquatable<T> {
+        public static ExpectEqualException Throw<T>(T expect, T found) {
             throw new ExpectEqualException($"Excpected {expect}, but found {found}");
         }
     }
-    public static void ExpectEqual<T>(T expect, T found) where T : IEquatable<T> {
+    public static void ExpectEqual<T>(T expect, T found) {
         if (!expect.Equals(found)) { ExpectEqualException.Throw<T>(expect, found); }
     }
 
     internal class ExpectNotEqualException : Exception {
         public ExpectNotEqualException(string message) : base(message) { }
         public ExpectNotEqualException() : base() { }
-        public static void Throw<T>(T expect, T found) where T : IEquatable<T> {
+        public static void Throw<T>(T expect, T found) {
             throw new ExpectNotEqualException($"Expected not equal, but found {expect} == {found}");
         }
     }
-    public static void ExpectNotEqual<T>(T expect, T found) where T : IEquatable<T> {
+    public static void ExpectNotEqual<T>(T expect, T found) {
         if (expect.Equals(found)) { ExpectNotEqualException.Throw<T>(expect, found); }
     }
 }
