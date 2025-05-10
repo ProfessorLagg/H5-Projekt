@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace H5.Http;
 public sealed class HelloWorldHandler : IRequestHandler {
-    public void Handle(HttpListenerContext context) {
+    public void Handle(HttpListenerContext context, HttpRoute? route) {
+        _ = route;
         HttpListenerResponse response = context.Response;
         response.ContentType = "text/html";
         response.Html("<span>Hello World!<span>");

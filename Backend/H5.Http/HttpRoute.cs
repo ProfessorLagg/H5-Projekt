@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace H5.Http;
 public sealed record class HttpRoute : IComparable<HttpRoute> {
+    public static readonly HttpRoute Root = new HttpRoute("/");
+
     public HttpStdMethod Method;
     public string Path;
     public ParsedUri Uri { get { return new ParsedUri(this.Path); } }
@@ -47,6 +49,13 @@ public sealed record class HttpRoute : IComparable<HttpRoute> {
             int cmp = cmpMethod + cmpPath;
             return Math.Sign(cmp);
         }
+    }
+
+    /// <summary>Removes this <see cref="HttpRoute.Path"/> from the input path</summary>
+    public string GetSubPath(string path) {
+        ReadOnlySpan<char> result = NormalizePath(path);
+        int sliceAt = int.Max(0, result.IndexOf(this.Path));
+        return new string(result.Slice(sliceAt));
     }
 }
 

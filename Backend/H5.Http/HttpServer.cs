@@ -15,7 +15,7 @@ public sealed class HttpServer {
 
     private readonly List<IMiddleware> IncomingMiddleware = new();
     private readonly List<IMiddleware> OutgoingMiddleware = new();
-    private readonly Dictionary<HttpRoute, IRequestHandler> Handlers = new();
+    private readonly SortedDictionary<HttpRoute, IRequestHandler> Handlers = new();
     private readonly IRequestErrorHandler ErrorHandler;
     private readonly HttpListener Listener = new();
 
@@ -77,12 +77,22 @@ public sealed class HttpServer {
             this.OutgoingMiddleware.Append(middleware);
         }
     }
-    private IRequestHandler? MapRoute(HttpListenerRequest request) {
+
+    private sealed record class MapRouteResult {
+        public readonly HttpRoute Route;
+        public readonly IRequestHandler Handler;
+        public MapRouteResult(HttpRoute route, IRequestHandler handler) {
+            this.Route = route;
+            this.Handler = handler;
+        }
+        public void Handle(HttpListenerContext context) { this.Handler.Handle(context, this.Route); }
+    };
+    private MapRouteResult? MapRoute(HttpListenerRequest request) {
         string url = request.RawUrl ?? "";
         HttpStdMethod method = HttpStdMethodExt.Parse(request.HttpMethod);
         HttpRoute requestRoute = new HttpRoute(url, method);
         foreach (HttpRoute route in this.Handlers.Keys) {
-            if (route.Match(requestRoute)) return this.Handlers[route];
+            if (route.Match(requestRoute)) return new MapRouteResult(route, this.Handlers[route]);
         }
 
         return null;
@@ -115,12 +125,12 @@ public sealed class HttpServer {
             if (!this.IncomingMiddleware[i].Handle(context)) return;
         }
 
-        IRequestHandler? handler = this.MapRoute(context.Request);
-        if (handler is null) {
+        MapRouteResult? mapResult = this.MapRoute(context.Request);
+        if (mapResult is null) {
             this.ErrorHandler.Handle(context, HttpStatusCode.NotFound);
         }
         else {
-            handler.Handle(context);
+            mapResult.Handle(context);
         }
 
         for (int i = 0; i < this.OutgoingMiddleware.Count; i++) {
@@ -135,9 +145,7 @@ public sealed class HttpServer {
         this.Listener.Prefixes.Add(uriPrefix);
     }
 
-    /// <summary>
-    /// Blocks the calling thread to run the WebServer
-    /// </summary>
+    /// <summary>Blocks the calling thread to run the WebServer</summary>
     public void Run() {
         this.Running = true;
         lock (DefitionLock) {
