@@ -63,7 +63,7 @@ public static class HttpUtils {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
     private static StringDictionary ExtentionMimeTypeBinding = ParseBaseMimeTypes().ToStringDictionary();
     private static IEnumerable<KeyValuePair<string, string>> ParseBaseMimeTypes() {
-        const string ResourceName = "BaseMimeTypes.csv";
+        const string ResourceName = "H5.Http.BaseMimeTypes.csv";
         const char SplitChar = ';';
         Assembly asm = typeof(HttpUtils).Assembly;
         string[] resourceNames = asm.GetManifestResourceNames();

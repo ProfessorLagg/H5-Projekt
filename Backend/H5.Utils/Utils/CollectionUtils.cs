@@ -10,7 +10,7 @@ public static class CollectionUtils {
     public static StringDictionary ToStringDictionary(this IEnumerable<KeyValuePair<string, string>> keyValuePairs) {
         StringDictionary result = new();
         foreach (KeyValuePair<string, string> kvp in keyValuePairs) {
-            result.Add(kvp.Key, kvp.Value);
+            result[kvp.Key] = kvp.Value;
         }
         return result;
     }

@@ -59,25 +59,5 @@ namespace H5.Http.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] BaseMimeTypes_csv {
-            get {
-                object obj = ResourceManager.GetObject("BaseMimeTypes.csv", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] BaseMimeTypes_csv1 {
-            get {
-                object obj = ResourceManager.GetObject("BaseMimeTypes.csv1", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }

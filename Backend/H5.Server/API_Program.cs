@@ -19,7 +19,14 @@ internal class API_Program {
         HttpServer server = new(controller, null, factory.CreateLogger<HttpServer>());
 
         foreach (string hostName in ApiSettings.HTTP.HostNames) {
-
+            if (ApiSettings.HTTP.EnableHttp) {
+                string httpPrefix = "http://" + hostName + $":{ApiSettings.HTTP.PortHttp}/";
+                server.AddPrefix(httpPrefix);
+            }
+            if (ApiSettings.HTTP.EnableHttps) {
+                string httpsPrefix = "https://" + hostName + $":{ApiSettings.HTTP.PortHttps}/";
+                server.AddPrefix(httpsPrefix);
+            }
         }
 
         server.Run();

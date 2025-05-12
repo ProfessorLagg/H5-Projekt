@@ -71,7 +71,7 @@ public static class ApiSettings {
             if (kvps.TryGetValue("EnableHttp", out string sEnableHttp)) { r.EnableHttp = bool.Parse(sEnableHttp); }
             if (kvps.TryGetValue("PortHttp", out string sPortHttp)) { r.PortHttp = ushort.Parse(sPortHttp); }
             if (kvps.TryGetValue("EnableHttps", out string sEnableHttps)) { r.EnableHttps = bool.Parse(sEnableHttps); }
-            if (kvps.TryGetValue("PortHttp", out string sPortHttps)) { r.PortHttps = ushort.Parse(sPortHttps); }
+            if (kvps.TryGetValue("PortHttps", out string sPortHttps)) { r.PortHttps = ushort.Parse(sPortHttps); }
             if (kvps.TryGetValue("HostNames", out string sHostNames)) {
                 r.HostNames = sHostNames.Split(',');
                 for (int i = 0; i < r.HostNames.Length; i++) { r.HostNames[i] = r.HostNames[i].Trim().ToLowerInvariant(); }
@@ -96,6 +96,7 @@ public static class ApiSettings {
             InvalidSettingException.ThrowIf(!(this.EnableHttp || this.EnableHttps), "Atleast one of HTTP.EnableHttp or HTTP.EnableHttps must be enabled");
             InvalidSettingException.ThrowIf(this.HostNames.Length == 0, "You must define atleast 1 host name in HTTP.HostNames");
             InvalidSettingException.ThrowIf(!Directory.Exists(this.ContentRoot), $"Could not find or access HTTP.ContentRoot directory \"{this.ContentRoot}\"");
+            InvalidSettingException.ThrowIf(EnableHttp && EnableHttps && PortHttp == PortHttps, $"http:// and https:// cannot both use port {PortHttp}");
         }
     }
 

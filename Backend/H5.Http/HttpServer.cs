@@ -10,9 +10,6 @@ using System.Xml;
 
 namespace H5.Http;
 public sealed class HttpServer {
-    private const string DebugHttpPrefix = "http://localhost:4728/";
-    private const string DebugHttpsPrefix = "http://localhost:7723/";
-
     private readonly List<IMiddleware> IncomingMiddleware = new();
     private readonly List<IMiddleware> OutgoingMiddleware = new();
     private readonly IRouteMatcher RouteMatcher;
@@ -97,10 +94,6 @@ public sealed class HttpServer {
         }
     }
     public void AddPrefix(string uriPrefix) {
-#if DEBUG
-        this.Listener.Prefixes.Remove(DebugHttpPrefix);
-        this.Listener.Prefixes.Remove(DebugHttpsPrefix);
-#endif
         this.Listener.Prefixes.Add(uriPrefix);
     }
 
