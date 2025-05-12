@@ -21,7 +21,7 @@ public sealed class HttpServer {
 
     private object DefitionLock = new();
     private ILogger Logger;
-    public bool Running { get; private set; } = false;
+    public bool ShouldRun { get; private set; } = false;
 
 
     public HttpServer(IRequestErrorHandler errorHandler, ILogger? logger) {
@@ -44,7 +44,7 @@ public sealed class HttpServer {
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="ArgumentException"></exception>
     public void AddHandler(HttpRoute route, IRequestHandler handler) {
-        if (this.Running) { throw new InvalidOperationException("Cannot edit handlers while server is running"); }
+        if (this.ShouldRun) { throw new InvalidOperationException("Cannot edit handlers while server is running"); }
         lock (DefitionLock) {
             if (!Handlers.TryAdd(route, handler)) {
                 throw new ArgumentException($"Cannot add duplicate of route {route}");
@@ -64,7 +64,7 @@ public sealed class HttpServer {
 
     // TODO Summary
     public void AddIncomingMiddleWare(IMiddleware middleware) {
-        if (this.Running) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
+        if (this.ShouldRun) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
         lock (DefitionLock) {
             this.IncomingMiddleware.Append(middleware);
         }
@@ -72,7 +72,7 @@ public sealed class HttpServer {
 
     // TODO Summary
     public void AddOutgoingMiddleWare(IMiddleware middleware) {
-        if (this.Running) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
+        if (this.ShouldRun) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
         lock (DefitionLock) {
             this.OutgoingMiddleware.Append(middleware);
         }
@@ -88,7 +88,7 @@ public sealed class HttpServer {
         public void Handle(HttpListenerContext context) { this.Handler.Handle(context, this.Route); }
     };
     private MapRouteResult? MapRoute(HttpListenerRequest request) {
-        string url = request.RawUrl ?? "";
+        string url = request.RawUrl ?? "/";
         HttpStdMethod method = HttpStdMethodExt.Parse(request.HttpMethod);
         HttpRoute requestRoute = new HttpRoute(url, method);
         foreach (HttpRoute route in this.Handlers.Keys) {
@@ -147,27 +147,42 @@ public sealed class HttpServer {
 
     /// <summary>Blocks the calling thread to run the WebServer</summary>
     public void Run() {
-        this.Running = true;
         lock (DefitionLock) {
+            this.ShouldRun = true;
             this.Listener.Start();
             string listening_msg = "Listening on:";
             foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
             this.Logger.LogInformation(listening_msg);
 
-            while (Listener.IsListening) {
-                HttpListenerContext context = Listener.GetContext();
+            while (Listener.IsListening && this.ShouldRun) {
+                HttpListenerContext? context = null;
                 try {
+                    context = Listener.GetContext();
                     HandleRequest(context);
                 }
                 catch (Exception e) {
                     this.Logger.LogWarning(e.ToString());
-                    this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
+                    if (context is not null) {
+                        this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
+                    }
                 }
-                LogResponse(context.Response);
-                context.Response.Close();
+                finally {
+                    if (context is not null) {
+                        LogResponse(context.Response);
+                        context.Response.OutputStream.Flush();
+                        context.Response.Close();
+                    }
+                }
+
             }
             if (Listener.IsListening) { Listener.Stop(); }
             Listener.Close();
+
         }
+    }
+
+    public void Stop() {
+        this.ShouldRun = false;
+        this.Listener.Stop();
     }
 }

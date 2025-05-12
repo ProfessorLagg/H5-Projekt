@@ -16,6 +16,14 @@ internal static class TestHelpers {
     public static void ExpectEqual<T>(T expect, T found) {
         if (!expect.Equals(found)) { ExpectEqualException.Throw<T>(expect, found); }
     }
+    public static void ExpectEqualSpans<T>(ref ReadOnlySpan<T> spanA, ref ReadOnlySpan<T> spanB) {
+        if (spanA.Length != spanB.Length) ExpectEqualException.Throw(spanA.Length, spanB.Length);
+        for (int i = 0; i < spanA.Length; i++) {
+            if (!spanA[i].Equals(spanB[i])) {
+                ExpectEqualException.Throw(spanA[i], spanB[i]);
+            }
+        }
+    }
 
     internal class ExpectNotEqualException : Exception {
         public ExpectNotEqualException(string message) : base(message) { }

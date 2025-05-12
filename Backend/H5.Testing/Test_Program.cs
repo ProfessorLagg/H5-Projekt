@@ -7,6 +7,7 @@ internal class Test_Program {
         UnitTestRunner testRunner = new();
         testRunner.AddTest<UnitTests.SFC32>();
         testRunner.AddTest<UnitTests.HttpStdMethod>();
+        testRunner.AddTest<UnitTests.FileServer>();
         testRunner.Run();
     }
 }

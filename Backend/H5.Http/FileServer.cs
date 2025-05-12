@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using H5.Utils.PathUtils;
 
 namespace H5.Http;
-internal class FileServer : IRequestHandler {
+public sealed class FileServer : IRequestHandler {
     public readonly DirectoryInfo RootDirectory;
 
     public FileServer(DirectoryInfo rootDirectory) {
@@ -29,9 +29,5 @@ internal class FileServer : IRequestHandler {
         requestFile.AssertExists();
 
         context.Response.File(requestFile);
-
-
-
-
     }
 }
