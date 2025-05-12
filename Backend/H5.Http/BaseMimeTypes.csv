@@ -25,7 +25,7 @@
 .jar;application/java-archive
 .jpeg;image/jpeg
 .jpg;image/jpeg
-.js;text/javascript (Specifications: HTML and RFC 9239)
+.js;text/javascript
 .json;application/json
 .jsonld;application/ld+json
 .mid;audio/midi

@@ -53,11 +53,12 @@ public static class HttpUtils {
     }
 
     public static void File(this HttpListenerResponse response, FileInfo file) {
-        response.SetStatus(HttpStatusCode.OK);
-        response.ContentType = HttpUtils.GetMimeType(file.Extension);
         using FileStream readStream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+        response.ContentLength64 = readStream.Length;
+        response.SendChunked = false;
+        response.ContentType = HttpUtils.GetMimeType(file.Extension);
         readStream.CopyTo(response.OutputStream);
-        response.ContentLength64 += readStream.Position;
+        response.SetStatus(HttpStatusCode.OK);
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
