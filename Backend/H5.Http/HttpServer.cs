@@ -28,8 +28,6 @@ public sealed class HttpServer {
         this.ErrorHandler = errorHandler ?? new DefaultErrorHandler();
         this.Logger = logger ?? NullLogger.Instance;
         this.RouteMatcher = routeMatcher;
-        this.Listener.Prefixes.Add(DebugHttpPrefix);
-        this.Listener.Prefixes.Add(DebugHttpsPrefix);
     }
 
     // TODO Summary

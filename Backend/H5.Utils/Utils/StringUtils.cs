@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H5.Lib.StringUtils;
-public static partial class Utils {
+namespace H5.Lib.Utils;
+public static class StringUtils {
     private readonly struct EscapeSequence {
         public readonly string Find;
         public readonly string Replace;
@@ -13,7 +13,6 @@ public static partial class Utils {
             this.Find = find;
             this.Replace = replace;
         }
-        public string Escape(string s) { return s.Replace(this.Find, this.Replace); }
     }
     private static readonly EscapeSequence[] WhitespaceEscapes = new EscapeSequence[] {
         new EscapeSequence("\r", @"\r"),
@@ -24,10 +23,13 @@ public static partial class Utils {
     };
 
     public static string EscapeWhitespace(this string str) {
-        string r = str;
+        StringBuilder sb = new(str);
+        sb.EscapeWhitespace();
+        return sb.ToString();
+    }
+    public static void EscapeWhitespace(this StringBuilder sb) {
         foreach (EscapeSequence e in WhitespaceEscapes) {
-            r = e.Escape(r);
+            sb.Replace(e.Find, e.Replace);
         }
-        return r;
     }
 }

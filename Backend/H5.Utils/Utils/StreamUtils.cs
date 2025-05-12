@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H5.Lib.StreamUtils;
-public static partial class Utils {
+namespace H5.Lib.Utils;
+public static class StreamUtils {
     public static IEnumerable<string> ReadLines(this StreamReader sr) {
         while (!sr.EndOfStream) {
             string? line = sr.ReadLine();

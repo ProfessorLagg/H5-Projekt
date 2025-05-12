@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 //using System.Net.Mime;
-using H5.Lib.PathUtils;
+using H5.Lib.Utils;
 
 namespace H5.Http;
 public sealed class FileServer : IRequestHandler {

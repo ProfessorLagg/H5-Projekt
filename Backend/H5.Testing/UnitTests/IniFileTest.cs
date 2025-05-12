@@ -5,14 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 using H5.Lib;
-using H5.Lib.PathUtils;
+using H5.Lib.Utils;
 namespace H5.Testing.UnitTests;
 internal class IniFile : IUnitTest {
 
     public string GetName() { return typeof(H5.Lib.IniFile).FullName; }
 
     public void Run() {
-        string srcFilePath = Path.Join(Utils.ExeDirectory.FullName, "TestData", "test.ini");
+        string srcFilePath = Path.Join(PathUtils.ExeDirectory.FullName, "TestData", "test.ini");
         FileInfo srcFileInfo = new(srcFilePath);
         string dstFilePath = Path.Join(srcFileInfo.DirectoryName, "_" + srcFileInfo.Name);
         FileInfo dstFileInfo = new(dstFilePath);

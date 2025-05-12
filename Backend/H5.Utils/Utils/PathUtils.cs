@@ -1,8 +1,8 @@
 ﻿using System.IO;
 
-namespace H5.Lib.PathUtils;
+namespace H5.Lib.Utils;
 
-public static partial class Utils {
+public static class PathUtils {
     private static char[] InvalidPathChars = Path.GetInvalidPathChars();
     private static char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
 
@@ -44,5 +44,10 @@ public static partial class Utils {
     }
     public static void AssertExists(this DirectoryInfo directory) {
         if (!directory.Exists) throw new Exception($"directory at \"{directory.FullName}\" did not exist, is not accisible or is not a directory");
+    }
+    public static void EnsureExists(this DirectoryInfo directory) {
+        if (directory.Exists) {
+            directory.Create();
+        }
     }
 }

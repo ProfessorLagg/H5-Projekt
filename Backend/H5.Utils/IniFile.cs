@@ -1,5 +1,4 @@
-﻿using H5.Lib.CollectionUtils;
-using H5.Lib.StreamUtils;
+﻿using H5.Lib.Utils;
 
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-using H5.Lib.StringUtils;
 namespace H5.Lib;
 public sealed class IniFile {
     private const string DefaultSectionName = "";
@@ -108,7 +106,7 @@ public sealed class IniFile {
     public static IniFile Load(string filePath) { return Load(new FileInfo(filePath), DefaultEncoding); }
 
     public string GetValue(string sectionName, string key) {
-        if (!this.Sections.TryGetValue(sectionName, out StringDictionary section)) { throw new ArgumentOutOfRangeException($"Could not find section [{sectionName}]"); }
+        StringDictionary section = this.GetSection(sectionName);
         if (section[key] is null) { throw new ArgumentOutOfRangeException($"Section [{sectionName}] does not contain key \"{key}\""); }
         return section[key];
     }
@@ -119,4 +117,16 @@ public sealed class IniFile {
         this.Sections[sectionName][key] = value;
     }
     public void SetValue(string key, string value) { this.SetValue(DefaultSectionName, key, value); }
+
+    /// <summary>Adds or overrides the section with the specified name</summary>
+    public void SetSection(string sectionName, IEnumerable<KeyValuePair<string, string>> kvps) {
+        this.Sections[sectionName] = kvps.ToStringDictionary();
+    }
+
+    public StringDictionary GetSection(string sectionName) {
+        if (!this.Sections.TryGetValue(sectionName, out StringDictionary section)) {
+            throw new ArgumentOutOfRangeException($"Could not find section [{sectionName}]");
+        }
+        return section;
+    }
 }

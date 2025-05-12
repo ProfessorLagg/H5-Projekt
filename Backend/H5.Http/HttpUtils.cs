@@ -9,8 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-using H5.Lib.CollectionUtils;
-using H5.Lib.StreamUtils;
+using H5.Lib.Utils;
 using H5.Http;
 
 namespace H5.Lib.HttpUtils;
