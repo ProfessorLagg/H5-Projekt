@@ -76,7 +76,7 @@ public static class ApiSettings {
                 r.HostNames = sHostNames.Split(',');
                 for (int i = 0; i < r.HostNames.Length; i++) { r.HostNames[i] = r.HostNames[i].Trim().ToLowerInvariant(); }
             }
-            if (kvps.TryGetValue("ContentRoot", out string sContentRoot)) { r.ContentRoot = sContentRoot; }
+            if (kvps.TryGetValue("ContentRoot", out string sContentRoot)) { r.ContentRoot = string.IsNullOrWhiteSpace(sContentRoot) ? r.ContentRoot : sContentRoot; }
 
 
             return r;
@@ -95,7 +95,7 @@ public static class ApiSettings {
         public void Validate() {
             InvalidSettingException.ThrowIf(!(this.EnableHttp || this.EnableHttps), "Atleast one of HTTP.EnableHttp or HTTP.EnableHttps must be enabled");
             InvalidSettingException.ThrowIf(this.HostNames.Length == 0, "You must define atleast 1 host name in HTTP.HostNames");
-            InvalidSettingException.ThrowIf(!Directory.Exists(this.ContentRoot), "Could not find or access HTTP.ContentRoot directory");
+            InvalidSettingException.ThrowIf(!Directory.Exists(this.ContentRoot), $"Could not find or access HTTP.ContentRoot directory \"{this.ContentRoot}\"");
         }
     }
 
