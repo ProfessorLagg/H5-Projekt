@@ -21,4 +21,8 @@
 		<ProjectReference Include="..\H5.Utils\H5.Utils.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="RequestHandlers\" />
+	</ItemGroup>
+
 </Project>

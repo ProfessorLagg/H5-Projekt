@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 using H5.Utils.CollectionUtils;
 using H5.Utils.StreamUtils;
+using H5.Http;
 
 namespace H5.Utils.HttpUtils;
 public static class HttpUtils {
@@ -80,5 +81,11 @@ public static class HttpUtils {
         const string DefaultMimeType = "text/plain";
         fileExtention = fileExtention.ToLowerInvariant();
         return ExtentionMimeTypeBinding[fileExtention] ?? DefaultMimeType;
+    }
+
+    public static ParsedUri ParseUri(this HttpListenerRequest request) {
+        if (request.Url is not null) return new ParsedUri(request.Url.ToString());
+        if (request.RawUrl is not null) return new ParsedUri(request.RawUrl);
+        return ParsedUri.Empty;
     }
 }

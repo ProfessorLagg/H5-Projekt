@@ -5,6 +5,8 @@ namespace H5.Http;
 
 /// <summary>Represents a uri in the standard format scheme ":" ["//" authority] path ["?" query] ["#" fragment]</summary>
 public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string> {
+    public static readonly ParsedUri Empty = new ParsedUri();
+
     // https://da.wikipedia.org/wiki/Uniform_Resource_Identifier
     private string _Scheme = string.Empty;
     private string _UserName = string.Empty;
@@ -106,8 +108,6 @@ public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string>
         if (hostport_split.Length > 1) { this.Port = hostport_split[1]; }
     }
 
-    public static ParsedUri Parse(string url) { return new ParsedUri(url); }
-
     public override string ToString() {
         StringBuilder sb = new StringBuilder();
         // Scheme
@@ -144,7 +144,6 @@ public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string>
         }
         return sb.ToString();
     }
-
     public bool Equals(string? other) {
         if (other == null) { return false; }
         // TODO

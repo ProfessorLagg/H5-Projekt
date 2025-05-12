@@ -15,7 +15,7 @@ public sealed class HttpServer {
 
     private readonly List<IMiddleware> IncomingMiddleware = new();
     private readonly List<IMiddleware> OutgoingMiddleware = new();
-    private readonly SortedDictionary<HttpRoute, IRequestHandler> Handlers = new();
+    private readonly IRouteMatcher RouteMatcher;
     private readonly IRequestErrorHandler ErrorHandler;
     private readonly HttpListener Listener = new();
 
@@ -24,43 +24,13 @@ public sealed class HttpServer {
     public bool ShouldRun { get; private set; } = false;
 
 
-    public HttpServer(IRequestErrorHandler errorHandler, ILogger? logger) {
-        this.ErrorHandler = errorHandler;
+    public HttpServer(IRouteMatcher routeMatcher, IRequestErrorHandler? errorHandler = null, ILogger? logger = null) {
+        this.ErrorHandler = errorHandler ?? new DefaultErrorHandler();
         this.Logger = logger ?? NullLogger.Instance;
-#if DEBUG
+        this.RouteMatcher = routeMatcher;
         this.Listener.Prefixes.Add(DebugHttpPrefix);
         this.Listener.Prefixes.Add(DebugHttpsPrefix);
-#endif
     }
-    public HttpServer() : this(new DefaultErrorHandler(), null) { }
-    public HttpServer(ILogger logger) : this(new DefaultErrorHandler(), logger) { }
-
-    /// <summary>
-    /// Adds a request handler to the <see cref="HttpServer"/>, and binds it to a specific route.
-    /// Fails if the route is already mapped, or if the server is running
-    /// </summary>
-    /// <param name="route">The route to handle</param>
-    /// <param name="handler">The handler to add</param>
-    /// <exception cref="InvalidOperationException"></exception>
-    /// <exception cref="ArgumentException"></exception>
-    public void AddHandler(HttpRoute route, IRequestHandler handler) {
-        if (this.ShouldRun) { throw new InvalidOperationException("Cannot edit handlers while server is running"); }
-        lock (DefitionLock) {
-            if (!Handlers.TryAdd(route, handler)) {
-                throw new ArgumentException($"Cannot add duplicate of route {route}");
-            }
-        }
-    }
-    /// <summary>
-    /// Adds a request handler to the <see cref="HttpServer"/>, and binds it to a specific route.
-    /// Fails if the route is already mapped, or if the server is running
-    /// </summary>
-    /// <param name="route">The route to handle</param>
-    /// <param name="handler">The handler to add</param>
-    /// <exception cref="InvalidOperationException"></exception>
-    /// <exception cref="ArgumentException"></exception>
-    public void AddHandler(string route, IRequestHandler handler) { this.AddHandler(route, HttpStdMethodExt.ANY, handler); }
-    public void AddHandler(string route, HttpStdMethod method, IRequestHandler handler) { this.AddHandler(new HttpRoute(route, method), handler); }
 
     // TODO Summary
     public void AddIncomingMiddleWare(IMiddleware middleware) {
@@ -85,18 +55,9 @@ public sealed class HttpServer {
             this.Route = route;
             this.Handler = handler;
         }
-        public void Handle(HttpListenerContext context) { this.Handler.Handle(context, this.Route); }
+        public void Handle(HttpListenerContext context) { this.Handler.Handle(context); }
     };
-    private MapRouteResult? MapRoute(HttpListenerRequest request) {
-        string url = request.RawUrl ?? "/";
-        HttpStdMethod method = HttpStdMethodExt.Parse(request.HttpMethod);
-        HttpRoute requestRoute = new HttpRoute(url, method);
-        foreach (HttpRoute route in this.Handlers.Keys) {
-            if (route.Match(requestRoute)) return new MapRouteResult(route, this.Handlers[route]);
-        }
 
-        return null;
-    }
     private void LogRequest(HttpListenerRequest request) {
         // TODO Gotta have settings for this
         this.Logger.LogInformation($"Recieved request on {request.RawUrl ?? "unkown route"}");
@@ -125,7 +86,7 @@ public sealed class HttpServer {
             if (!this.IncomingMiddleware[i].Handle(context)) return;
         }
 
-        MapRouteResult? mapResult = this.MapRoute(context.Request);
+        IRequestHandler? mapResult = this.RouteMatcher.MatchRoute(context.Request);
         if (mapResult is null) {
             this.ErrorHandler.Handle(context, HttpStatusCode.NotFound);
         }

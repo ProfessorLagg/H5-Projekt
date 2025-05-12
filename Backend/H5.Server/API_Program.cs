@@ -16,8 +16,9 @@ internal class API_Program {
 
         );
 
-        HttpServer server = new(factory.CreateLogger<HttpServer>());
-        server.AddHandler("/", HttpStdMethod.GET, new HelloWorldHandler());
+        ApiController controller = new();
+
+        HttpServer server = new(controller, null, factory.CreateLogger<HttpServer>());
 
         server.Run();
     }
