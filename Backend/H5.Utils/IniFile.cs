@@ -12,18 +12,36 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using H5.Lib.StringUtils;
 namespace H5.Lib;
 public sealed class IniFile {
     private const string DefaultSectionName = "";
-
     private static readonly Encoding DefaultEncoding = Encoding.UTF8;
 
     private readonly SortedDictionary<string, StringDictionary> Sections = new(StringComparer.InvariantCultureIgnoreCase);
 
-    public void Save(FileInfo file) {
-        throw new NotImplementedException();
+    public void Save(Stream stream, Encoding encoding) {
+        using StreamWriter sw = new(stream, encoding);
+        int sectionIndex = 0;
+        foreach (string sectionName in this.Sections.Keys) {
+            if (sectionIndex > 0) { sw.Write('\n'); }
+            if (sectionName.Length > 0) { sw.Write($"[{sectionName}]\n"); }
+
+            foreach (string k in Sections[sectionName].Keys) {
+                string v = Sections[sectionName][k];
+                sw.Write($"{k}={v.EscapeWhitespace()}\n");
+            }
+            sectionIndex += 1;
+        }
     }
-    public void Save(string filePath) { this.Save(new FileInfo(filePath)); }
+    public void Save(Stream stream) { this.Save(stream, DefaultEncoding); }
+    public void Save(FileInfo file, Encoding encoding) {
+        using FileStream stream = file.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
+        this.Save(stream, encoding);
+    }
+    public void Save(FileInfo file) { this.Save(file, DefaultEncoding); }
+    public void Save(string filePath, Encoding encoding) { this.Save(new FileInfo(filePath), encoding); }
+    public void Save(string filePath) { this.Save(filePath, DefaultEncoding); }
 
     public static IniFile Load(Stream stream, Encoding encoding) {
         IniFile result = new();
@@ -67,7 +85,7 @@ public sealed class IniFile {
             if (sectionHeadOpenIdx >= 0) {
                 if (sectionHeadCloseIdx >= span.Length) { throw new FormatException($"Malformed section header on line:{lineIndex}: missing closing tag"); }
 
-                currentSection = new string(span.Slice(sectionHeadOpenIdx, sectionHeadCloseIdx));
+                currentSection = new string(span.Slice(sectionHeadOpenIdx, sectionHeadCloseIdx).Slice(1));
                 continue;
             }
 
