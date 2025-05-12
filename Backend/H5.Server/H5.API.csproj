@@ -28,7 +28,7 @@
 
 	<ItemGroup>
 		<None Update="ApiSettings.ini" LinkBase="ApiSettings.ini" CopyToOutputDirectory="Always"/>
-		<ContentWithTargetPath Include="$(SolutionDirectory)..\..\Frontend\**" CopyToOutputDirectory="Always" TargetPath="wwwroot\%(Filename)%(Extension)" />
+		<ContentWithTargetPath Include="$(SolutionDirectory)..\..\Frontend\**" CopyToOutputDirectory="Always" TargetPath="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<!--<ItemGroup>
