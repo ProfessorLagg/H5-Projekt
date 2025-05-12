@@ -5,11 +5,11 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<PublishAot>False</PublishAot>
+		<PublishAot>True</PublishAot>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
 		<PublishTrimmed>True</PublishTrimmed>
-		<DebugType>embedded</DebugType>
+		<DebugType>pdbonly</DebugType>
 
 		<Authors>Søren P.K Thuesen</Authors>
 	</PropertyGroup>
