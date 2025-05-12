@@ -23,7 +23,7 @@ public sealed record class HttpRoute : IComparable<HttpRoute> {
         this.Method = method;
         this.Path = NormalizePath(uri.Path);
     }
-    public HttpRoute(string url, HttpStdMethod method = HttpStdMethodExt.ANY) : this(ParsedUri.Parse(url), method) { }
+    public HttpRoute(string url, HttpStdMethod method = HttpStdMethodExt.ANY) : this(new ParsedUri(url), method) { }
 
     private static bool PathMatch(HttpRoute a, HttpRoute b) {
         if (a.Path.Length != b.Path.Length) return false;

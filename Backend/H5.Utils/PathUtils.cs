@@ -1,10 +1,13 @@
 ﻿using System.IO;
 
-namespace H5.Utils.PathUtils;
+namespace H5.Lib.PathUtils;
 
 public static partial class Utils {
     private static char[] InvalidPathChars = Path.GetInvalidPathChars();
     private static char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
+
+    public static FileInfo ExeFile => new FileInfo(System.Environment.ProcessPath);
+    public static DirectoryInfo ExeDirectory => ExeFile.Directory!;
     public static bool ValidateDirectoryPath(ReadOnlySpan<char> path) {
         foreach (char c in path) {
             foreach (char invalidChar in InvalidPathChars) {

@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H5.PRNG", "H5.PRNG\H5.PRNG.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H5.Testing", "H5.Testing\H5.Testing.csproj", "{56382D87-518C-492E-AEDD-425891C672F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H5.Utils", "H5.Utils\H5.Utils.csproj", "{E907623C-2459-4C5D-AC1F-F9C004170BD7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H5.Lib", "H5.Utils\H5.Lib.csproj", "{E907623C-2459-4C5D-AC1F-F9C004170BD7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

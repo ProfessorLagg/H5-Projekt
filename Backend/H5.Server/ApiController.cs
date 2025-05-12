@@ -7,13 +7,14 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
+using H5.Lib.PathUtils;
 namespace H5.API;
 public sealed class ApiController : IRouteMatcher {
     public readonly FileServer FileHandler;
 
     public ApiController() {
         // TODO Get the directory location of wwwroot from settings
-        string fileServerRootPath = System.Environment.ProcessPath ?? Path.GetFullPath(Path.Join(".", "wwwroot"));
+        string fileServerRootPath = Path.Join(Utils.ExeDirectory.FullName, "wwwroot");
         this.FileHandler = new(fileServerRootPath, "/");
     }
 

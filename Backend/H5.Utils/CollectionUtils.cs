@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H5.Utils.CollectionUtils;
+namespace H5.Lib.CollectionUtils;
 public static partial class Utils {
     public static StringDictionary ToStringDictionary(this IEnumerable<KeyValuePair<string, string>> keyValuePairs) {
         StringDictionary result = new();

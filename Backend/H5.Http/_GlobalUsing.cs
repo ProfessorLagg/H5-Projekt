@@ -1,1 +1,1 @@
-﻿global using H5.Utils.HttpUtils;
+﻿global using H5.Lib.HttpUtils;

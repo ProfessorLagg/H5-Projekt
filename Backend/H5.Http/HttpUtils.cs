@@ -9,11 +9,11 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-using H5.Utils.CollectionUtils;
-using H5.Utils.StreamUtils;
+using H5.Lib.CollectionUtils;
+using H5.Lib.StreamUtils;
 using H5.Http;
 
-namespace H5.Utils.HttpUtils;
+namespace H5.Lib.HttpUtils;
 public static class HttpUtils {
     /// <summary>Sets both the <see cref="HttpListenerResponse.StatusCode"/> and <see cref="HttpListenerResponse.StatusDescription"/> fields</summary>
     public static void SetStatus(this HttpListenerResponse response, HttpStatusCode statusCode) {
