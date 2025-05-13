@@ -9,6 +9,26 @@ class sfc32 {
         return view;
     }
 
+    static test() {
+        let seed = new Uint32Array(4);
+        seed[0] = 9 - 0;
+        seed[1] = 9 - 1;
+        seed[2] = 9 - 2;
+        seed[3] = 9 - 3;
+        let result = {
+            seed: Array.from(seed),
+            integers: [],
+        };
+        let rand = new sfc32(seed);
+        const iterCount = 8;
+
+        for (let i = 0; i < iterCount; i++) {
+            const v = rand.nextInt();
+            result.integers.push(v);
+        }
+
+        return JSON.stringify(result);
+    }
 
     constructor(s) {
         if (!(s instanceof Uint32Array)) { throw new TypeError("seed was not an instance of Uint32Array") }
@@ -16,7 +36,7 @@ class sfc32 {
         this.count = 0;
         this.seed = new Uint32Array(4);
         this.state = new Uint32Array(4);
-        for(let i = 0; i < 4; i++){
+        for (let i = 0; i < 4; i++) {
             this.seed[i] = s[i];
             this.state[i] = s[i];
         }
@@ -50,23 +70,45 @@ class sfc32 {
     }
 }
 
-function test_sfc32() {
-    let seed = new Uint32Array(4);
-    seed[0] = 9 - 0;
-    seed[1] = 9 - 1;
-    seed[2] = 9 - 2;
-    seed[3] = 9 - 3;
-    let result = {
-        seed: Array.from(seed),
-        integers: [],
-    };
-    let rand = new sfc32(seed);
-    const iterCount = 8;
+// === Basic typeof checks ===
+function isUndefined(v) {
+    return typeof (v) === "undefined";
+}
+function isBoolean(v) {
+    return typeof (v) === "boolean";
+}
+function isNumber(v) {
+    return typeof (v) === "number";
+}
+function isBigint(v) {
+    return typeof (v) === "bigint";
+}
+function isString(v) {
+    return typeof (v) === "string";
+}
+function isSymbol(v) {
+    return typeof (v) === "symbol";
+}
+function isFunction(v) {
+    return typeof (v) === "function";
+}
+function isObject(v) {
+    // typeof(null) === "object". See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof#typeof_null
+    return typeof (v) === "object" && v !== null;
+}
 
-    for (let i = 0; i < iterCount; i++) {
-        const v = rand.nextInt();
-        result.integers.push(v);
-    }
+// === Number type checks ===
+function isInteger(v) {
+    return isNumber(v) && Number.isInteger(v);
+}
+function isFloat(v) {
+    return isNumber(v) && Number.isFloat(v);
+}
 
-    return JSON.stringify(result);
+// === Object Type Checks ===
+function isArrayBuffer(v) {
+    return v instanceof ArrayBuffer;
+}
+function isArrayBufferView(v) {
+    return isObject(v) && ArrayBuffer.isView(v);
 }

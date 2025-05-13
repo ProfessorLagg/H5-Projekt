@@ -1,0 +1,39 @@
+<template id="tmpl-game-board">
+    <style>
+        
+    </style>
+</template>
+<script>
+    class HTMLBoardElement extends HTMLElement {
+        static #componentName = 'game-board';
+        static #templateId = 'tmpl-game-board';
+        static async define() {
+            let templateText = undefined;
+            try {
+                const response = await fetch("./template.html");
+                if (!response.ok) { throw new Error(`Response status: ${response.status}`); }
+                templateText = await response.text();
+            } catch (e) {
+                console.error(e);
+                return
+            }
+
+            let templateElement = document.createElement(templateId);
+            templateElement.innerHTML = templateText;
+            document.body.appendChild(templateElement);
+
+            customElements.define(componentName, HTMLBoardElement);
+        }
+
+        constructor() {
+            super();
+            let template = document.getElementById(templateId);
+            let templateContent = template.content;
+
+            const shadowRoot = this.attachShadow({ mode: "open" });
+            shadowRoot.appendChild(templateContent.cloneNode(true));
+        }
+    }
+
+    HTMLBoardElement.define();
+</script>
