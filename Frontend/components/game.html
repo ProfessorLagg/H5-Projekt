@@ -4,44 +4,48 @@
 <template id="tmpl-game">
     <style>
         * {
-            font-family: "Open Sans", sans-serif;
             box-sizing: border-box;
-            color: var(--color-text);
-            padding: 0;
             margin: 0;
+            padding: 0;
         }
 
         :host {
-            justify-self: center;
-            aspect-ratio: 1/2 !important;
-            padding: var(--baseunit);
+            --baseunit: 1em;
+        }
+
+        :host {
+            aspect-ratio: 1/2;
             display: grid;
             grid-auto-flow: row dense;
             grid-auto-columns: 1fr;
             grid-auto-rows: 1fr;
             grid-template-columns: 100%;
-            grid-template-rows: max(var(--baseunit), 10%) 50% auto;
-            gap: var(--baseunit) 0em;
-            justify-content: space-between;
+            grid-template-rows: 2em 50% auto;
             gap: var(--baseunit);
-            border: 1px solid var(--color-text);
-            background-color: rgba(0, 0, 0, 0%);
+            justify-content: space-between;
+            border: 1px solid rgba(0, 0, 0, 0);
+            position: relative;
+
+            /* background-color: rgba(255, 0, 0, 33%); */
         }
 
         @media (min-aspect-ratio: 1/2) {
             :host {
-                height: 100%;
+                top: 0;
+                left: calc(50% - 25vh);
+                height: 100vh;
             }
         }
 
         @media (max-aspect-ratio: 1/2) {
             :host {
-                width: 100%;
+                width: 100vw;
+                top: calc(100% - 200vw);
+                left: 0;
             }
         }
 
         :host>* {
-            width: 100%;
             background-color: rgba(0, 0, 0, 50%);
             outline: 1px solid var(--color-text);
         }
@@ -56,15 +60,16 @@
     const gameTemplate = document.getElementById(gameTemplateId);
     class CustomGameElement extends HTMLElement {
         connectedCallback() {
+            console.debug(this.localName, "connectedCallback()");
             let templateContent = gameTemplate.content;
 
             this.attachShadow({ mode: "open" });
             this.shadowRoot.appendChild(templateContent.cloneNode(true));
-            console.debug(this, "connectedCallback()");
+            
         }
         constructor() {
             super();
-            console.debug(this, "constructor()");
+            console.debug(this.localName, "constructor()");
         }
     }
 
