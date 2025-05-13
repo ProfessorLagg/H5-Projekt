@@ -13,17 +13,9 @@
 
     <body>
         <div class="background-pattern"></div>
-        
-        <template hx-get="components/board.html" hx-swap="outerHTML" hx-trigger="load"></template>
-        <template hx-get="components/score.html" hx-swap="outerHTML" hx-trigger="load"></template>
-        <template hx-get="components/piecebuffer.html" hx-swap="outerHTML" hx-trigger="load"></template>
- 
-        <div id="game-wrap">
-            <game-score></game-score>
-            <game-board></game-board>
-            <game-piecebuffer></game-piecebuffer>
-        </div>
+        <template hx-get="components/game.html" hx-swap="outerHTML" hx-trigger="load"></template>
 
+        <game-wrap></game-wrap>
         
         <script src="js/postbody.js"></script>
     </body>
