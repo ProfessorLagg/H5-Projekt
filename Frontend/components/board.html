@@ -6,7 +6,7 @@
             --cell-color-light: rgba(255, 255, 255, var(--cell-empty-opacity));
             --cell-border-color: rgba(153, 145, 102, 100%);
             --cell-space: calc(min(0.25vh, 0.5vw)/2 + 0.49px);
-            --cell-highlight: 0 0 calc(var(--baseunit) * 1.25) 0 rgba(255, 255, 255, 100%) inset;
+            --cell-highlight: 0 0 calc(12 * var(--cell-space)) 0 rgba(255, 255, 255, 100%) inset;
         }
 
         :host {
@@ -42,6 +42,7 @@
             border-radius: 10%;
             background-color: magenta;
             background-blend-mode: multiply;
+            box-shadow: 0 0 calc(8 * var(--cell-space)) 0 black inset;
         }
 
         /* Even Groups */
@@ -51,7 +52,6 @@
         .board-cell[grp="6"],
         .board-cell[grp="8"] {
             background-color: var(--cell-color-dark);
-            box-shadow: 0 0 8px 0 black inset;
         }
 
         /* Uneven Groups */
@@ -60,7 +60,6 @@
         .board-cell[grp="5"],
         .board-cell[grp="7"] {
             background-color: var(--cell-color-light);
-            box-shadow: 0 0 8px 0 black inset;
         }
 
         /* Cell State*/
