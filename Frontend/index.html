@@ -4,6 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js -->
         <script src="js/htmx.min.js"></script>
         <script src="js/head.js"></script>
         <link rel="stylesheet" href="css/root.css">
@@ -11,7 +12,12 @@
     </head>
 
     <body>
-        
+        <template hx-get="components/board.html" hx-swap="outerHTML" hx-trigger="load"></template>
+        <template hx-get="components/score.html" hx-swap="outerHTML" hx-trigger="load"></template>
+        <div id="game-wrap">
+            <game-score></game-score>
+            <game-board class="debug"></game-board>
+        </div>
         <script src="js/postbody.js"></script>
     </body>
 

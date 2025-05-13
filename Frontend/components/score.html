@@ -1,0 +1,49 @@
+<template id="tmpl-game-score">
+    <style>
+        :host {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100% !important;
+            
+            background-color: rgba(0, 0, 255, 10%);
+            outline: 1px solid black;
+        }
+
+        .score-display {
+            width: fit-content;
+            text-align: center;
+            font-size: 2em;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            background-color: rgba(0, 255, 0, 10%);
+            outline: 1px solid black;
+        }
+    </style>
+    <p class="score-display">0000</p>
+</template>
+<script id="scrpt-game-board">
+    const scoreElementName = 'game-score';
+    const scoreTemplateId = 'tmpl-game-score';
+    const scoreTemplate = document.getElementById(scoreTemplateId);
+    class CustomScoreElement extends HTMLElement {
+        connectedCallback() {
+            let templateContent = scoreTemplate.content;
+
+            this.attachShadow({ mode: "open" });
+            this.shadowRoot.appendChild(templateContent.cloneNode(true));
+            this.setAttribute("score", this.score);
+        }
+        attributeChangedCallback(name, oldValue, newValue) {
+            console.log(`Attribute ${name} has changed.`);
+        }
+
+        constructor() {
+            super();
+            this.score = Number(0);
+        }
+    }
+
+    customElements.define(scoreElementName, CustomScoreElement);
+</script>
