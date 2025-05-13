@@ -14,18 +14,16 @@
         }
 
         :host {
-            
             display: grid;
             grid-auto-flow: row dense;
             grid-template-columns: 100%;
-            /* grid-template-rows: min(1fr, 2em); */
-            grid-template-rows: 2em 9fr 5fr;
+            grid-template-rows: auto 9fr 5fr;
             gap: var(--baseunit);
-
             /*non-grid setings*/
             aspect-ratio: 1/2;
-            border: 1px solid rgba(0, 0, 0, 0);
             position: relative;
+            padding-top: var(--baseunit) !important;
+            padding-bottom: var(--baseunit) !important;
             /* debug settings */
             /* background-color: rgba(255, 0, 255, 50%); */
         }

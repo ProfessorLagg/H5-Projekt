@@ -1,22 +1,39 @@
 <template id="tmpl-game-score">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
         :host {
             display: flex;
             align-items: center;
             justify-content: center;
+            justify-self: center;
+            min-width: 4em;
+            width: 100%;
+            height: fit-content;
+            padding-left: 0.5em !important;
+            padding-right: 0.5em !important;
+            /**/
+            background-image: url(/img/topography.svg);
+            background-color: hsl(30, 100%, 12%);
+            background-blend-mode: multiply;
+            background-size: 30%;
+            outline: 1px solid rgba(0,0,0,50%);
+            
+            /* border: 1px solid var(--color-text); */
+            color: var(--color-text);
+            font-size: 2em;
         }
 
         .score-display {
-            width: fit-content;
             text-align: center;
-            font-size: 2em;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Roboto', sans-serif;
             font-weight: bold;
             margin: 0;
             padding: 0;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
     </style>
-    <p class="score-display">0000</p>
+    <p class="score-display">0999</p>
 </template>
 <script id="scrpt-game-score">
     const scoreElementName = 'game-score';

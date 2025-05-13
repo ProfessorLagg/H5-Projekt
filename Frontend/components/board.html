@@ -5,7 +5,8 @@
             --cell-color-dark: rgba(0, 0, 0, var(--cell-empty-opacity));
             --cell-color-light: rgba(255, 255, 255, var(--cell-empty-opacity));
             --cell-border-color: rgba(153, 145, 102, 100%);
-            --cell-space: 2px;
+            --cell-space: calc(min(0.25vh, 0.5vw)/2 + 0.49px);
+            --cell-highlight: 0 0 calc(var(--baseunit) * 1.25) 0 rgba(255, 255, 255, 100%) inset;
         }
 
         :host {
@@ -41,7 +42,6 @@
             border-radius: 10%;
             background-color: magenta;
             background-blend-mode: multiply;
-            
         }
 
         /* Even Groups */
@@ -51,7 +51,7 @@
         .board-cell[grp="6"],
         .board-cell[grp="8"] {
             background-color: var(--cell-color-dark);
-            
+            box-shadow: 0 0 8px 0 black inset;
         }
 
         /* Uneven Groups */
@@ -65,20 +65,20 @@
 
         /* Cell State*/
         .board-cell:hover {
-            box-shadow: 0 0 var(--baseunit) 0 magenta inset;
+            box-shadow: var(--cell-highlight) !important;
         }
 
         .board-cell[state="0"] {
             background-image: url(/img/pixel-dots.svg);
             background-clip: border-box;
-            
         }
 
         .board-cell[state="1"] {
             background-image: url(/img/block_white.svg);
+            background-color: hsla(30, 100%, 24%, 50%);
             background-size: cover;
-            /* background-color: rgba(0,0,0, 50%); */
             background-blend-mode: multiply;
+            box-shadow: none;
         }
     </style>
 </template>
