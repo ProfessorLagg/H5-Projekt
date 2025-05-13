@@ -1,14 +1,81 @@
+:root {
+    --baseunit: 1vmin;
+    --color-text: white;
+}
+
 * {
     font-family: "Open Sans", sans-serif;
     box-sizing: border-box;
+    color: var(--color-text);
     padding: 0;
     margin: 0;
 }
 
+body {
+    background-color: black;
+    z-index: -9999;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+.background-pattern {
+    width: 100vw;
+    height: 100vh;
+    background-image: url("/img/topography_inverse.svg");
+    background-color: rgb(0, 255, 255, 50%);
+    background-blend-mode: hue;
+    background-repeat: repeat;
+    background-origin: border-box;
+    opacity: 50%;
+    z-index: -9998;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
 #game-wrap {
+    justify-self: center;
+    aspect-ratio: 1/2 !important;
+    padding: var(--baseunit);
+    display: grid;
+    grid-auto-flow: row dense;
+    grid-auto-columns: 1fr;
+    grid-auto-rows: 1fr;
+    grid-template-columns: 100%;
+    grid-template-rows: max(var(--baseunit), 10%) 50% auto;
+    gap: var(--baseunit) 0em;
+
+
+
+    justify-content: space-between;
+
+    gap: var(--baseunit);
+    border: 1px solid var(--color-text);
+    background-color: rgba(0, 0, 0, 0%);
+}
+
+@media (min-aspect-ratio: 1/2) {
+    #game-wrap {
+        height: 100%;
+    }
+}
+
+@media (max-aspect-ratio: 1/2) {
+    #game-wrap {
+        width: 100%;
+    }
+}
+
+
+
+#game-wrap>* {
     width: 100%;
-    height: 100%;
-    padding: 1em;
+
+    background-color: rgba(0, 0, 0, 50%);
+    outline: 1px solid var(--color-text);
+
 }
 
 .debug {
