@@ -18,13 +18,7 @@
         <game-wrap id="game"></game-wrap>
         <script hx-get="js/postbody.js" hx-swap="innerHTML" hx-trigger="load"></script>
         <script>
-            async function updateShapes() {
-                shapes = await fetch("shapes.json").then(r => r.json());
-                shapeIds = Object.keys(shapes).flatMap(x => Number(x)).filter(x => TypeChecker.isInteger(x) && x >= 0);
-            }
             async function cycleShapes() {
-                await updateShapes();
-
                 var i = 0;
                 var shapeKeys = Object.keys(shapes);
                 game.pieces[0].shapeId = i;
