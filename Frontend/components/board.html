@@ -35,6 +35,9 @@
             background-color: rgba(100, 45, 0, 100%);
             background-blend-mode: multiply;
             border: var(--cell-space) solid var(--cell-border-color);
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         .board-cell {
@@ -78,11 +81,10 @@
             display: none;
         }
 
-        .board-cell[state="1"] {
-            background-color: hsla(30, 100%, 24%, 100%);
-        }
+        .board-cell[state="1"] {}
 
         .board-cell-img {
+            background-color: hsla(30, 100%, 24%, 100%);
             max-width: 100%;
             max-height: 100%;
             margin: 0;
