@@ -1,6 +1,6 @@
 <template hx-get="components/board.html" hx-swap="outerHTML" hx-trigger="load"></template>
 <template hx-get="components/score.html" hx-swap="outerHTML" hx-trigger="load"></template>
-<template hx-get="components/piecebuffer.html" hx-swap="outerHTML" hx-trigger="load"></template>
+<template hx-get="components/piece.html" hx-swap="outerHTML" hx-trigger="load"></template>
 <template id="tmpl-game">
     <style>
         * {
@@ -55,20 +55,31 @@
             }
         }
 
-        :host>* {
-            /* background-color: rgba(0, 0, 0, 50%); */
-            /* border: 1px solid var(--color-text); */
+        .piecebuffer {
+            outline: 1px solid var(--color-text);
+        }
+
+        .blockfill {
+            background-image: url(/img/block_white.svg);
+            background-color: hsla(30, 100%, 24%, 50%);
+            background-size: cover;
+            background-blend-mode: multiply;
+            box-shadow: none;
         }
     </style>
-    <game-score></game-score>
-    <game-board></game-board>
-    <game-piecebuffer></game-piecebuffer>
+    <game-score id="score"></game-score>
+    <game-board id="board"></game-board>
+    <div class="piecebuffer">
+        <game-piece id="piece-1"></game-piece>
+        <game-piece id="piece-2"></game-piece>
+        <game-piece id="piece-3"></game-piece>
+    </div>
 </template>
 <script id="scrpt-game">
     const gameElementName = 'game-wrap';
     const gameTemplateId = 'tmpl-game';
     const gameTemplate = document.getElementById(gameTemplateId);
-    class CustomGameElement extends HTMLElement {
+    class CustomGameElement extends HTMLElement {        
         connectedCallback() {
             console.debug(this.localName, "connectedCallback()");
             let templateContent = gameTemplate.content;
@@ -80,6 +91,12 @@
         constructor() {
             super();
             console.debug(this.localName, "constructor()");
+            this.seed = sfc32.getSeed();
+            this.rand = new sfc32(this.seed);
+        }
+        getScoreElem(){
+            const r = this.shadowRoot.getElementById('score');
+            return r;
         }
     }
 

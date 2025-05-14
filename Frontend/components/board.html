@@ -6,7 +6,11 @@
             --cell-color-light: rgba(255, 255, 255, var(--cell-empty-opacity));
             --cell-border-color: rgba(153, 145, 102, 100%);
             --cell-space: calc(min(0.25vh, 0.5vw)/2 + 0.49px);
-            --cell-highlight: 0 0 calc(12 * var(--cell-space)) 0 rgba(255, 255, 255, 100%) inset;
+            /**/
+            /* box-shadow: 8px 8px 36px 16px rgba(0,0,0,0.43) inset; */
+            --cell-shadow: var(--cell-space) var(--cell-space) calc(4 * var(--cell-space)) calc(2 * var(--cell-space)) rgba(0, 0, 0, .66) inset;
+            /* --cell-highlight: 0 0 calc(12 * var(--cell-space)) 0 rgba(255, 255, 255, 100%) inset; */
+            --cell-highlight: var(--cell-space) var(--cell-space) calc(4 * var(--cell-space)) calc(2 * var(--cell-space)) rgba(255, 255, 255, .66) inset;
         }
 
         :host {
@@ -42,7 +46,8 @@
             border-radius: 10%;
             background-color: magenta;
             background-blend-mode: multiply;
-            box-shadow: 0 0 calc(8 * var(--cell-space)) 0 black inset;
+            box-shadow: var(--cell-shadow);
+            overflow: hidden;
         }
 
         /* Even Groups */
@@ -63,23 +68,32 @@
         }
 
         /* Cell State*/
-        .board-cell:hover {
-            box-shadow: var(--cell-highlight) !important;
+        @media (any-hover: hover) {
+            .board-cell:hover {
+                box-shadow: var(--cell-highlight) !important;
+            }
         }
 
-        .board-cell[state="0"] {
-            background-image: url(/img/pixel-dots.svg);
-            background-clip: border-box;
+        .board-cell[state="0"]>.board-cell-img {
+            display: none;
         }
 
         .board-cell[state="1"] {
-            background-image: url(/img/block_white.svg);
-            background-color: hsla(30, 100%, 24%, 50%);
-            background-size: cover;
-            background-blend-mode: multiply;
-            box-shadow: none;
+            background-color: hsla(30, 100%, 24%, 100%);
+        }
+
+        .board-cell-img {
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0;
+            padding: 0;
         }
     </style>
+</template>
+<template id="tmpl-game-boardcell">
+    <div idx="0" grp="0" row="0" col="0" state="0" class="board-cell" onclick="toggleCell(this)">
+        <img src="/img/block_white.svg" alt="block white" class="board-cell-img">
+    </div>
 </template>
 <script id="scrpt-game-board">
     function indexTo1D(row, col) {
@@ -104,39 +118,48 @@
         return gr + gc;
     }
 
+    function enableCell(cell) {
+        // TODO Check cell is element
+        // TODO Check cell has state attribute
+        cell.setAttribute("state", 1);
+    }
+    function disableCell(cell) {
+        // TODO Check cell is element
+        // TODO Check cell has state attribute
+        cell.setAttribute("state", 0);
+    }
+    function toggleCell(cell) {
+        console.debug("toggleCell(", cell, ")");
+        // TODO Check cell is element
+        // TODO Check cell has state attribute
+        let cellState = parseInt(cell.getAttribute("state"));
+        if (cellState === 0) {
+            enableCell(cell);
+        } else if (cellState === 1) {
+            disableCell(cell);
+        } else {
+            console.error("Invalid cell state", cellState, "on element: ", cell);
+        }
+    }
+
     const boardElementName = 'game-board';
     const boardTemplateId = 'tmpl-game-board';
     const boardTemplate = document.getElementById(boardTemplateId);
+    const cellTemplateId = 'tmpl-game-boardcell';
+    const cellTemplate = document.getElementById(cellTemplateId);
     class CustomBoardElement extends HTMLElement {
-        cellClickHandler(e) {
-            console.debug("board cell click handler:", e.target);
-            let state = parseInt(e.target.getAttribute("state"));
-            let idx = parseInt(e.target.getAttribute("idx"));
-            if (state === 0) {
-                e.target.setAttribute("state", 1);
-            } else if (state === 1) {
-                e.target.setAttribute("state", 0);
-            } else {
-                console.error("Invalid cell state:", state, "on element: ", e.target);
-            }
-        }
         createCells() {
             console.debug(this.localName, "createCells()");
             for (let row = 0; row < 9; row += 1) {
                 for (let col = 0; col < 9; col++) {
-                    let elem = document.createElement("div");
                     let idx = indexTo1D(row, col);
                     let grp = calcGroup(row, col);
+                    let clone = cellTemplate.content.cloneNode(true);
+                    let elem = clone.firstElementChild;
                     elem.setAttribute("idx", idx)
                     elem.setAttribute("grp", grp)
                     elem.setAttribute("row", row);
                     elem.setAttribute("col", col);
-                    elem.setAttribute("state", 0);
-                    elem.classList.add("board-cell");
-
-                    elem.addEventListener("click", e => {
-                        this.cellClickHandler(e);
-                    });
                     this.shadowRoot.appendChild(elem);
                 }
             }

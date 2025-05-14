@@ -1,0 +1,30 @@
+<template id="tmpl-game-piece">
+    <style>
+        :host {
+            background-color: magenta;
+        }
+    </style>
+</template>
+<script id="scrpt-game-piece">
+    const pieceElementNameElementName = 'game-piece';
+    const pieceElementNameTemplateId = 'tmpl-game-piece';
+    const pieceElementNameTemplate = document.getElementById(pieceElementNameTemplateId);
+    class CustomPieceElement extends HTMLElement {
+        connectedCallback() {
+            let templateContent = pieceElementNameTemplate.content;
+
+            this.attachShadow({ mode: "open" });
+            this.shadowRoot.appendChild(templateContent.cloneNode(true));
+        }
+        attributeChangedCallback(name, oldValue, newValue) {
+            console.log(`Attribute ${name} has changed.`);
+        }
+
+        constructor() {
+            super();
+            this.score = Number(0);
+        }
+    }
+
+    customElements.define(pieceElementNameElementName, CustomPieceElement);
+</script>

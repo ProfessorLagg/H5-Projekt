@@ -70,45 +70,34 @@ class sfc32 {
     }
 }
 
-// === Basic typeof checks ===
-function isUndefined(v) {
-    return typeof (v) === "undefined";
-}
-function isBoolean(v) {
-    return typeof (v) === "boolean";
-}
-function isNumber(v) {
-    return typeof (v) === "number";
-}
-function isBigint(v) {
-    return typeof (v) === "bigint";
-}
-function isString(v) {
-    return typeof (v) === "string";
-}
-function isSymbol(v) {
-    return typeof (v) === "symbol";
-}
-function isFunction(v) {
-    return typeof (v) === "function";
-}
-function isObject(v) {
-    // typeof(null) === "object". See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof#typeof_null
-    return typeof (v) === "object" && v !== null;
-}
+class TypeChecker {
+    // === Basic typeof checks ===
+    static isUndefined(v) { return typeof (v) === "undefined"; }
+    static isBoolean(v) { return typeof (v) === "boolean"; }
+    static isNumber(v) { return typeof (v) === "number"; }
+    static isBigint(v) { return typeof (v) === "bigint"; }
+    static isString(v) { return typeof (v) === "string"; }
+    static isSymbol(v) { return typeof (v) === "symbol"; }
+    static isFunction(v) { return typeof (v) === "function"; }
+    static isObject(v) {
+        // typeof(null) === "object". See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof#typeof_null
+        return typeof (v) === "object" && v !== null;
+    }
 
-// === Number type checks ===
-function isInteger(v) {
-    return isNumber(v) && Number.isInteger(v);
-}
-function isFloat(v) {
-    return isNumber(v) && Number.isFloat(v);
-}
+    // === Additional Null Checks ===
+    static isNull(v) { return v === null; }
+    static isNullOrUndefined(v) { return TypeChecker.isUndefined(v) || TypeChecker.isNull(v); }
 
-// === Object Type Checks ===
-function isArrayBuffer(v) {
-    return v instanceof ArrayBuffer;
-}
-function isArrayBufferView(v) {
-    return isObject(v) && ArrayBuffer.isView(v);
+    // === Number type checks ===
+    static isInteger(v) { return TypeChecker.isNumber(v) && Number.isInteger(v); }
+    static isFloat(v) { return TypeChecker.isNumber(v) && Number.isFloat(v); }
+    static isFinite(v) { return TypeChecker.isNumber(v) && Number.isFinite(v); }
+
+    // === Object Type Checks ===
+    static isArrayBuffer(v) { return v instanceof ArrayBuffer; }
+    static isArrayBufferView(v) { return TypeChecker.isObject(v) && ArrayBuffer.isView(v); }
+
+    constructor() {
+        throw new Error(TypeChecker.name, " is a static class");
+    }
 }

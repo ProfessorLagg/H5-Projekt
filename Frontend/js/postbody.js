@@ -1,1 +1,4 @@
-const rand = new sfc32(sfc32.getSeed());
+const game = document.getElementById('game');
+const scoreElem = game.getScoreElem();
+
+console.log("game loaded!");

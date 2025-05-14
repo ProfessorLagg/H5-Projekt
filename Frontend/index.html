@@ -8,6 +8,7 @@
         <script src="js/htmx.min.js"></script>
         <script src="js/head.js"></script>
         <link rel="stylesheet" href="css/root.css">
+        <link rel="prefetch" href="/img/block_white.svg" />
         <title>Laggdoku</title>
     </head>
 
@@ -15,9 +16,8 @@
         <div class="background-pattern2"></div>
         <template hx-get="components/game.html" hx-swap="outerHTML" hx-trigger="load"></template>
 
-        <game-wrap></game-wrap>
+        <game-wrap id="game"></game-wrap>
         
-        <script src="js/postbody.js"></script>
+        <script hx-get="js/postbody.js" hx-swap="innerHTML" hx-trigger="load"></script>
     </body>
-
 </html>
