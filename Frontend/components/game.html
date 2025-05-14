@@ -57,17 +57,19 @@
 
         .piecebuffer {
             outline: 1px solid var(--color-text);
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            height: min-content;
+            margin-top: auto;
         }
 
-        .blockfill {
-            background-image: url(/img/block_white.svg);
-            background-color: hsla(30, 100%, 24%, 50%);
-            background-size: cover;
-            background-blend-mode: multiply;
-            box-shadow: none;
+        game-piece {
+            width: 33% !important;
         }
     </style>
     <game-score id="score"></game-score>
+    <div id="space-between"></div>
     <game-board id="board"></game-board>
     <div class="piecebuffer">
         <game-piece id="piece-1"></game-piece>
@@ -76,17 +78,37 @@
     </div>
 </template>
 <script id="scrpt-game">
+    function indexTo1D(row, col) {
+        const r = Math.max(0, Math.min(9, row));
+        const c = Math.max(0, Math.min(9, col));
+        return r * 9 + c;
+    }
+    function indexTo2D(index) {
+        const idx = Math.max(0, Math.min(80, index));
+        const col = idx % 9;
+        const row = (idx - col) / 9
+        return {
+            row: row,
+            col: col,
+        }
+    }
+
     const gameElementName = 'game-wrap';
     const gameTemplateId = 'tmpl-game';
     const gameTemplate = document.getElementById(gameTemplateId);
-    class CustomGameElement extends HTMLElement {        
+    class CustomGameElement extends HTMLElement {
+        clickHandler(event) {
+            console.debug(this.localName, "clickHandler()");
+            this.restart();
+            this.removeEventListener("click", this.clickHandler)
+        }
         connectedCallback() {
             console.debug(this.localName, "connectedCallback()");
             let templateContent = gameTemplate.content;
 
             this.attachShadow({ mode: "open" });
             this.shadowRoot.appendChild(templateContent.cloneNode(true));
-
+            this.addEventListener("click", this.clickHandler)
         }
         constructor() {
             super();
@@ -94,9 +116,30 @@
             this.seed = sfc32.getSeed();
             this.rand = new sfc32(this.seed);
         }
-        getScoreElem(){
-            const r = this.shadowRoot.getElementById('score');
-            return r;
+        get score() {
+            return this.shadowRoot.getElementById('score');
+        }
+        get board() {
+            return this.shadowRoot.getElementById('board');
+        }
+        get pieces() {
+            return [
+                this.shadowRoot.getElementById('piece-1'),
+                this.shadowRoot.getElementById('piece-2'),
+                this.shadowRoot.getElementById('piece-3'),
+            ]
+        }
+
+        fillPieceBuffer() {
+            this.pieces[0].shapeId = shapeIds[this.rand.nextInt() % shapeIds.length];
+            this.pieces[1].shapeId = shapeIds[this.rand.nextInt() % shapeIds.length];
+            this.pieces[2].shapeId = shapeIds[this.rand.nextInt() % shapeIds.length];
+        }
+        restart() {
+            console.log(this.localName, "restart()");
+            this.seed = sfc32.getSeed();
+            this.rand = new sfc32(this.seed);
+            this.fillPieceBuffer();
         }
     }
 

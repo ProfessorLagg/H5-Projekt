@@ -15,9 +15,28 @@
     <body>
         <div class="background-pattern2"></div>
         <template hx-get="components/game.html" hx-swap="outerHTML" hx-trigger="load"></template>
-
         <game-wrap id="game"></game-wrap>
-        
         <script hx-get="js/postbody.js" hx-swap="innerHTML" hx-trigger="load"></script>
+        <script>
+            async function updateShapes() {
+                shapes = await fetch("shapes.json").then(r => r.json());
+                shapeIds = Object.keys(shapes).flatMap(x => Number(x)).filter(x => TypeChecker.isInteger(x) && x >= 0);
+            }
+            async function cycleShapes() {
+                await updateShapes();
+
+                var i = 0;
+                var shapeKeys = Object.keys(shapes);
+                game.pieces[0].shapeId = i;
+                i += 1;
+                window.addEventListener("keydown", e => {
+                    if (e.key == "Enter") {
+                        game.pieces[0].shapeId = i;
+                        i = (i + 1) % shapeIds.length;
+                    }
+                })
+            }
+        </script>
     </body>
+
 </html>

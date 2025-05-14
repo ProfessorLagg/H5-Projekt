@@ -39,29 +39,25 @@
         static observedAttributes = ['value'];
         connectedCallback() {
             console.debug(this.localName, "connectedCallback()");
-
+            this.attachShadow({ mode: "open" });
+            this.shadowRoot.appendChild(scoreTemplate.content.cloneNode(true));
+            this.setAttribute("value", 0);
         }
         attributeChangedCallback(name, oldValue, newValue) {
             console.debug(this.localName, `attributeChangedCallback(name: ${name}, oldValue: ${oldValue},newValue: ${newValue},")`);
-            if(name == 'value'){
+            if (name == 'value') {
                 this.shadowRoot.getElementById('score-display').textContent = this.value.toString();
                 return;
             }
-            
         }
+        constructor() {
+            super();
+        }
+
         get value() { return parseInt(this.getAttribute('value')); }
         set value(value) {
             if (!TypeChecker.isInteger(value)) { throw new Error(`Expected integer but found ${typeof value}`) }
             this.setAttribute("value", value);
-        }
-
-        constructor() {
-            super();
-            let clone = scoreTemplate.content.cloneNode(true);
-
-            this.attachShadow({ mode: "open" });
-            this.shadowRoot.appendChild(clone);
-            this.setAttribute("value", 0);
         }
     }
 
