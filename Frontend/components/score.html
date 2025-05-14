@@ -28,7 +28,7 @@
             text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
     </style>
-    <p id="score-display">0000</p>
+    <p id="score-display">0</p>
 </template>
 <script id="scrpt-game-score">
     const scoreElementName = 'game-score';
@@ -44,7 +44,7 @@
         attributeChangedCallback(name, oldValue, newValue) {
             console.debug(this.localName, `attributeChangedCallback(name: ${name}, oldValue: ${oldValue},newValue: ${newValue},")`);
             if(name == 'value'){
-                this.shadowRoot.getElementById('score-display').textContent = this.value.toString().padStart(4,'0')
+                this.shadowRoot.getElementById('score-display').textContent = this.value.toString();
                 return;
             }
             
