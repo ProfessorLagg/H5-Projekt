@@ -23,8 +23,6 @@ public sealed class ConsoleLog : ILogDestination {
         lock (WriteLock) {
             Stream stream = Console.OpenStandardOutput();
             StreamWriter streamWriter = new(stream, Console.OutputEncoding, -1, true);
-            streamWriter.Write(logMessage.Timestamp.ToString("yyyy-MM-dd HH:mm:sszzz"));
-            streamWriter.Write("  ");
             streamWriter.Write(logMessage.Scope.Name);
             streamWriter.Write(':');
             streamWriter.Write(logMessage.Level.ToString());
