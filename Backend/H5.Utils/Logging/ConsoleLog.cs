@@ -1,9 +1,12 @@
 ﻿using H5.Lib.Utils;
 
+using Microsoft.Win32.SafeHandles;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +20,7 @@ public sealed class ConsoleLog : ILogDestination {
     }
 
     public void Write(LogMessage logMessage) {
+        new SafeFileHandle();
         lock (WriteLock) {
             Stream stream = Console.OpenStandardOutput();
             StreamWriter streamWriter = new(stream, Console.OutputEncoding, Environment.SystemPageSize, true);
