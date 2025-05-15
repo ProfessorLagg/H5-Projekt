@@ -12,7 +12,6 @@ public static class Log {
     private const string DefaultScope = "Default";
     private static readonly ConcurrentBag<ILogDestination> Destinations = new();
 
-
     public static void Error(string message) { Write(LogLevel.Error, message); }
     public static void Error(string scope, string message) { Write(LogLevel.Error, scope, message); }
 
@@ -25,7 +24,6 @@ public static class Log {
     public static void Debug(string message) { Write(LogLevel.Debug, message); }
     public static void Debug(string scope, string message) { Write(LogLevel.Debug, scope, message); }
 
-
     public static void Write(LogLevel logLevel, string? message, params object?[] args) { Write(logLevel, DefaultScope, message); }
 
     public static void Write(LogLevel logLevel, string scope, string? message, params object?[] args) {
@@ -34,6 +32,16 @@ public static class Log {
         });
     }
 
+    public static void AddLogDestination(ILogDestination destination) {
+        foreach (ILogDestination dst in Destinations) {
+            if (destination.Equals(dst)) { throw new ArgumentException($"ILogDestination {destination} already added"); }
+        }
+        Destinations.Add(destination);
+    }
+
+    public static void AddFileLog() { AddLogDestination(new FileLog()); }
+    public static void AddFileLog(string logDirPath) { AddFileLog(new DirectoryInfo(logDirPath)); }
+    public static void AddFileLog(DirectoryInfo logDir) { AddLogDestination(new FileLog(logDir)); }
 }
 #nullable disable
 
