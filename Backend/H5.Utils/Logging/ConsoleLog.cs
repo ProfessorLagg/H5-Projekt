@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace H5.Lib.Logging;
-#nullable enable
 public sealed class ConsoleLog : ILogDestination {
     private object WriteLock = new();
 
@@ -17,21 +16,21 @@ public sealed class ConsoleLog : ILogDestination {
         return true;
     }
     public void Write(LogScope scope, LogLevel logLevel, string? message) {
+
+    }
+
+    public void Write(LogMessage logMessage) {
         lock (WriteLock) {
             Stream stream = Console.OpenStandardOutput();
             StreamWriter streamWriter = new(stream, Console.OutputEncoding, -1, true);
-            streamWriter.Write(DateTime.Now.ToString("yyyy-MM-dd HH:mm:sszzz"));
+            streamWriter.Write(logMessage.Timestamp.ToString("yyyy-MM-dd HH:mm:sszzz"));
             streamWriter.Write("  ");
-
-            streamWriter.Write(scope.Name);
+            streamWriter.Write(logMessage.Scope.Name);
             streamWriter.Write(':');
-
-            streamWriter.Write(logLevel.ToString());
+            streamWriter.Write(logMessage.Level.ToString());
             streamWriter.Write("  ");
-            message = message ?? "";
-            streamWriter.WriteLine(message.Trim());
+            streamWriter.WriteLine(logMessage.Message.Trim());
             streamWriter.Close();
         }
     }
 }
-#nullable disable

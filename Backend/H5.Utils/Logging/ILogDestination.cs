@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace H5.Lib.Logging;
 #nullable enable
 public interface ILogDestination : IEquatable<ILogDestination> {
-    public void Write(LogScope scope, LogLevel logLevel, string? message);
+    public void Write(LogMessage logMessage);
 }
 #nullable disable

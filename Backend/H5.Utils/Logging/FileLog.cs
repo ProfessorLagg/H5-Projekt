@@ -63,20 +63,20 @@ public sealed class FileLog : ILogDestination {
         FileLog otherFileLogger = (FileLog)other;
         return this.LogDirectory.Equals(otherFileLogger.LogDirectory);
     }
-    public void Write(LogScope scope, LogLevel logLevel, string? message) {
+
+    public void Write(LogMessage logMessage) {
         lock (WriteLock) {
             FileStream stream = this.EnsureLogFile();
             StreamWriter streamWriter = new(stream, this.Encoding, -1, true);
-            streamWriter.Write(DateTime.Now.ToString("yyyy-MM-dd HH:mm:sszzz"));
+            streamWriter.Write(logMessage.Timestamp.ToString("yyyy-MM-dd HH:mm:sszzz"));
             streamWriter.Write("  ");
 
-            streamWriter.Write(scope.Name);
+            streamWriter.Write(logMessage.Scope.Name);
             streamWriter.Write(':');
 
-            streamWriter.Write(logLevel.ToString());
+            streamWriter.Write(logMessage.Level.ToString());
             streamWriter.Write("  ");
-            message = message ?? "";
-            streamWriter.WriteLine(message.Trim().EscapeWhitespace());
+            streamWriter.WriteLine(logMessage.Message.Trim().EscapeWhitespace());
             streamWriter.Close();
         }
     }

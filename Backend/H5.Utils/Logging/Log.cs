@@ -23,11 +23,12 @@ public static class Log {
     public static void Debug(string? message) { Write(LogLevel.Debug, message); }
     public static void Debug(this LogScope scope, string? message) { scope.Write(LogLevel.Debug, message); }
 
-    public static void Write(LogLevel logLevel, string? message) { LogScope.Default.Write(logLevel, message); }
-    public static void Write(this LogScope scope, LogLevel logLevel, string? message) {
-        Parallel.ForEach(Destinations, dst => {
-            dst.Write(scope, logLevel, message);
-        });
+    public static void Write(LogLevel level, string? message) { LogScope.Default.Write(level, message); }
+    public static void Write(this LogScope scope, LogLevel level, string? message) {
+        LogMessage lm = new(scope, level, message);
+        foreach (ILogDestination dst in Destinations) {
+            ThreadPool.QueueUserWorkItem<LogMessage>(dst.Write, lm, false);
+        }
     }
 
     public static void AddLogDestination(ILogDestination destination) {
