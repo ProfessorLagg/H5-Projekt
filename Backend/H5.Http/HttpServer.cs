@@ -78,21 +78,34 @@ public sealed class HttpServer {
         this.Logger.Log(level, msgbuilder.ToString());
     }
     private void HandleRequest(HttpListenerContext context) {
-        LogRequest(context.Request);
-        for (int i = 0; i < this.IncomingMiddleware.Count; i++) {
-            if (!this.IncomingMiddleware[i].Handle(context)) return;
-        }
+        try {
+            LogRequest(context.Request);
+            for (int i = 0; i < this.IncomingMiddleware.Count; i++) {
+                // Returning here still runs the finally block
+                if (!this.IncomingMiddleware[i].Handle(context)) return;
+            }
 
-        IRequestHandler? mapResult = this.RouteMatcher.MatchRoute(context.Request);
-        if (mapResult is null) {
-            this.ErrorHandler.Handle(context, HttpStatusCode.NotFound);
-        }
-        else {
-            mapResult.Handle(context);
-        }
+            IRequestHandler? mapResult = this.RouteMatcher.MatchRoute(context.Request);
+            if (mapResult is null) { this.ErrorHandler.Handle(context, HttpStatusCode.NotFound); }
+            else { mapResult.Handle(context); }
 
-        for (int i = 0; i < this.OutgoingMiddleware.Count; i++) {
-            if (!this.OutgoingMiddleware[i].Handle(context)) return;
+            for (int i = 0; i < this.OutgoingMiddleware.Count; i++) {
+                // Returning here still runs the finally block
+                if (!this.OutgoingMiddleware[i].Handle(context)) return;
+            }
+        }
+        catch (Exception e) {
+            this.Logger.LogError(e, "Exception trying to handle request: {0}", context.Request);
+            if (context is not null) {
+                this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
+            }
+        }
+        finally {
+            if (context is not null) {
+                LogResponse(context.Response);
+                context.Response.OutputStream.Flush();
+                context.Response.Close();
+            }
         }
     }
     public void AddPrefix(string uriPrefix) {
@@ -100,33 +113,28 @@ public sealed class HttpServer {
     }
 
     private async Task Schedule() {
-        while ((Listener.IsListening && this.ShouldRun) || this.RequestQueue.Count > 0) {
-            if (this.RequestQueue.TryDequeue(out HttpListenerContext? context)) {
-                if (context is null) {
-                    this.Logger.LogWarning($"Found null context");
-                    continue;
-                }
-                await Task.Run(() => {
-                    try {
-                        HandleRequest(context);
-                    }
-                    catch (Exception e) {
-                        this.Logger.LogWarning(e.ToString());
-                        if (context is not null) {
-                            this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
-                        }
-                    }
-                    finally {
-                        if (context is not null) {
-                            LogResponse(context.Response);
-                            context.Response.OutputStream.Flush();
-                            context.Response.Close();
-                        }
-                    }
-                });
-
+        WaitCallback handleRequest = (object? ctx) => {
+            if (ctx is null) {
+                this.Logger.LogError($"null context: {Environment.StackTrace}");
             }
-        }
+            else if (ctx is not HttpListenerContext) {
+                this.Logger.LogError($"Expected {typeof(HttpListenerContext).FullName} but found {ctx.GetType().FullName}: {Environment.StackTrace}");
+            }
+            else {
+                this.HandleRequest((HttpListenerContext)ctx);
+            }
+        };
+        Func<bool> shouldRun = () => this.ShouldRun || this.RequestQueue.IsEmpty || this.Listener.IsListening;
+        Action scheduleNext = () => {
+            if (this.RequestQueue.TryDequeue(out HttpListenerContext? context)) {
+                ThreadPool.QueueUserWorkItem(handleRequest, context);
+            }
+        };
+        this.Logger.LogInformation("Scheduler Started");
+        do {
+            await Task.Run(scheduleNext);
+        } while (await Task.Run(shouldRun));
+        this.Logger.LogInformation("Scheduler Ended");
     }
     private async Task Listen() {
         this.ShouldRun = true;
