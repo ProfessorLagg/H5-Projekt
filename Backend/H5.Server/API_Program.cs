@@ -1,11 +1,15 @@
 ﻿using H5.Http;
 using H5.Lib;
+using H5.Lib.Logging;
 namespace H5.API;
 internal class API_Program {
     static void Main(string[] args) {
         ApiSettings.Load();
-        Console.Write($"Loaded settings:\n{ApiSettings.ToIniFile()}\n");
         ApiSettings.Validate();
+        Console.Write($"Loaded settings:\n{ApiSettings.ToIniFile()}\n");
+        if (ApiSettings.Logging.LogToConsole) { Log.AddConsoleLog(); }
+        if (ApiSettings.Logging.LogToFile) { Log.AddFileLog(ApiSettings.Logging.LogDirPath); }
+
 
         ApiController controller = new();
         HttpServer server = new(controller, null);
