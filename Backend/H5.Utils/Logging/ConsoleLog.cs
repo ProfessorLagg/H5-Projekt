@@ -16,7 +16,7 @@ public sealed class ConsoleLog : ILogDestination {
         return true;
     }
 
-    public void Write_v0(LogMessage logMessage) {
+    public void Write(LogMessage logMessage) {
         lock (WriteLock) {
             Stream stream = Console.OpenStandardOutput();
             StreamWriter streamWriter = new(stream, Console.OutputEncoding, Environment.SystemPageSize, true);
@@ -26,12 +26,6 @@ public sealed class ConsoleLog : ILogDestination {
             streamWriter.Write("  ");
             streamWriter.WriteLine(logMessage.Message.Trim());
             streamWriter.Close();
-        }
-    }
-    public void Write(LogMessage lm) {
-        lock (WriteLock) {
-            FastConsole.WriteLine($"{lm.Level.ToString()}\t{lm.Scope.Name}  {lm.Message.Trim()}");
-            FastConsole.Flush();
         }
     }
 }
