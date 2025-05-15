@@ -145,4 +145,10 @@ public sealed class IniFile {
         }
         return section;
     }
+
+    public override string ToString() {
+        MemoryStream stream = new();
+        this.Save(stream, Encoding.Unicode);
+        return Encoding.Unicode.GetString(stream.GetBuffer());
+    }
 }

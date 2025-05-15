@@ -6,7 +6,10 @@ namespace H5.API;
 internal class API_Program {
     static void Main(string[] args) {
         ApiSettings.Load();
+        Console.Write($"Loaded settings:\n{ApiSettings.ToIniFile()}\n");
         ApiSettings.Validate();
+
+        
 
         using ILoggerFactory factory = LoggerFactory.Create(builder => {
             builder = builder.SetMinimumLevel(ApiSettings.Logging.MinimumLoggingLevel);

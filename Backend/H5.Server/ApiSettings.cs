@@ -32,6 +32,7 @@ public static class ApiSettings {
 
     public static void Validate() {
         HTTP.Validate();
+        Logging.Validate();
     }
     private static bool LoadCalled = false;
     public static IDictionary<string, IDictionary<string, string>> ToInstance() {
@@ -145,9 +146,9 @@ public static class ApiSettings {
             if (kvps.TryGetValue("MinimumLoggingLevel", out string? sMinimumLoggingLevel)) { r.MinimumLoggingLevel = Enum.Parse<LogLevel>(sMinimumLoggingLevel); }
             if (kvps.TryGetValue("LogToConsole", out string? sLogToConsole)) { r.LogToConsole = bool.Parse(sLogToConsole); }
             if (kvps.TryGetValue("LogToFile", out string? sLogToFile)) { r.LogToFile = bool.Parse(sLogToFile); }
-            if (kvps.TryGetValue("LogDirPath", out string? sLogDirPath)) { r.LogDirPath = sLogDirPath ?? r.LogDirPath; }
+            if (kvps.TryGetValue("LogDirPath", out string? sLogDirPath)) { r.LogDirPath = string.IsNullOrWhiteSpace(sLogDirPath) ? r.LogDirPath : sLogDirPath; }
             if (kvps.TryGetValue("LogW3", out string? sLogW3)) { r.LogW3 = bool.Parse(sLogW3); }
-            if (kvps.TryGetValue("LogW3DirPath", out string? sLogW3DirPath)) { r.LogW3DirPath = sLogW3DirPath ?? r.LogW3DirPath; }
+            if (kvps.TryGetValue("LogW3DirPath", out string? sLogW3DirPath)) { r.LogW3DirPath = string.IsNullOrWhiteSpace(sLogW3DirPath) ? r.LogW3DirPath : sLogW3DirPath; }
 
             return r;
         }
@@ -161,8 +162,11 @@ public static class ApiSettings {
         }
         IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
         public void Validate() {
-            InvalidSettingException.ThrowIf(this.LogToFile && !Directory.Exists(this.LogDirPath), "Could not find or access Logging.LogDirPath");
-            InvalidSettingException.ThrowIf(this.LogW3 && !Directory.Exists(this.LogW3DirPath), "Could not find or access Logging.LogW3DirPath");
+            DirectoryInfo LogDir = new(this.LogDirPath);
+            InvalidSettingException.ThrowIf(this.LogToFile && !LogDir.ValidatePath(), "Could not find or access Logging.LogDirPath");
+
+            DirectoryInfo LogW3Dir = new(this.LogW3DirPath);
+            InvalidSettingException.ThrowIf(this.LogW3 && !LogW3Dir.ValidatePath(), "Could not find or access Logging.LogW3DirPath");
         }
     }
     private static LoggingSettings? _Logging = null;
