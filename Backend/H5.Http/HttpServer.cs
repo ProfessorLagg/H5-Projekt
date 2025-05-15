@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Primitives;
+﻿using H5.Lib.Logging;
 
 using System;
 using System.Collections.Concurrent;
@@ -18,12 +16,12 @@ public sealed class HttpServer {
 
     private object DefitionLock = new();
     private Mutex DefinitionMutex = new();
-    private ILogger Logger;
     public bool ShouldRun { get; private set; } = false;
 
-    public HttpServer(IRouteMatcher routeMatcher, IRequestErrorHandler? errorHandler = null, ILogger? logger = null) {
+    private const string LogScope = "HttpServer";
+
+    public HttpServer(IRouteMatcher routeMatcher, IRequestErrorHandler? errorHandler = null) {
         this.ErrorHandler = errorHandler ?? new DefaultErrorHandler();
-        this.Logger = logger ?? NullLogger.Instance;
         this.RouteMatcher = routeMatcher;
     }
 
@@ -55,11 +53,11 @@ public sealed class HttpServer {
 
     private void LogRequest(HttpListenerRequest request) {
         // TODO Gotta have settings for this
-        this.Logger.LogInformation($"Recieved request on {request.RawUrl ?? "unkown route"}");
+        Log.Write(LogLevel.Info, $"Recieved request on {request.RawUrl ?? "unkown route"}");
     }
     private void LogResponse(HttpListenerResponse response) {
         const string spacer = "  ";
-        LogLevel level = LogLevel.Information;
+        LogLevel level = LogLevel.Info;
         if (response.StatusCode < 200 || response.StatusCode > 299) {
             level = LogLevel.Error;
         }
@@ -73,7 +71,7 @@ public sealed class HttpServer {
             msgbuilder.Append(": ");
             msgbuilder.AppendLine(response.Headers[i] ?? "");
         }
-        this.Logger.Log(level, msgbuilder.ToString());
+        Log.Write(level, msgbuilder.ToString());
     }
     private void HandleRequest(HttpListenerContext context) {
         try {
@@ -93,7 +91,7 @@ public sealed class HttpServer {
             }
         }
         catch (Exception e) {
-            this.Logger.LogError(e, "Exception trying to handle request: {0}", context.Request);
+            Log.Error($"Exception: {e} trying to handle request: {context.Request.Url}");
             if (context is not null) {
                 this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
             }
@@ -117,7 +115,7 @@ public sealed class HttpServer {
             this.Listener.Start();
             string listening_msg = "Listening on:";
             foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
-            this.Logger.LogInformation(listening_msg);
+            Log.Info(listening_msg);
             while (Listener.IsListening && this.ShouldRun) {
                 HttpListenerContext context = Listener.GetContext(); ;
                 ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);

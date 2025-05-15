@@ -1,7 +1,6 @@
 ﻿using H5.Lib;
+using H5.Lib.Logging;
 using H5.Lib.Utils;
-
-using Microsoft.Extensions.Logging;
 
 using System;
 using System.Collections;
@@ -130,7 +129,7 @@ public static class ApiSettings {
         public const string SectionName = "Logging";
 
         ///<summary>Lowest level of logs that get printed to console and generic log file</summary>
-        public LogLevel MinimumLoggingLevel = LogLevel.Information;
+        public LogLevel MaxLogLevel = LogLevel.Info;
         /// <summary>Enables/Disables writing generic log to console</summary>
         public bool LogToConsole = true;
         /// <summary>Enables/Disables writing generic log to file</summary>
@@ -143,7 +142,7 @@ public static class ApiSettings {
         public string LogW3DirPath = Path.Join(PathUtils.ExeDirectory.FullName, "LogW3");
         public static LoggingSettings Parse(IDictionary<string, string> kvps) {
             LoggingSettings r = new();
-            if (kvps.TryGetValue("MinimumLoggingLevel", out string? sMinimumLoggingLevel)) { r.MinimumLoggingLevel = Enum.Parse<LogLevel>(sMinimumLoggingLevel); }
+            if (kvps.TryGetValue("MaxLogLevel", out string? sMinimumLoggingLevel)) { r.MaxLogLevel = Enum.Parse<LogLevel>(sMinimumLoggingLevel); }
             if (kvps.TryGetValue("LogToConsole", out string? sLogToConsole)) { r.LogToConsole = bool.Parse(sLogToConsole); }
             if (kvps.TryGetValue("LogToFile", out string? sLogToFile)) { r.LogToFile = bool.Parse(sLogToFile); }
             if (kvps.TryGetValue("LogDirPath", out string? sLogDirPath)) { r.LogDirPath = string.IsNullOrWhiteSpace(sLogDirPath) ? r.LogDirPath : sLogDirPath; }
@@ -154,7 +153,7 @@ public static class ApiSettings {
         }
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator() {
-            yield return new KeyValuePair<string, string>("MinimumLoggingLevel", this.MinimumLoggingLevel.ToString());
+            yield return new KeyValuePair<string, string>("MaxLogLevel", this.MaxLogLevel.ToString());
             yield return new KeyValuePair<string, string>("LogToFile", this.LogToFile.ToString().ToLowerInvariant());
             yield return new KeyValuePair<string, string>("LogDirPath", this.LogDirPath.ToString());
             yield return new KeyValuePair<string, string>("LogW3", this.LogW3.ToString().ToLowerInvariant());
