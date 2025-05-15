@@ -31,8 +31,4 @@
 		<ContentWithTargetPath Include="$(SolutionDirectory)..\..\Frontend\**" CopyToOutputDirectory="Always" TargetPath="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
-	<!--<ItemGroup>
-		<ContentWithTargetPath Include="$(SolutionDirectory)..\..\Frontend\**" CopyToOutputDirectory="Always" TargetPath="wwwroot\%(Filename)%(Extension)" />
-	</ItemGroup>-->
-
 </Project>
