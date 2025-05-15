@@ -135,19 +135,19 @@ public static class ApiSettings {
         /// <summary>Enables/Disables writing generic log to file</summary>
         public bool LogToFile = false;
         /// <summary>Directory logfiles are placed in when <see cref="LogToFile"/> is enabled</summary>
-        public string LogDirPath = string.Empty;
+        public string LogDirPath = Path.Join(PathUtils.ExeDirectory.FullName, "Log");
         /// <summary>Enables/Disables writing W3 Extended Log File Format to file</summary>
         public bool LogW3 = false;
         /// <summary>Directory logfiles are placed in when <see cref="LogW3"/> is enabled</summary>
-        public string LogW3DirPath = string.Empty;
+        public string LogW3DirPath = Path.Join(PathUtils.ExeDirectory.FullName, "LogW3");
         public static LoggingSettings Parse(IDictionary<string, string> kvps) {
             LoggingSettings r = new();
             if (kvps.TryGetValue("MinimumLoggingLevel", out string? sMinimumLoggingLevel)) { r.MinimumLoggingLevel = Enum.Parse<LogLevel>(sMinimumLoggingLevel); }
             if (kvps.TryGetValue("LogToConsole", out string? sLogToConsole)) { r.LogToConsole = bool.Parse(sLogToConsole); }
             if (kvps.TryGetValue("LogToFile", out string? sLogToFile)) { r.LogToFile = bool.Parse(sLogToFile); }
-            if (kvps.TryGetValue("LogDirPath", out string? sLogDirPath)) { r.LogDirPath = sLogDirPath; }
+            if (kvps.TryGetValue("LogDirPath", out string? sLogDirPath)) { r.LogDirPath = sLogDirPath ?? r.LogDirPath; }
             if (kvps.TryGetValue("LogW3", out string? sLogW3)) { r.LogW3 = bool.Parse(sLogW3); }
-            if (kvps.TryGetValue("LogW3DirPath", out string? sLogW3DirPath)) { r.LogW3DirPath = sLogW3DirPath; }
+            if (kvps.TryGetValue("LogW3DirPath", out string? sLogW3DirPath)) { r.LogW3DirPath = sLogW3DirPath ?? r.LogW3DirPath; }
 
             return r;
         }
