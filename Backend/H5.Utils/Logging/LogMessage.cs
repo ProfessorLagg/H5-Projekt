@@ -16,7 +16,7 @@ public sealed record class LogMessage {
         Timestamp = DateTime.Now;
         Scope = scope;
         Level = level;
-        message = message ?? string.Empty;
+        Message = message ?? string.Empty;
     }
 #nullable disable
 }
