@@ -15,8 +15,10 @@ public sealed class HttpServer {
     private readonly IRouteMatcher RouteMatcher;
     private readonly IRequestErrorHandler ErrorHandler;
     private readonly HttpListener Listener = new();
+    private readonly ConcurrentQueue<HttpListenerContext> RequestQueue = new();
 
     private object DefitionLock = new();
+    private Mutex DefinitionMutex = new();
     private ILogger Logger;
     public bool ShouldRun { get; private set; } = false;
 
@@ -97,39 +99,60 @@ public sealed class HttpServer {
         this.Listener.Prefixes.Add(uriPrefix);
     }
 
+    private async Task Schedule() {
+        while ((Listener.IsListening && this.ShouldRun) || this.RequestQueue.Count > 0) {
+            if (this.RequestQueue.TryDequeue(out HttpListenerContext? context)) {
+                if (context is null) {
+                    this.Logger.LogWarning($"Found null context");
+                    continue;
+                }
+                await Task.Run(() => {
+                    try {
+                        HandleRequest(context);
+                    }
+                    catch (Exception e) {
+                        this.Logger.LogWarning(e.ToString());
+                        if (context is not null) {
+                            this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
+                        }
+                    }
+                    finally {
+                        if (context is not null) {
+                            LogResponse(context.Response);
+                            context.Response.OutputStream.Flush();
+                            context.Response.Close();
+                        }
+                    }
+                });
+
+            }
+        }
+    }
+    private async Task Listen() {
+        this.ShouldRun = true;
+        this.Listener.Start();
+        string listening_msg = "Listening on:";
+        foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
+        this.Logger.LogInformation(listening_msg);
+
+        while (Listener.IsListening && this.ShouldRun) {
+            HttpListenerContext context = await Listener.GetContextAsync(); ;
+            this.RequestQueue.Enqueue(context);
+
+
+        }
+        if (Listener.IsListening) { Listener.Stop(); }
+        Listener.Close();
+
+    }
+
     /// <summary>Blocks the calling thread to run the WebServer</summary>
     public void Run() {
         lock (DefitionLock) {
-            this.ShouldRun = true;
-            this.Listener.Start();
-            string listening_msg = "Listening on:";
-            foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
-            this.Logger.LogInformation(listening_msg);
-
-            while (Listener.IsListening && this.ShouldRun) {
-                HttpListenerContext? context = null;
-                try {
-                    context = Listener.GetContext();
-                    HandleRequest(context);
-                }
-                catch (Exception e) {
-                    this.Logger.LogWarning(e.ToString());
-                    if (context is not null) {
-                        this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
-                    }
-                }
-                finally {
-                    if (context is not null) {
-                        LogResponse(context.Response);
-                        context.Response.OutputStream.Flush();
-                        context.Response.Close();
-                    }
-                }
-
-            }
-            if (Listener.IsListening) { Listener.Stop(); }
-            Listener.Close();
-
+            var listenTask = this.Listen();
+            var handleTask = this.Schedule();
+            listenTask.Wait();
+            handleTask.Wait();
         }
     }
 
