@@ -10,7 +10,6 @@
 		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
 		<PublishTrimmed>True</PublishTrimmed>
 		<DebugType>pdbonly</DebugType>
-
 		<Authors>Søren P.K Thuesen</Authors>
 	</PropertyGroup>
 

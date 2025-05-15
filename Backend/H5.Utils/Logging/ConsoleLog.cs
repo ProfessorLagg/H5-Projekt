@@ -15,20 +15,23 @@ public sealed class ConsoleLog : ILogDestination {
         if (other is null || other is not ConsoleLog) { return false; }
         return true;
     }
-    public void Write(LogScope scope, LogLevel logLevel, string? message) {
 
-    }
-
-    public void Write(LogMessage logMessage) {
+    public void Write_v0(LogMessage logMessage) {
         lock (WriteLock) {
             Stream stream = Console.OpenStandardOutput();
-            StreamWriter streamWriter = new(stream, Console.OutputEncoding, -1, true);
+            StreamWriter streamWriter = new(stream, Console.OutputEncoding, Environment.SystemPageSize, true);
             streamWriter.Write(logMessage.Scope.Name);
             streamWriter.Write(':');
             streamWriter.Write(logMessage.Level.ToString());
             streamWriter.Write("  ");
             streamWriter.WriteLine(logMessage.Message.Trim());
             streamWriter.Close();
+        }
+    }
+    public void Write(LogMessage lm) {
+        lock (WriteLock) {
+            FastConsole.WriteLine($"{lm.Level.ToString()}\t{lm.Scope.Name}  {lm.Message.Trim()}");
+            FastConsole.Flush();
         }
     }
 }
