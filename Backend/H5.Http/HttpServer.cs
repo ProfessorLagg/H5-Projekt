@@ -8,14 +8,16 @@ using System.Xml;
 
 namespace H5.Http;
 public sealed class HttpServer {
+    private static LogScope Logger = new LogScope(typeof(HttpServer).FullName);
+
     private readonly List<IMiddleware> IncomingMiddleware = new();
     private readonly List<IMiddleware> OutgoingMiddleware = new();
     private readonly IRouteMatcher RouteMatcher;
     private readonly IRequestErrorHandler ErrorHandler;
     private readonly HttpListener Listener = new();
 
+
     private object DefitionLock = new();
-    private Mutex DefinitionMutex = new();
     public bool ShouldRun { get; private set; } = false;
 
     private const string LogScope = "HttpServer";
@@ -53,7 +55,7 @@ public sealed class HttpServer {
 
     private void LogRequest(HttpListenerRequest request) {
         // TODO Gotta have settings for this
-        Log.Write(LogLevel.Info, $"Recieved request on {request.RawUrl ?? "unkown route"}");
+        Logger.Write(LogLevel.Info, $"Recieved request on {request.RawUrl ?? "unkown route"}");
     }
     private void LogResponse(HttpListenerResponse response) {
         const string spacer = "  ";
@@ -71,7 +73,7 @@ public sealed class HttpServer {
             msgbuilder.Append(": ");
             msgbuilder.AppendLine(response.Headers[i] ?? "");
         }
-        Log.Write(level, msgbuilder.ToString());
+        Logger.Write(level, msgbuilder.ToString());
     }
     private void HandleRequest(HttpListenerContext context) {
         try {
@@ -91,7 +93,7 @@ public sealed class HttpServer {
             }
         }
         catch (Exception e) {
-            Log.Error($"Exception: {e} trying to handle request: {context.Request.Url}");
+            Logger.Error($"Exception: {e} trying to handle request: {context.Request.Url}");
             if (context is not null) {
                 this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
             }
@@ -115,7 +117,7 @@ public sealed class HttpServer {
             this.Listener.Start();
             string listening_msg = "Listening on:";
             foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
-            Log.Info(listening_msg);
+            Logger.Info(listening_msg);
             while (Listener.IsListening && this.ShouldRun) {
                 HttpListenerContext context = Listener.GetContext(); ;
                 ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);
