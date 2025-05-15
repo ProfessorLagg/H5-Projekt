@@ -12,6 +12,7 @@ internal class Test_Program {
         testRunner.AddTest<UnitTests.HttpStdMethodTest>();
         testRunner.AddTest<UnitTests.IniFileTest>();
         testRunner.AddTest<UnitTests.ApiSettingsTest>();
+        testRunner.AddTest<UnitTests.CustomLoggerTest>();
         testRunner.Run();
     }
 }
