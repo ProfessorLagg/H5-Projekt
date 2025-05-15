@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace H5.Lib.Utils;
 public static class StreamUtils {
+#nullable enable
     public static IEnumerable<string> ReadLines(this StreamReader sr) {
         while (!sr.EndOfStream) {
             string? line = sr.ReadLine();
             if (line is not null) yield return line!;
         }
     }
+
+
     public static async Task<IList<string>> ReadLinesAsync(this StreamReader sr) {
         List<string> result = new();
         while (!sr.EndOfStream) {
@@ -21,6 +24,7 @@ public static class StreamUtils {
 
         return result;
     }
+#nullable disable
     /// <summary>
     /// Check that 2 streams contain exactly the same bytes.
     /// Does not reset positions

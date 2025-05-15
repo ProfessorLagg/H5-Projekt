@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using H5.Lib;
 using H5.Lib.Utils;
 namespace H5.Testing.UnitTests;
-internal class IniFile : IUnitTest {
+internal class IniFileTest : IUnitTest {
 
     public string GetName() { return typeof(H5.Lib.IniFile).FullName; }
 

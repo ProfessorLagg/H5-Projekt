@@ -25,5 +25,10 @@ public static class CollectionUtils {
         value = v!;
         return true;
     }
+    public static IEnumerable<string> EnumerateKeys(this StringDictionary @this) {
+        foreach(string key in @this.Keys) {
+            yield return key;
+        }
+    }
 #nullable disable
 }

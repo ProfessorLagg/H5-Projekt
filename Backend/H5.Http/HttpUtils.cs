@@ -44,7 +44,7 @@ public static class HttpUtils {
         Stream rs = request.InputStream;
         rs.Seek(0, SeekOrigin.Begin);
         byte[] bytes = new byte[rs.Length];
-        rs.Read(bytes.AsSpan());
+        rs.Read(bytes, 0, bytes.Length);
         return bytes;
     }
     public static string RawString(this HttpListenerRequest request) {

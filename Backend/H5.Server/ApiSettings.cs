@@ -11,6 +11,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,18 +32,32 @@ public static class ApiSettings {
 
     public static void Validate() {
         HTTP.Validate();
-
-
     }
     private static bool LoadCalled = false;
+    public static IDictionary<string, IDictionary<string, string>> ToInstance() {
+        Dictionary<string, IDictionary<string, string>> result = new();
+        result[HTTPSettings.SectionName] = HTTP.ToDictionary();
+        result[LoggingSettings.SectionName] = Logging.ToDictionary();
+        return result;
+    }
+    public static void LoadDefault() {
+        _HTTP = new();
+        _Logging = new();
+        LoadCalled = true;
+    }
     public static void Load() {
         SettingsFile = IniFile.Load(SettingsFileInfo);
         LoadCalled = true;
     }
-    public static void Save() {
+    public static IniFile ToIniFile() {
         IniFile result = new();
         result.SetSection(HTTPSettings.SectionName, HTTP);
-        result.SetSection(HTTPSettings.SectionName, Logging);
+        result.SetSection(LoggingSettings.SectionName, Logging);
+        return result;
+    }
+    public static void Save() {
+        SettingsFile = ToIniFile();
+        SettingsFile.Save(SettingsFilePath);
     }
     #endregion
 
@@ -58,7 +73,7 @@ public static class ApiSettings {
         /// <summary>Should the API server respond to https:// requests</summary>
         public bool EnableHttps = true;
         /// <summary>The port the API server listsens for https:// requests on</summary>
-        public ushort PortHttps = 80;
+        public ushort PortHttps = 443;
 
         /// <summary>Hostnames the API server listens for requests on ex. localhost, casa-blanca.com, *</summary>
         public string[] HostNames = new string[] { "*" };
@@ -66,29 +81,28 @@ public static class ApiSettings {
         /// <summary>Directory path to static content.Defaults to {exe directory}\wwwroot if empty or missing</summary>
         public string ContentRoot = Path.Join(PathUtils.ExeDirectory.FullName, "wwwroot");
 
-        public static HTTPSettings Parse(StringDictionary kvps) {
+        public static HTTPSettings Parse(IDictionary<string, string> kvps) {
             HTTPSettings r = new();
-            if (kvps.TryGetValue("EnableHttp", out string sEnableHttp)) { r.EnableHttp = bool.Parse(sEnableHttp); }
-            if (kvps.TryGetValue("PortHttp", out string sPortHttp)) { r.PortHttp = ushort.Parse(sPortHttp); }
-            if (kvps.TryGetValue("EnableHttps", out string sEnableHttps)) { r.EnableHttps = bool.Parse(sEnableHttps); }
-            if (kvps.TryGetValue("PortHttps", out string sPortHttps)) { r.PortHttps = ushort.Parse(sPortHttps); }
-            if (kvps.TryGetValue("HostNames", out string sHostNames)) {
+            if (kvps.TryGetValue("EnableHttp", out string? sEnableHttp)) { r.EnableHttp = bool.Parse(sEnableHttp); }
+            if (kvps.TryGetValue("PortHttp", out string? sPortHttp)) { r.PortHttp = ushort.Parse(sPortHttp); }
+            if (kvps.TryGetValue("EnableHttps", out string? sEnableHttps)) { r.EnableHttps = bool.Parse(sEnableHttps); }
+            if (kvps.TryGetValue("PortHttps", out string? sPortHttps)) { r.PortHttps = ushort.Parse(sPortHttps); }
+            if (kvps.TryGetValue("HostNames", out string? sHostNames)) {
                 r.HostNames = sHostNames.Split(',');
                 for (int i = 0; i < r.HostNames.Length; i++) { r.HostNames[i] = r.HostNames[i].Trim().ToLowerInvariant(); }
             }
-            if (kvps.TryGetValue("ContentRoot", out string sContentRoot)) { r.ContentRoot = string.IsNullOrWhiteSpace(sContentRoot) ? r.ContentRoot : sContentRoot; }
-
+            if (kvps.TryGetValue("ContentRoot", out string? sContentRoot)) { r.ContentRoot = string.IsNullOrWhiteSpace(sContentRoot) ? r.ContentRoot : sContentRoot; }
 
             return r;
         }
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator() {
-            yield return new KeyValuePair<string, string>("EnableHttp", this.EnableHttp.ToString());
+            yield return new KeyValuePair<string, string>("EnableHttp", this.EnableHttp.ToString().ToLowerInvariant());
             yield return new KeyValuePair<string, string>("PortHttp", this.PortHttp.ToString());
-            yield return new KeyValuePair<string, string>("EnableHttps", this.EnableHttps.ToString());
+            yield return new KeyValuePair<string, string>("EnableHttps", this.EnableHttps.ToString().ToLowerInvariant());
             yield return new KeyValuePair<string, string>("PortHttps", this.PortHttps.ToString());
             yield return new KeyValuePair<string, string>("HostNames", string.Join(',', this.HostNames));
-            yield return new KeyValuePair<string, string>("EnableHttp", this.ContentRoot.ToString());
+            yield return new KeyValuePair<string, string>("ContentRoot", this.ContentRoot.ToString());
         }
         IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
 
@@ -126,24 +140,23 @@ public static class ApiSettings {
         public bool LogW3 = false;
         /// <summary>Directory logfiles are placed in when <see cref="LogW3"/> is enabled</summary>
         public string LogW3DirPath = string.Empty;
-
-        public StringDictionary ToDictionary() { throw new NotImplementedException(); }
-        public static LoggingSettings Parse(StringDictionary kvps) {
+        public static LoggingSettings Parse(IDictionary<string, string> kvps) {
             LoggingSettings r = new();
-            if (kvps.TryGetValue("MinimumLoggingLevel", out string sMinimumLoggingLevel)) { r.MinimumLoggingLevel = Enum.Parse<LogLevel>(sMinimumLoggingLevel); }
-            if (kvps.TryGetValue("LogToFile", out string sLogToFile)) { r.LogToFile = bool.Parse(sLogToFile); }
-            if (kvps.TryGetValue("LogDirPath", out string sLogDirPath)) { r.LogDirPath = sLogDirPath; }
-            if (kvps.TryGetValue("LogW3", out string sLogW3)) { r.LogW3 = bool.Parse(sLogW3); }
-            if (kvps.TryGetValue("LogW3DirPath", out string sLogW3DirPath)) { r.LogW3DirPath = sLogW3DirPath; }
+            if (kvps.TryGetValue("MinimumLoggingLevel", out string? sMinimumLoggingLevel)) { r.MinimumLoggingLevel = Enum.Parse<LogLevel>(sMinimumLoggingLevel); }
+            if (kvps.TryGetValue("LogToConsole", out string? sLogToConsole)) { r.LogToConsole = bool.Parse(sLogToConsole); }
+            if (kvps.TryGetValue("LogToFile", out string? sLogToFile)) { r.LogToFile = bool.Parse(sLogToFile); }
+            if (kvps.TryGetValue("LogDirPath", out string? sLogDirPath)) { r.LogDirPath = sLogDirPath; }
+            if (kvps.TryGetValue("LogW3", out string? sLogW3)) { r.LogW3 = bool.Parse(sLogW3); }
+            if (kvps.TryGetValue("LogW3DirPath", out string? sLogW3DirPath)) { r.LogW3DirPath = sLogW3DirPath; }
 
             return r;
         }
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator() {
             yield return new KeyValuePair<string, string>("MinimumLoggingLevel", this.MinimumLoggingLevel.ToString());
-            yield return new KeyValuePair<string, string>("LogToFile", this.LogToFile.ToString());
+            yield return new KeyValuePair<string, string>("LogToFile", this.LogToFile.ToString().ToLowerInvariant());
             yield return new KeyValuePair<string, string>("LogDirPath", this.LogDirPath.ToString());
-            yield return new KeyValuePair<string, string>("LogW3", this.LogW3.ToString());
+            yield return new KeyValuePair<string, string>("LogW3", this.LogW3.ToString().ToLowerInvariant());
             yield return new KeyValuePair<string, string>("LogW3DirPath", this.LogW3DirPath.ToString());
         }
         IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
@@ -163,4 +176,3 @@ public static class ApiSettings {
     }
     #endregion
 }
-

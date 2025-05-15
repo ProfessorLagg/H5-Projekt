@@ -8,9 +8,10 @@ internal class Test_Program {
     static void Main(string[] args) {
         Console.WriteLine($"Default Encoding: {Encoding.Default}");
         UnitTestRunner testRunner = new();
-        testRunner.AddTest<UnitTests.SFC32>();
-        testRunner.AddTest<UnitTests.HttpStdMethod>();
-        testRunner.AddTest<UnitTests.IniFile>();
+        testRunner.AddTest<UnitTests.SFC32Test>();
+        testRunner.AddTest<UnitTests.HttpStdMethodTest>();
+        testRunner.AddTest<UnitTests.IniFileTest>();
+        testRunner.AddTest<UnitTests.ApiSettingsTest>();
         testRunner.Run();
     }
 }

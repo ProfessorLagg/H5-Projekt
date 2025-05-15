@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using H5.Http;
 
 namespace H5.Testing.UnitTests;
-internal sealed class HttpStdMethod : IUnitTest {
+internal sealed class HttpStdMethodTest : IUnitTest {
     public string GetName() { return typeof(Http.HttpStdMethod).FullName; }
 
     private void TestComponents() {

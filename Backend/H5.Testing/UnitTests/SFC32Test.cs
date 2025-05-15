@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using H5.PRNG;
 
 namespace H5.Testing.UnitTests;
-internal class SFC32 : IUnitTest {
+internal class SFC32Test : IUnitTest {
 
     public string GetName() { return typeof(PRNG.SFC32).FullName; }
     const int IterCount = ushort.MaxValue;
