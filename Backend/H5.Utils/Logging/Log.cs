@@ -39,6 +39,8 @@ public static class Log {
     public static void AddFileLog() { AddLogDestination(new FileLog()); }
     public static void AddFileLog(string logDirPath) { AddFileLog(new DirectoryInfo(logDirPath)); }
     public static void AddFileLog(DirectoryInfo logDir) { AddLogDestination(new FileLog(logDir)); }
+
+    public static void AddConsoleLog() { AddLogDestination(new ConsoleLog()); }
 }
 #nullable disable
 

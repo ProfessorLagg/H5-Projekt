@@ -11,18 +11,19 @@ public sealed class CustomLoggerTest : IUnitTest {
     public string GetName() { return typeof(H5.Lib.Logging.Log).FullName; }
 
     public void Run() {
+        Log.AddConsoleLog();
         Log.AddFileLog();
 
-        Log.Debug($"{nameof(Log.Debug)}: {Environment.StackTrace}");
-        Log.Info($"{nameof(Log.Info)}: {Environment.StackTrace}");
-        Log.Warn($"{nameof(Log.Warn)}: {Environment.StackTrace}");
-        Log.Error($"{nameof(Log.Error)}: {Environment.StackTrace}");
+        Log.Debug($"{Environment.StackTrace}");
+        Log.Info($"{Environment.StackTrace}");
+        Log.Warn($"{Environment.StackTrace}");
+        Log.Error($"{Environment.StackTrace}");
 
 
         LogScope scope = new("TestScope", LogLevel.Debug);
-        scope.Debug($"{nameof(Log.Debug)}: {Environment.StackTrace}");
-        scope.Info($"{nameof(Log.Info)}: {Environment.StackTrace}");
-        scope.Warn($"{nameof(Log.Warn)}: {Environment.StackTrace}");
-        scope.Error($"{nameof(Log.Error)}: {Environment.StackTrace}");
+        scope.Debug($"{Environment.StackTrace}");
+        scope.Info($"{Environment.StackTrace}");
+        scope.Warn($"{Environment.StackTrace}");
+        scope.Error($"{Environment.StackTrace}");
     }
 }

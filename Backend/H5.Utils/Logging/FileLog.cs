@@ -77,8 +77,6 @@ public sealed class FileLog : ILogDestination {
             streamWriter.Write("  ");
             message = message ?? "";
             streamWriter.WriteLine(message.Trim().EscapeWhitespace());
-
-            streamWriter.Flush();
             streamWriter.Close();
         }
     }
