@@ -15,13 +15,11 @@ public sealed class HttpServer {
     private readonly IRouteMatcher RouteMatcher;
     private readonly IRequestErrorHandler ErrorHandler;
     private readonly HttpListener Listener = new();
-    private readonly ConcurrentQueue<HttpListenerContext> RequestQueue = new();
 
     private object DefitionLock = new();
     private Mutex DefinitionMutex = new();
     private ILogger Logger;
     public bool ShouldRun { get; private set; } = false;
-
 
     public HttpServer(IRouteMatcher routeMatcher, IRequestErrorHandler? errorHandler = null, ILogger? logger = null) {
         this.ErrorHandler = errorHandler ?? new DefaultErrorHandler();
@@ -112,55 +110,20 @@ public sealed class HttpServer {
         this.Listener.Prefixes.Add(uriPrefix);
     }
 
-    private async Task Schedule() {
-        WaitCallback handleRequest = (object? ctx) => {
-            if (ctx is null) {
-                this.Logger.LogError($"null context: {Environment.StackTrace}");
-            }
-            else if (ctx is not HttpListenerContext) {
-                this.Logger.LogError($"Expected {typeof(HttpListenerContext).FullName} but found {ctx.GetType().FullName}: {Environment.StackTrace}");
-            }
-            else {
-                this.HandleRequest((HttpListenerContext)ctx);
-            }
-        };
-        Func<bool> shouldRun = () => this.ShouldRun || this.RequestQueue.IsEmpty || this.Listener.IsListening;
-        Action scheduleNext = () => {
-            if (this.RequestQueue.TryDequeue(out HttpListenerContext? context)) {
-                ThreadPool.QueueUserWorkItem(handleRequest, context);
-            }
-        };
-        this.Logger.LogInformation("Scheduler Started");
-        do {
-            await Task.Run(scheduleNext);
-        } while (await Task.Run(shouldRun));
-        this.Logger.LogInformation("Scheduler Ended");
-    }
-    private async Task Listen() {
-        this.ShouldRun = true;
-        this.Listener.Start();
-        string listening_msg = "Listening on:";
-        foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
-        this.Logger.LogInformation(listening_msg);
-
-        while (Listener.IsListening && this.ShouldRun) {
-            HttpListenerContext context = await Listener.GetContextAsync(); ;
-            this.RequestQueue.Enqueue(context);
-
-
-        }
-        if (Listener.IsListening) { Listener.Stop(); }
-        Listener.Close();
-
-    }
-
     /// <summary>Blocks the calling thread to run the WebServer</summary>
     public void Run() {
         lock (DefitionLock) {
-            var listenTask = this.Listen();
-            var handleTask = this.Schedule();
-            listenTask.Wait();
-            handleTask.Wait();
+            this.ShouldRun = true;
+            this.Listener.Start();
+            string listening_msg = "Listening on:";
+            foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
+            this.Logger.LogInformation(listening_msg);
+            while (Listener.IsListening && this.ShouldRun) {
+                HttpListenerContext context = Listener.GetContext(); ;
+                ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);
+            }
+            if (Listener.IsListening) { Listener.Stop(); }
+            Listener.Close();
         }
     }
 
