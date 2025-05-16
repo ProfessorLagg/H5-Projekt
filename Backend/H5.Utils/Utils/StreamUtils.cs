@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,8 +14,6 @@ public static class StreamUtils {
             if (line is not null) yield return line!;
         }
     }
-
-
     public static async Task<IList<string>> ReadLinesAsync(this StreamReader sr) {
         List<string> result = new();
         while (!sr.EndOfStream) {
@@ -48,5 +47,12 @@ public static class StreamUtils {
             if (bufstreamA.ReadByte() != bufstreamB.ReadByte()) return false;
         }
         return true;
+    }
+    public static byte[] ReadAllBytes(this FileInfo file) {
+        byte[] buf = new byte[file.Length];
+        using FileStream fs = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+        int readCount = fs.Read(buf);
+        Debug.Assert(readCount == buf.Length, $"Read Count ({readCount}) != Buffer Size ({buf.Length})");
+        return buf;
     }
 }

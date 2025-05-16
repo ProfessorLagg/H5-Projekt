@@ -40,7 +40,7 @@ public static class PathUtils {
         if (!directory.ValidatePath()) throw new Exception($"\"{directory.FullName}\" is not a valid directory path");
     }
     public static void AssertExists(this FileInfo file) {
-        if (!file.Exists) throw new Exception($"file at \"{file.FullName}\" did not exist, is not accisible or is not a file");
+        if (!file.Exists) throw new FileNotFoundException($"file at \"{file.FullName}\" did not exist, is not accisible or is not a file");
     }
     public static void AssertExists(this DirectoryInfo directory) {
         if (!directory.Exists) throw new Exception($"directory at \"{directory.FullName}\" did not exist, is not accisible or is not a directory");

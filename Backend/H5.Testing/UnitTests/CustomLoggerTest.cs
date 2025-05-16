@@ -32,6 +32,6 @@ public sealed class CustomLoggerTest : IUnitTest {
         scope.Warn($"{Environment.StackTrace}");
         scope.Error($"{Environment.StackTrace}");
 
-
+        TestLogLevelNames();
     }
 }
