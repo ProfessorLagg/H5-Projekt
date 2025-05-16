@@ -153,12 +153,23 @@
             const shadowRoot = cell0.getRootNode();
             const board = shadowRoot.host;
             board.removeAllLit();
-            const r0 = parseInt(cell0.getAttribute('row'));
-            const c0 = parseInt(cell0.getAttribute('col'))
-
-
+            let r0 = parseInt(cell0.getAttribute('row'));
+            let c0 = parseInt(cell0.getAttribute('col'));
             const shape = CustomPieceElement.selected.shape;
-            let offset = undefined;
+
+            let offset = shape[0];
+            let r_mid = offset.r;
+            let c_mid = offset.c;
+            for (let i = 1; i < shape.length; i++) {
+                offset = shape[i];
+                r_mid += offset.r;
+                c_mid += offset.c;
+            }
+            r_mid = Math.floor(r_mid / shape.length);
+            c_mid = Math.floor(c_mid / shape.length);
+            r0 -= r_mid;
+            c0 -= c_mid;
+            console.log("r_mid:", r_mid, "c_mid", c_mid);
             let cell = undefined;
             for (let i = 0; i < shape.length; i++) {
                 offset = shape[i];
