@@ -5,6 +5,9 @@ internal class API_Program {
 	static void Main(string[] args) {
 		ApiSettings.Load();
 		ApiSettings.Validate();
+#if DEBUG
+		ApiSettings.Logging.LogToConsole = true;
+#endif
 		Console.Write($"Loaded settings:\n{ApiSettings.ToIniFile()}\n");
 		if (ApiSettings.Logging.LogToConsole) { Log.AddConsoleLog(); }
 		if (ApiSettings.Logging.LogToFile) { Log.AddFileLog(ApiSettings.Logging.LogDirPath); }

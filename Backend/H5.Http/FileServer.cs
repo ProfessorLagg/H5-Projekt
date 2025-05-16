@@ -8,24 +8,18 @@ using System.Runtime.InteropServices;
 
 namespace H5.Http;
 public sealed class FileServer : IRequestHandler {
+	#region Static Data
 	private static LogScope Logger = new LogScope(typeof(FileServer).FullName);
+	#endregion
+
+	#region Instance Data
 	public readonly DirectoryInfo RootDirectory;
 	public readonly HttpRoute Route;
 	public readonly CacheSettings CacheConfig;
+	#endregion
 
-	public record class CacheSettings {
-		public static CacheSettings Default = new();
-		/// <summary>If the file server should cache file content</summary>
-		public bool EnableCache = true;
-		/// <summary>The maximum size of cached files in bytes</summary>
-		public int MaxFileSize = 4096;
-		/// <summary>The maximum time a file lives in the cache without being touched</summary>
-		public TimeSpan CacheLifetime = TimeSpan.FromMinutes(10);
-	}
-
-	/// <summary>
-	/// Creates a new FileServer request handler
-	/// </summary>
+	#region Constructors
+	/// <summary>Creates a new FileServer request handler</summary>
 	/// <param name="rootDirectory">The root directory where the file server looks for files</param>
 	/// <param name="rootRoute">The root route that the file server is handling</param>
 	/// <param name="cacheConfig">File content cache settings. If <see cref="null"/> uses <see cref="CacheSettings.Default"/></param>
@@ -35,11 +29,36 @@ public sealed class FileServer : IRequestHandler {
 		this.RootDirectory = rootDirectory;
 		this.Route = rootRoute ?? HttpRoute.Root;
 		this.CacheConfig = cacheConfig ?? CacheSettings.Default;
+		if (this.CacheConfig.EnableCache) { this.CleanCacheAction = this.CleanCache; }
 	}
+	/// <summary>Creates a new FileServer request handler</summary>
+	/// <param name="rootDirectoryPath">The root directory where the file server looks for files</param>
 	public FileServer(string rootDirectoryPath) : this(new DirectoryInfo(rootDirectoryPath)) { }
+	/// <summary>Creates a new FileServer request handler</summary>
+	/// <param name="rootDirectoryPath">The root directory where the file server looks for files</param>
+	/// <param name="httpRoute">The root route that the file server is handling</param>
 	public FileServer(string rootDirectoryPath, string httpRoute) : this(new DirectoryInfo(rootDirectoryPath), new HttpRoute(httpRoute)) { }
+	/// <summary>Creates a new FileServer request handler</summary>
+	/// <param name="rootDirectoryPath">The root directory where the file server looks for files</param>
+	/// <param name="cacheConfig">File content cache settings</param>
+	public FileServer(string rootDirectoryPath, CacheSettings cacheConfig) : this(new DirectoryInfo(rootDirectoryPath), null, cacheConfig) { }
+	/// <summary>Creates a new FileServer request handler</summary>
+	/// <param name="rootDirectoryPath">The root directory where the file server looks for files</param>
+	/// <param name="httpRoute">The root route that the file server is handling</param>
+	/// <param name="cacheConfig">File content cache settings</param>
+	public FileServer(string rootDirectoryPath, string httpRoute, CacheSettings cacheConfig) : this(new DirectoryInfo(rootDirectoryPath), new HttpRoute(httpRoute), cacheConfig) { }
+	#endregion
 
 	#region Caching
+	public record class CacheSettings {
+		public static CacheSettings Default = new();
+		/// <summary>If the file server should cache file content</summary>
+		public bool EnableCache = true;
+		/// <summary>The maximum size of cached files in bytes</summary>
+		public int MaxFileSize = 4096;
+		/// <summary>The maximum time a file lives in the cache without being touched</summary>
+		public TimeSpan CacheLifetime = TimeSpan.FromMinutes(10);
+	}
 	private record class FileCacheValue {
 		public DateTime LastWriteTimeUtc = DateTime.MinValue;
 		public byte[] Content = Array.Empty<byte>();
@@ -88,6 +107,7 @@ public sealed class FileServer : IRequestHandler {
 			Logger.Debug($"Removed {k} from file cache");
 		}
 	}
+	private readonly Action CleanCacheAction = () => { };
 	private byte[] ReadFileCached(FileInfo file) {
 		if (file.Length > this.CacheConfig.MaxFileSize) { return file.ReadAllBytes(); }
 		FileCacheValue? cacheValue = null;
@@ -100,10 +120,12 @@ public sealed class FileServer : IRequestHandler {
 		}
 		Debug.Assert(cacheValue is not null);
 		LastTouchedCache[file.FullName] = DateTime.Now;
-		CleanCache();
+		CleanCacheAction.Invoke();
 		return cacheValue.Content;
 	}
 	#endregion
+
+	#region Request Handling
 	private void WriteResponse(HttpListenerResponse response, FileInfo file) {
 		byte[] fileContent = this.ReadFileCached(file);
 		response.ContentLength64 = fileContent.Length;
@@ -125,4 +147,5 @@ public sealed class FileServer : IRequestHandler {
 		this.WriteResponse(context.Response, requestFile);
 		//HttpUtils.File(context.Response, requestFile);
 	}
+	#endregion
 }

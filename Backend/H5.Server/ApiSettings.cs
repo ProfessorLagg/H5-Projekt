@@ -52,7 +52,7 @@ public static class ApiSettings {
 	#endregion
 
 	#region HTTP
-	public sealed record class HTTPSettings : IEnumerable<KeyValuePair<string, string>> {
+	public sealed class HTTPSettings : IEnumerable<KeyValuePair<string, string>> {
 		public const string SectionName = "HTTP";
 
 		/// <summary>Should the API server respond to http:// requests</summary>
@@ -68,9 +68,6 @@ public static class ApiSettings {
 		/// <summary>Hostnames the API server listens for requests on ex. localhost, casa-blanca.com, *</summary>
 		public string[] HostNames = new string[] { "*" };
 
-		/// <summary>Directory path to static content.Defaults to {exe directory}\wwwroot if empty or missing</summary>
-		public string ContentRoot = Path.Join(PathUtils.ExeDirectory.FullName, "wwwroot");
-
 		public static HTTPSettings Parse(IDictionary<string, string> kvps) {
 			HTTPSettings r = new();
 			if (kvps.TryGetValue("EnableHttp", out string? sEnableHttp)) { r.EnableHttp = bool.Parse(sEnableHttp); }
@@ -81,7 +78,7 @@ public static class ApiSettings {
 				r.HostNames = sHostNames.Split(',');
 				for (int i = 0; i < r.HostNames.Length; i++) { r.HostNames[i] = r.HostNames[i].Trim().ToLowerInvariant(); }
 			}
-			if (kvps.TryGetValue("ContentRoot", out string? sContentRoot)) { r.ContentRoot = string.IsNullOrWhiteSpace(sContentRoot) ? r.ContentRoot : sContentRoot; }
+
 
 			return r;
 		}
@@ -92,14 +89,12 @@ public static class ApiSettings {
 			yield return new KeyValuePair<string, string>("EnableHttps", this.EnableHttps.ToString().ToLowerInvariant());
 			yield return new KeyValuePair<string, string>("PortHttps", this.PortHttps.ToString());
 			yield return new KeyValuePair<string, string>("HostNames", string.Join(',', this.HostNames));
-			yield return new KeyValuePair<string, string>("ContentRoot", this.ContentRoot.ToString());
 		}
 		IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
 
 		public void Validate() {
 			InvalidSettingException.ThrowIf(!(this.EnableHttp || this.EnableHttps), "Atleast one of HTTP.EnableHttp or HTTP.EnableHttps must be enabled");
 			InvalidSettingException.ThrowIf(this.HostNames.Length == 0, "You must define atleast 1 host name in HTTP.HostNames");
-			InvalidSettingException.ThrowIf(!Directory.Exists(this.ContentRoot), $"Could not find or access HTTP.ContentRoot directory \"{this.ContentRoot}\"");
 			InvalidSettingException.ThrowIf(EnableHttp && EnableHttps && PortHttp == PortHttps, $"http:// and https:// cannot both use port {PortHttp}");
 		}
 	}
@@ -165,6 +160,44 @@ public static class ApiSettings {
 			if (_Logging is null) { _Logging = LoggingSettings.Parse(SettingsFile.GetSection("Logging")); }
 
 			return _Logging;
+		}
+	}
+	#endregion
+
+	#region FileServer
+	public sealed class FileServerSettings : IEnumerable<KeyValuePair<string, string>> {
+		public const string SectionName = "FileServer";
+		/// <summary>Directory path to static content.Defaults to {exe directory}\wwwroot if empty or missing</summary>
+		public string ContentRoot = Path.Join(PathUtils.ExeDirectory.FullName, "wwwroot");
+		/// <summary>Toggles the file server in-memory cache. Defaults to true if not specified</summary>
+		public bool EnableCaching = true;
+		/// <summary>Maximum size of cached files in bytes. Defaults to 4096 if not specified</summary>
+		public uint MaxCacheFileSize = 4096;
+		/// <summary>Seconds a file can go untouched in the cache before it gets cleaned up. Defaults to 600 if not specified</summary>
+		public uint CacheLifetimeSeconds = 600;
+
+		public static FileServerSettings Parse(IDictionary<string, string> kvps) {
+			FileServerSettings r = new();
+			if (kvps.TryGetValue("ContentRoot", out string? sContentRoot)) { r.ContentRoot = string.IsNullOrWhiteSpace(sContentRoot) ? r.ContentRoot : sContentRoot; }
+			if (kvps.TryGetValue("EnableCaching", out string? sEnableCaching)) { r.EnableCaching = string.IsNullOrWhiteSpace(sEnableCaching) ? r.EnableCaching : bool.Parse(sEnableCaching); }
+			if (kvps.TryGetValue("MaxCacheFileSize", out string? sMaxCacheFileSize)) { r.MaxCacheFileSize = string.IsNullOrWhiteSpace(sMaxCacheFileSize) ? r.MaxCacheFileSize : uint.Parse(sMaxCacheFileSize); }
+			if (kvps.TryGetValue("CacheLifetimeSeconds", out string? sCacheLifetimeSeconds)) { r.CacheLifetimeSeconds = string.IsNullOrWhiteSpace(sCacheLifetimeSeconds) ? r.CacheLifetimeSeconds : uint.Parse(sCacheLifetimeSeconds); }
+			return r;
+		}
+		public void Validate() {
+			InvalidSettingException.ThrowIf(!Directory.Exists(this.ContentRoot), $"Could not find or access HTTP.ContentRoot directory \"{this.ContentRoot}\"");
+		}
+		public IEnumerator<KeyValuePair<string, string>> GetEnumerator() {
+			yield return new KeyValuePair<string, string>("ContentRoot", this.ContentRoot.ToString());
+		}
+		IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
+	}
+	private static FileServerSettings? _FileServer = null;
+	public static FileServerSettings FileServer {
+		get {
+			if (!LoadCalled) { throw new Exception("Load has not been called"); }
+			if (_FileServer is null) { _FileServer = FileServerSettings.Parse(SettingsFile.GetSection(FileServerSettings.SectionName)); }
+			return _FileServer;
 		}
 	}
 	#endregion

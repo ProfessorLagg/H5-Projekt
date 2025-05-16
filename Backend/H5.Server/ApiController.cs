@@ -3,7 +3,7 @@
 using System.Net;
 namespace H5.API;
 public sealed class ApiController : IRouteMatcher {
-	public readonly FileServer FileHandler = new(ApiSettings.HTTP.ContentRoot, "/");
+	public readonly FileServer FileHandler = new(ApiSettings.FileServer.ContentRoot, "/");
 
 
 	public IRequestHandler? MatchRoute(HttpListenerRequest request) {
