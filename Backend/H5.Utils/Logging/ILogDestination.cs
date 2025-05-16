@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace H5.Lib.Logging;
+﻿namespace H5.Lib.Logging;
 #nullable enable
 public interface ILogDestination : IEquatable<ILogDestination> {
-    public void Write(LogMessage logMessage);
+	public void Write(LogMessage logMessage);
 }
 #nullable disable
