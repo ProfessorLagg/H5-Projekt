@@ -71,17 +71,13 @@
         }
 
         /* Cell State*/
-        @media (any-hover: hover) {
-            .board-cell:hover {
-                box-shadow: var(--cell-highlight) !important;
-            }
+        .board-cell.highlight {
+            box-shadow: var(--cell-highlight) !important;
         }
 
         .board-cell[state="0"]>.board-cell-img {
             display: none;
         }
-
-        .board-cell[state="1"] {}
 
         .board-cell-img {
             background-color: hsla(30, 100%, 24%, 100%);
@@ -93,7 +89,7 @@
     </style>
 </template>
 <template id="tmpl-game-boardcell">
-    <div idx="0" grp="0" row="0" col="0" state="0" class="board-cell" onclick="toggleCell(this)">
+    <div idx="0" grp="0" row="0" col="0" state="0" class="board-cell">
         <img src="/img/block_white.svg" alt="block white" class="board-cell-img">
     </div>
 </template>
@@ -136,6 +132,61 @@
     const cellTemplate = document.getElementById(cellTemplateId);
     var blockSize = -1;
     class CustomBoardElement extends HTMLElement {
+
+        litCells = [];
+        removeAllLit() {
+            console.debug(this.localName, "removeAllHighlights()")
+            let cell = undefined;
+            while (this.litCells.length > 0) {
+                cell = this.litCells.pop();
+                cell.classList.remove('highlight');
+            }
+        }
+        lightCell(cell) {
+            cell.classList.add('highlight')
+            this.litCells.push(cell);
+        }
+        mouseenterCellHandler(e) {
+            if (CustomPieceElement.selected === undefined) { return; }
+
+            const cell0 = e.target;
+            const shadowRoot = cell0.getRootNode();
+            const board = shadowRoot.host;
+            board.removeAllLit();
+            const r0 = parseInt(cell0.getAttribute('row'));
+            const c0 = parseInt(cell0.getAttribute('col'))
+
+
+            const shape = CustomPieceElement.selected.shape;
+            let offset = undefined;
+            let cell = undefined;
+            for (let i = 0; i < shape.length; i++) {
+                offset = shape[i];
+                cell = shadowRoot.querySelector(`.board-cell[row="${offset.r + r0}"][col="${offset.c + c0}"][state="0"]`)
+                if (TypeChecker.isNullOrUndefined(cell)) {
+                    board.removeAllLit();
+                    return;
+                }
+                board.lightCell(cell);
+            }
+        }
+
+        clickCellHandler(e) {
+            const board = e.target.getRootNode().host;
+            const shape = CustomPieceElement.selected.shape;
+            console.log("shape:", shape);
+            console.log("board.litCells:", board.litCells);
+            if (board.litCells.length === shape.length) {
+                let cell = undefined;
+                while (board.litCells.length > 0) {
+                    cell = board.litCells.pop();
+                    cell.classList.remove('highlight');
+                    cell.setAttribute("state", 1);
+                }
+                CustomPieceElement.placeSelected();
+            }
+        }
+
         updateBlockSize() {
             console.debug(this.localName, "updateBlockSize()");
             const cell = this.getCellByIndex(0);
@@ -144,6 +195,7 @@
         resizeHandler(event) {
             this.updateBlockSize();
         }
+
         createCells() {
             console.debug(this.localName, "createCells()");
             for (let row = 0; row < 9; row += 1) {
@@ -151,12 +203,14 @@
                     let idx = indexTo1D(row, col);
                     let grp = calcGroup(row, col);
                     let clone = cellTemplate.content.cloneNode(true);
-                    let elem = clone.firstElementChild;
-                    elem.setAttribute("idx", idx)
-                    elem.setAttribute("grp", grp)
-                    elem.setAttribute("row", row);
-                    elem.setAttribute("col", col);
-                    this.shadowRoot.appendChild(elem);
+                    let cell = clone.firstElementChild;
+                    cell.setAttribute("idx", idx)
+                    cell.setAttribute("grp", grp)
+                    cell.setAttribute("row", row);
+                    cell.setAttribute("col", col);
+                    cell.addEventListener("mouseenter", this.mouseenterCellHandler, true)
+                    cell.addEventListener("click", this.clickCellHandler, true)
+                    this.shadowRoot.appendChild(cell);
                 }
             }
         }

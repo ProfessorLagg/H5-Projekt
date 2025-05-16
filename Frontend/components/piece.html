@@ -4,7 +4,7 @@
             aspect-ratio: 1/1 !important;
             /**/
             /* background-color: magenta; */
-            outline: 1px solid magenta;
+            /* outline: 1px solid magenta; */
             /**/
             display: grid;
             grid-auto-flow: row dense;
@@ -102,52 +102,26 @@
 
     class CustomPieceElement extends HTMLElement {
         static observedAttributes = ['shapeId'];
-        static stuckPiece = undefined;
-        static stuckOffset = { x: 0, y: 0 }
-        static moveToMouse(e) {
-            if (CustomPieceElement.stuckPiece === undefined) {
-                window.removeEventListener("mousemove", CustomPieceElement.moveToMouse, true);
-                throw new Error("CustomPieceElement.stuckPiece was undefined");
+        static selected = undefined;
+
+        static selectPiece(piece) {
+            CustomPieceElement.unselectPiece();
+            CustomPieceElement.selected = piece;
+            CustomPieceElement.selected.classList.add('selected')
+        }
+        static unselectPiece() {
+            if (CustomPieceElement.selected !== undefined) {
+                CustomPieceElement.selected.classList.remove('selected');
+                CustomPieceElement.selected = undefined;
             }
-            // console.log(e);
-
-            CustomPieceElement.stuckPiece.style.left = (e.clientX - CustomPieceElement.stuckOffset.x) + 'px';
-            CustomPieceElement.stuckPiece.style.top = (e.clientY - CustomPieceElement.stuckOffset.y) + 'px';
-            // CustomPieceElement.stuckPiece.style.left = (e.clientX - CustomPieceElement.stuckPiece.clientWidth / 2) + 'px';
-
-            // CustomPieceElement.stuckPiece.style.top = (e.clientY - CustomPieceElement.stuckGrabPos[1]) + 'px';
-            // CustomPieceElement.stuckPiece.style.left = (e.clientX + CustomPieceElement.stuckGrabPos[0]) + 'px';
         }
-        stickToMouse(e) {
-            e.preventDefault();
-            CustomPieceElement.stuckPiece = this;
-
-            CustomPieceElement.stuckPiece.style.position = 'absolute';
-            CustomPieceElement.stuckPiece.style.transform = `scale(${5 / 3})`
-
-            let bounds = CustomPieceElement.stuckPiece.getBoundingClientRect();
-            CustomPieceElement.stuckOffset.x = bounds.width;
-            CustomPieceElement.stuckOffset.y = bounds.height / 2;
-
-
-            // CustomPieceElement.stuckOffset.x = (e.clientX - bounds.left);
-            // CustomPieceElement.stuckOffset.y = (bounds.height / 2) - ();
-
-
-            console.log("stickToMouse", "\n\te:", e, "\n\tbounds:", bounds, "\n\tCustomPieceElement.stuckOffset:", CustomPieceElement.stuckOffset);
-            window.addEventListener("mousemove", CustomPieceElement.moveToMouse, true);
-            window.addEventListener("mouseup", CustomPieceElement.unstickFromMouse, true);
-            CustomPieceElement.moveToMouse(e);
+        static placeSelected() {
+            let piece = CustomPieceElement.selected;
+            CustomPieceElement.unselectPiece();
+            piece.shapeId = -1;
         }
-        static unstickFromMouse() {
-            CustomPieceElement.stuckPiece.style.position = '';
-            CustomPieceElement.stuckPiece.style.top = '';
-            CustomPieceElement.stuckPiece.style.left = '';
-            CustomPieceElement.stuckPiece.style.transform = '';
-            CustomPieceElement.stuckPiece.removeAttribute("grab-x");
-            CustomPieceElement.stuckPiece.removeAttribute("grab-y");
-            CustomPieceElement.stuckPiece = undefined;
-            window.removeEventListener("mousemove", CustomPieceElement.moveToMouse, true);
+        clickHandler(e) {
+            CustomPieceElement.selectPiece(this);
         }
 
         connectedCallback() {
@@ -157,7 +131,7 @@
             this.shadowRoot.appendChild(templateContent.cloneNode(true));
             // this.shapeId = ((Math.random() * shapeIds.length) | 0);
             this.shapeId = -1;
-            this.addEventListener("mousedown", this.stickToMouse);
+            this.addEventListener("click", this.clickHandler);
         }
 
         attributeChangedCallback(name, oldValue, newValue) {
