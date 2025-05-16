@@ -12,9 +12,10 @@ using System.Threading.Tasks;
 
 namespace H5.Lib.Logging;
 public sealed class ConsoleLog : ILogDestination {
+    private static readonly int BufferSize = Environment.SystemPageSize;
     private object WriteLock = new();
     private Stream StdOut = Console.OpenStandardOutput();
-    private static readonly int BufferSize = Environment.SystemPageSize;
+
 
     public bool Equals(ILogDestination? other) {
         if (other is null || other is not ConsoleLog) { return false; }
@@ -22,15 +23,11 @@ public sealed class ConsoleLog : ILogDestination {
     }
 
     public void Write(LogMessage logMessage) {
-        new SafeFileHandle();
         lock (WriteLock) {
-            StreamWriter streamWriter = new(StdOut, Console.OutputEncoding, BufferSize, true);
-            streamWriter.Write(logMessage.Scope.Name);
-            streamWriter.Write(':');
-            streamWriter.Write(logMessage.Level.ToString());
-            streamWriter.Write("  ");
-            streamWriter.WriteLine(logMessage.Message.Trim());
-            streamWriter.Close();
+            string msg = $"{logMessage.Scope.Name}:{logMessage.Level.Name()}{Environment.NewLine}{logMessage.Message}{Environment.NewLine}";
+            byte[] msgBytes = Console.OutputEncoding.GetBytes(msg);
+            StdOut.Write(msgBytes);
+            StdOut.Flush();
         }
     }
 
