@@ -108,9 +108,13 @@
         peicePlacedHandler(e) {
             this.score.value += e.detail.deltaScore;
             const pieces = this.pieces;
-            const shapeIds = pieces.map(x => x.shapeId);
+
+            // Check for clearables
+            this.score.value += this.board.clear();
+
+            // Check if i need to refill the piece-buffer
             let refill = true;
-            for (let i = 0; i < shapeIds.length; i++) { refill &= shapeIds[i] === -1; }
+            for (let i = 0; i < pieces.length; i++) { refill &= pieces[i].shapeId === -1; }
             if (refill) { this.fillPieceBuffer() }
         }
         clickHandler(event) {

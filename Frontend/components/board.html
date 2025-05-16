@@ -181,7 +181,6 @@
                 board.lightCell(cell);
             }
         }
-
         clickCellHandler(e) {
             const board = e.target.getRootNode().host;
             const shape = CustomPieceElement.selected.shape;
@@ -197,16 +196,6 @@
                 CustomPieceElement.placeSelected();
             }
         }
-
-        updateBlockSize() {
-            console.debug(this.localName, "updateBlockSize()");
-            const cell = this.getCellByIndex(0);
-            blockSize = (cell.clientWidth + cell.clientHeight) / 2;
-        }
-        resizeHandler(event) {
-            this.updateBlockSize();
-        }
-
         createCells() {
             console.debug(this.localName, "createCells()");
             for (let row = 0; row < 9; row += 1) {
@@ -233,11 +222,127 @@
             return Array.from(this.shadowRoot.querySelectorAll('.board-cell'));
         }
 
+        updateBlockSize() {
+            console.debug(this.localName, "updateBlockSize()");
+            const cell = this.getCellByIndex(0);
+            blockSize = (cell.clientWidth + cell.clientHeight) / 2;
+        }
+        resizeHandler(event) {
+            this.updateBlockSize();
+        }
+
         reset() {
             const cells = this.cells;
             for (let i = 0; i < this.cells.length; i++) {
                 cells[i].setAttribute("state", 0);
             }
+        }
+
+        getGroups() {
+            return [
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="0"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="1"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="2"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="3"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="4"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="5"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="5"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="6"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="7"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="8"]')),
+            ]
+        }
+        getRows() {
+            return [
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="0"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="1"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="2"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="3"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="4"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="5"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="5"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="6"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="7"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="8"]')),
+            ]
+        }
+        getColoumns() {
+            return [
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="0"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="1"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="2"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="3"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="4"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="5"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="5"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="6"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="7"]')),
+                Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="8"]')),
+            ]
+        }
+
+        /** clears all clearable cells. returns the delta score*/
+        clear() {
+            let clearableSections = [];
+            let section = undefined;
+            // GROUPS
+            const grps = this.getGroups();
+            for (let i = 0; i < grps.length; i++) {
+                section = grps[i];
+                let filled = true;
+                for (let j = 0; j < section.length; j++) {
+                    const state = parseInt(section[j].getAttribute("state"));
+                    if (state !== 1) {
+                        filled = false;
+                        break;
+                    }
+                }
+                if (filled) { clearableSections.push(section); }
+            }
+            section = undefined;
+
+            // ROWS
+            const rows = this.getRows();
+            for (let i = 0; i < rows.length; i++) {
+                section = rows[i];
+                let filled = true;
+                for (let j = 0; j < section.length; j++) {
+                    const state = parseInt(section[j].getAttribute("state"));
+                    if (state !== 1) {
+                        filled = false;
+                        break;
+                    }
+                }
+                if (filled) { clearableSections.push(section); }
+            }
+            section = undefined;
+
+            // COLUMNS
+            const cols = this.getColoumns();
+            for (let i = 0; i < cols.length; i++) {
+                section = cols[i];
+                let filled = true;
+                for (let j = 0; j < section.length; j++) {
+                    const state = parseInt(section[j].getAttribute("state"));
+                    if (state !== 1) {
+                        filled = false;
+                        break;
+                    }
+                }
+                if (filled) { clearableSections.push(section); }
+            }
+            section = undefined;
+
+            // DISABLING
+            let result = 0;
+            for (let i = 0; i < clearableSections.length; i++) {
+                section = clearableSections[i];
+                for (let j = 0; j < section.length; j++) {
+                    result += 1;
+                    disableCell(section[j]);
+                }
+            }
+            return result;
         }
 
         connectedCallback() {
