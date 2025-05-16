@@ -1,26 +1,45 @@
-﻿using H5.Lib.Utils;
+﻿using H5.Lib.Logging;
+using H5.Lib.Utils;
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
+using System.Runtime.InteropServices;
 
 namespace H5.Http;
 public sealed class FileServer : IRequestHandler {
+	private static LogScope Logger = new LogScope(typeof(FileServer).FullName);
 	public readonly DirectoryInfo RootDirectory;
 	public readonly HttpRoute Route;
+	public readonly CacheSettings CacheConfig;
 
-	public FileServer(DirectoryInfo rootDirectory, HttpRoute? matchedRoute = null) {
+	public record class CacheSettings {
+		public static CacheSettings Default = new();
+		/// <summary>If the file server should cache file content</summary>
+		public bool EnableCache = true;
+		/// <summary>The maximum size of cached files in bytes</summary>
+		public int MaxFileSize = 4096;
+		/// <summary>The maximum time a file lives in the cache without being touched</summary>
+		public TimeSpan CacheLifetime = TimeSpan.FromMinutes(10);
+	}
+
+	/// <summary>
+	/// Creates a new FileServer request handler
+	/// </summary>
+	/// <param name="rootDirectory">The root directory where the file server looks for files</param>
+	/// <param name="rootRoute">The root route that the file server is handling</param>
+	/// <param name="cacheConfig">File content cache settings. If <see cref="null"/> uses <see cref="CacheSettings.Default"/></param>
+	public FileServer(DirectoryInfo rootDirectory, HttpRoute? rootRoute = null, CacheSettings? cacheConfig = null) {
 		if (!rootDirectory.ValidatePath()) throw new ArgumentException($"\"{rootDirectory.FullName}\" is not a valid directory path");
 		if (!rootDirectory.Exists) throw new ArgumentException($"Could not find or access directory at \"{rootDirectory.FullName}\"");
 		this.RootDirectory = rootDirectory;
-		this.Route = matchedRoute ?? HttpRoute.Root;
+		this.Route = rootRoute ?? HttpRoute.Root;
+		this.CacheConfig = cacheConfig ?? CacheSettings.Default;
 	}
 	public FileServer(string rootDirectoryPath) : this(new DirectoryInfo(rootDirectoryPath)) { }
 	public FileServer(string rootDirectoryPath, string httpRoute) : this(new DirectoryInfo(rootDirectoryPath), new HttpRoute(httpRoute)) { }
 
 	#region Caching
-	/// <summary>Size in bytes of the largest file the FileServer will cache in memory</summary>
-	private static readonly int MaxCachedFileSize = Environment.SystemPageSize;
 	private record class FileCacheValue {
 		public DateTime LastWriteTimeUtc = DateTime.MinValue;
 		public byte[] Content = Array.Empty<byte>();
@@ -40,22 +59,48 @@ public sealed class FileServer : IRequestHandler {
 		public void UpdateContentIfNeed(FileInfo file) {
 			if (this.Content.Length != file.Length) {
 				this.OverwriteContent(file, true);
-			} else if (this.LastWriteTimeUtc != file.LastWriteTimeUtc) {
+			}
+			else if (this.LastWriteTimeUtc != file.LastWriteTimeUtc) {
 				this.OverwriteContent(file, false);
 			}
 		}
 	}
+	private readonly ConcurrentDictionary<string, DateTime> LastTouchedCache = new();
 	private readonly ConcurrentDictionary<string, FileCacheValue> FileContentCache = new();
+	private DateTime NextClean = DateTime.MinValue;
+
+	/// <summary>Cleans the FileContentCache if enough time has passed since the previous clean</summary>
+	private void CleanCache() {
+		if (NextClean <= DateTime.Now) { return; }
+		NextClean = DateTime.Now + CacheConfig.CacheLifetime;
+		List<string> removeKeys = new();
+		foreach (KeyValuePair<string, DateTime> kvp in LastTouchedCache) {
+			if ((DateTime.Now - kvp.Value) > this.CacheConfig.CacheLifetime) {
+				removeKeys.Add(kvp.Key);
+			}
+			else if (kvp.Value < NextClean) {
+				NextClean = kvp.Value;
+			}
+		}
+		foreach (string k in CollectionsMarshal.AsSpan(removeKeys)) {
+			LastTouchedCache.Remove(k, out _);
+			FileContentCache.Remove(k, out _);
+			Logger.Debug($"Removed {k} from file cache");
+		}
+	}
 	private byte[] ReadFileCached(FileInfo file) {
-		if (file.Length > MaxCachedFileSize) { return file.ReadAllBytes(); }
+		if (file.Length > this.CacheConfig.MaxFileSize) { return file.ReadAllBytes(); }
 		FileCacheValue? cacheValue = null;
 		if (FileContentCache.TryGetValue(file.FullName, out cacheValue) && cacheValue is not null) {
 			cacheValue.UpdateContentIfNeed(file);
-		} else {
+		}
+		else {
 			cacheValue = new(file);
 			FileContentCache[file.FullName] = cacheValue;
 		}
 		Debug.Assert(cacheValue is not null);
+		LastTouchedCache[file.FullName] = DateTime.Now;
+		CleanCache();
 		return cacheValue.Content;
 	}
 	#endregion
