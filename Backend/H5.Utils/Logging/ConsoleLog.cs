@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 namespace H5.Lib.Logging;
 public sealed class ConsoleLog : ILogDestination {
     private object WriteLock = new();
+    private Stream StdOut = Console.OpenStandardOutput();
+    private static readonly int BufferSize = Environment.SystemPageSize;
 
     public bool Equals(ILogDestination? other) {
         if (other is null || other is not ConsoleLog) { return false; }
@@ -22,8 +24,7 @@ public sealed class ConsoleLog : ILogDestination {
     public void Write(LogMessage logMessage) {
         new SafeFileHandle();
         lock (WriteLock) {
-            Stream stream = Console.OpenStandardOutput();
-            StreamWriter streamWriter = new(stream, Console.OutputEncoding, Environment.SystemPageSize, true);
+            StreamWriter streamWriter = new(StdOut, Console.OutputEncoding, BufferSize, true);
             streamWriter.Write(logMessage.Scope.Name);
             streamWriter.Write(':');
             streamWriter.Write(logMessage.Level.ToString());
@@ -31,5 +32,9 @@ public sealed class ConsoleLog : ILogDestination {
             streamWriter.WriteLine(logMessage.Message.Trim());
             streamWriter.Close();
         }
+    }
+
+    ~ConsoleLog() {
+        this.StdOut.Close();
     }
 }

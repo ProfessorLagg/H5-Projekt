@@ -14,6 +14,8 @@ public sealed class FileLog : ILogDestination {
     public static readonly DirectoryInfo DefaultDirectory = new DirectoryInfo(DefaultDirectoryPath);
     public static readonly Encoding DefaultEncoding = Encoding.UTF8;
 
+    private static readonly int BufferSize = Environment.SystemPageSize;
+
     #region Instance Data
     private DirectoryInfo LogDirectory;
     private Encoding Encoding;
@@ -49,7 +51,7 @@ public sealed class FileLog : ILogDestination {
         this.LogFileDate = DateTime.Today;
         string logFilePath = CalculateLogfilePath(this.LogDirectory, this.LogFileDate);
         this.LogDirectory.EnsureExists();
-        this.LogFileStream = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.Read, Environment.SystemPageSize, false);
+        this.LogFileStream = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.Read, BufferSize, false);
     }
     private FileStream EnsureLogFile() {
         if (this.LogFileDate != DateTime.Today) { NewLogFile(); }
