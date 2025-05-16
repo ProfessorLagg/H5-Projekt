@@ -117,8 +117,11 @@
         }
         static placeSelected() {
             let piece = CustomPieceElement.selected;
+            let deltaScore = piece.shape.length;
             CustomPieceElement.unselectPiece();
             piece.shapeId = -1;
+            let placedEvent = new CustomEvent("pieceplaced", { detail: { deltaScore: deltaScore } });
+            document.dispatchEvent(placedEvent)
         }
         clickHandler(e) {
             CustomPieceElement.selectPiece(this);
@@ -131,7 +134,7 @@
             this.shadowRoot.appendChild(templateContent.cloneNode(true));
             // this.shapeId = ((Math.random() * shapeIds.length) | 0);
             this.shapeId = -1;
-            this.addEventListener("click", this.clickHandler);
+            this.addEventListener("click", this.clickHandler, true);
         }
 
         attributeChangedCallback(name, oldValue, newValue) {

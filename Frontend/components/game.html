@@ -105,6 +105,14 @@
     const gameTemplateId = 'tmpl-game';
     const gameTemplate = document.getElementById(gameTemplateId);
     class CustomGameElement extends HTMLElement {
+        peicePlacedHandler(e) {
+            this.score.value += e.detail.deltaScore;
+            const pieces = this.pieces;
+            const shapeIds = pieces.map(x => x.shapeId);
+            let refill = true;
+            for (let i = 0; i < shapeIds.length; i++) { refill &= shapeIds[i] === -1; }
+            if (refill) { this.fillPieceBuffer() }
+        }
         clickHandler(event) {
             console.debug(this.localName, "clickHandler()");
             this.restart();
@@ -117,6 +125,7 @@
             this.attachShadow({ mode: "open" });
             this.shadowRoot.appendChild(templateContent.cloneNode(true));
             this.addEventListener("click", this.clickHandler)
+            document.addEventListener("pieceplaced", e => this.peicePlacedHandler(e));
         }
         constructor() {
             super();

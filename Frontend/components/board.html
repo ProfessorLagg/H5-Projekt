@@ -169,7 +169,7 @@
             c_mid = Math.floor(c_mid / shape.length);
             r0 -= r_mid;
             c0 -= c_mid;
-            console.log("r_mid:", r_mid, "c_mid", c_mid);
+            console.debug("r_mid:", r_mid, "c_mid", c_mid);
             let cell = undefined;
             for (let i = 0; i < shape.length; i++) {
                 offset = shape[i];
@@ -185,8 +185,8 @@
         clickCellHandler(e) {
             const board = e.target.getRootNode().host;
             const shape = CustomPieceElement.selected.shape;
-            console.log("shape:", shape);
-            console.log("board.litCells:", board.litCells);
+            console.debug("shape:", shape);
+            console.debug("board.litCells:", board.litCells);
             if (board.litCells.length === shape.length) {
                 let cell = undefined;
                 while (board.litCells.length > 0) {
