@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 
 namespace H5.Lib.Utils;
 public static class StringUtils {
@@ -27,5 +28,37 @@ public static class StringUtils {
 		foreach (EscapeSequence e in WhitespaceEscapes) {
 			sb.Replace(e.Find, e.Replace);
 		}
+	}
+	public static string ToLargestUnitString(this TimeSpan timeSpan) => timeSpan.ToLargestUnitString(CultureInfo.InvariantCulture);
+	public static string ToLargestUnitString(this TimeSpan timeSpan, IFormatProvider format) {
+		double value = timeSpan.Ticks;
+		string unit_str = " ticks";
+
+		if (timeSpan.Ticks >= TimeSpan.TicksPerDay) {
+			value = timeSpan.TotalDays;
+			unit_str = " days";
+		}
+		else if (timeSpan.Ticks >= TimeSpan.TicksPerHour) {
+			value = timeSpan.TotalHours;
+			unit_str = " hours";
+		}
+		else if (timeSpan.Ticks >= TimeSpan.TicksPerSecond) {
+			value = timeSpan.TotalSeconds;
+			unit_str = "s";
+		}
+		else if (timeSpan.Ticks >= TimeSpan.TicksPerMillisecond) {
+			value = timeSpan.TotalMilliseconds;
+			unit_str = "ms";
+		}
+		else if (timeSpan.Ticks >= TimeSpan.TicksPerMicrosecond) {
+			value = timeSpan.TotalMicroseconds;
+			unit_str = "us";
+		}
+		else {
+			value = timeSpan.TotalNanoseconds;
+			unit_str = "ns";
+		}
+
+		return value.ToString("n", format) + unit_str;
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using H5.Lib.Logging;
+using H5.Lib.Utils;
 
 using System.Net;
 using System.Text;
@@ -98,6 +99,8 @@ public sealed class HttpServer {
 			Logger.Error("context was already disposed!");
 		}
 	}
+	const string HandleTimeHeaderName = @"X-HandleTime";
+	const string ReceivedHeaderName = @"X-Received";
 	private void HandleRequest(HttpListenerContext context) {
 		try {
 			LogRequest(context.Request);
@@ -111,7 +114,9 @@ public sealed class HttpServer {
 				HandleException(context, new RouteNotFoundException(context));
 				this.ErrorHandler.Handle(context, HttpStatusCode.NotFound);
 			}
-			else { mapResult.Handle(context); }
+			else {
+				mapResult.Handle(context);
+			}
 
 			for (int i = 0; i < this.OutgoingMiddleware.Count; i++) {
 				// Returning here still runs the finally block
@@ -126,11 +131,20 @@ public sealed class HttpServer {
 		}
 		finally {
 			if (context is not null) {
+				DateTime recieved = DateTime.Parse(context.Request.Headers[ReceivedHeaderName]!).ToUniversalTime();
+				TimeSpan handleTime = DateTime.UtcNow - recieved;
+				context.Response.Headers[HandleTimeHeaderName] = handleTime.ToLargestUnitString();
 				LogResponse(context.Response);
 				context.Response.OutputStream.Flush();
 				context.Response.Close();
 			}
 		}
+	}
+	private void ScheduleRequest(HttpListenerContext context) {
+		context.Response.SendChunked = false;
+		context.Response.Headers.Add(@"Server", @""); // This is the only way to remove the Server field
+		context.Request.Headers[ReceivedHeaderName] = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.ffffffzzz");
+		ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);
 	}
 	public void AddPrefix(string uriPrefix) {
 		this.Listener.Prefixes.Add(uriPrefix);
@@ -147,9 +161,7 @@ public sealed class HttpServer {
 
 			while (Listener.IsListening && this.ShouldRun) {
 				HttpListenerContext context = Listener.GetContext();
-				context.Response.SendChunked = false;
-				context.Response.Headers.Add("Server", ""); // This is the only way to remove the Server field
-				ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);
+				this.ScheduleRequest(context);
 			}
 			if (Listener.IsListening) { Listener.Stop(); }
 			Listener.Close();
