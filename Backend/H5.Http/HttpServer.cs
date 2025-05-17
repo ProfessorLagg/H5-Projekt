@@ -51,7 +51,6 @@ public sealed class HttpServer {
 	};
 
 	private void LogRequest(HttpListenerRequest request) {
-		// TODO Gotta have settings for this
 		Logger.Write(LogLevel.Info, $"Recieved request on {request.RawUrl ?? "unkown route"}");
 	}
 	private void LogResponse(HttpListenerResponse response) {
@@ -101,9 +100,11 @@ public sealed class HttpServer {
 				// Returning here still runs the finally block
 				if (!this.OutgoingMiddleware[i].Handle(context)) return;
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			HandleException(context, e);
-		} finally {
+		}
+		finally {
 			if (context is not null) {
 				LogResponse(context.Response);
 				context.Response.OutputStream.Flush();
@@ -123,8 +124,9 @@ public sealed class HttpServer {
 			string listening_msg = "Listening on:";
 			foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
 			Logger.Info(listening_msg);
+
 			while (Listener.IsListening && this.ShouldRun) {
-				HttpListenerContext context = Listener.GetContext(); ;
+				HttpListenerContext context = Listener.GetContext();
 				ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);
 			}
 			if (Listener.IsListening) { Listener.Stop(); }

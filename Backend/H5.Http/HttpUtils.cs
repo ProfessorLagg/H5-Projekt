@@ -11,7 +11,7 @@ public static class HttpUtils {
 	/// <summary>Sets both the <see cref="HttpListenerResponse.StatusCode"/> and <see cref="HttpListenerResponse.StatusDescription"/> fields</summary>
 	public static void SetStatus(this HttpListenerResponse response, HttpStatusCode statusCode) {
 		response.StatusCode = (int)statusCode;
-		response.StatusDescription = statusCode.ToString();
+		response.StatusDescription = statusCode.ToStringCached();
 	}
 
 	public static void AppendContent(this HttpListenerResponse response, byte[] bytes) {

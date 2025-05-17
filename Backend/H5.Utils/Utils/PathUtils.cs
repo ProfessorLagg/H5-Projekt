@@ -41,10 +41,10 @@ public static class PathUtils {
 		if (!file.Exists) throw new FileNotFoundException($"file at \"{file.FullName}\" did not exist, is not accisible or is not a file");
 	}
 	public static void AssertExists(this DirectoryInfo directory) {
-		if (!directory.Exists) throw new Exception($"directory at \"{directory.FullName}\" did not exist, is not accisible or is not a directory");
+		if (!directory.Exists) throw new DirectoryNotFoundException($"directory at \"{directory.FullName}\" did not exist, is not accisible or is not a directory");
 	}
 	public static void EnsureExists(this DirectoryInfo @this) {
 		if (!@this.Exists) { @this.Create(); }
-		if (!@this.Exists) { throw new DirectoryNotFoundException($"Could not create directory \"{@this.FullName}\""); }
+		@this.AssertExists();
 	}
 }

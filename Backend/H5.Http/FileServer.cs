@@ -65,7 +65,6 @@ public sealed class FileServer : IRequestHandler {
 
 		public FileCacheValue(FileInfo file) {
 			this.OverwriteContent(file, true);
-
 		}
 
 		private void OverwriteContent(FileInfo file, bool resize) {
@@ -115,7 +114,7 @@ public sealed class FileServer : IRequestHandler {
 			cacheValue.UpdateContentIfNeed(file);
 		}
 		else {
-			cacheValue = new(file);
+			cacheValue = new FileCacheValue(file);
 			FileContentCache[file.FullName] = cacheValue;
 		}
 		Debug.Assert(cacheValue is not null);
