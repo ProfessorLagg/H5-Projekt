@@ -1,9 +1,11 @@
-﻿using H5.Lib.Logging;
+﻿
+using H5.Lib.Logging;
 using H5.Lib.Utils;
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Mail;
 using System.Runtime.InteropServices;
 
 namespace H5.Http;
@@ -107,8 +109,8 @@ public sealed class FileServer : IRequestHandler {
 		}
 	}
 	private readonly Action CleanCacheAction = () => { };
-	private byte[] ReadFileCached(FileInfo file) {
-		if (file.Length > this.CacheConfig.MaxFileSize) { return file.ReadAllBytes(); }
+	private byte[]? ReadFileCached(FileInfo file) {
+		if (file.Length > this.CacheConfig.MaxFileSize) { return null; }
 		FileCacheValue? cacheValue = null;
 		if (FileContentCache.TryGetValue(file.FullName, out cacheValue) && cacheValue is not null) {
 			cacheValue.UpdateContentIfNeed(file);
@@ -125,26 +127,28 @@ public sealed class FileServer : IRequestHandler {
 	#endregion
 
 	#region Request Handling
-	private void WriteResponse(HttpListenerResponse response, FileInfo file) {
-		byte[] fileContent = this.ReadFileCached(file);
-		response.ContentLength64 = fileContent.Length;
-		response.SendChunked = false;
-		response.ContentType = HttpUtils.GetMimeType(file.Extension);
-		response.OutputStream.Write(fileContent);
-		response.SetStatus(HttpStatusCode.OK);
+	private void WriteResponse(HttpListenerContext context, FileInfo file) {
+		byte[]? cacheContent = this.ReadFileCached(file);
+		if (cacheContent is not null) {
+			context.WriteResponse(cacheContent, HttpUtils.GetMimeType(file.Extension), HttpStatusCode.OK);
+		}
+		else {
+			using FileStream fileStream = file.OpenRead();
+			context.WriteResponse(fileStream, HttpUtils.GetMimeType(file.Extension), HttpStatusCode.OK);
+		}
 	}
 	public void Handle(HttpListenerContext context) {
 		ArgumentNullException.ThrowIfNullOrWhiteSpace(context.Request.RawUrl);
-		string routeString = context.Request.RawUrl;
+		if (context.Request.Url is null) { throw new RouteNotFoundException(context); }
+		string routeString = context.Request.Url.LocalPath;
 		string requestFilePath = this.Route.GetSubPath(routeString);
 		requestFilePath = requestFilePath.Replace('/', Path.DirectorySeparatorChar);
 		requestFilePath = Path.Join(this.RootDirectory.FullName, requestFilePath);
 		FileInfo requestFile = new(requestFilePath);
 		requestFile.AssertValidPath();
-		requestFile.AssertExists();
+		//requestFile.AssertExists();
 
-		this.WriteResponse(context.Response, requestFile);
-		//HttpUtils.File(context.Response, requestFile);
+		this.WriteResponse(context, requestFile);
 	}
 	#endregion
 }

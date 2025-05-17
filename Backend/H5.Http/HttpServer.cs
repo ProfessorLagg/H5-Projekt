@@ -51,7 +51,17 @@ public sealed class HttpServer {
 	};
 
 	private void LogRequest(HttpListenerRequest request) {
-		Logger.Write(LogLevel.Info, $"Recieved request on {request.RawUrl ?? "unkown route"}");
+		const string spacer = "  ";
+		StringBuilder msgbuilder = new();
+		msgbuilder.AppendLine("HTTP Request:");
+		msgbuilder.AppendLine($"{spacer}{request.HttpMethod} {request.RawUrl} {request.GetHTTPVersionString()}");
+		for (int i = 0; i < request.Headers.Count; i++) {
+			msgbuilder.Append(spacer);
+			msgbuilder.Append(request.Headers.Keys[i] ?? "");
+			msgbuilder.Append(": ");
+			msgbuilder.AppendLine(request.Headers[i] ?? "");
+		}
+		Logger.Write(LogLevel.Info, msgbuilder.ToString());
 	}
 	private void LogResponse(HttpListenerResponse response) {
 		const string spacer = "  ";
@@ -71,18 +81,21 @@ public sealed class HttpServer {
 		}
 		Logger.Write(level, msgbuilder.ToString());
 	}
-	private void HandleException(HttpListenerContext context, Exception e) {
+	private void HandleException(HttpListenerContext context, Exception e, HttpStatusCode? errorCode = null) {
 		if (e is FileNotFoundException || e is DirectoryNotFoundException) {
+			errorCode = HttpStatusCode.NotFound;
 			Logger.Warn($"Could not match file to url: {context.Request.Url}");
-			if (context is not null) {
-				this.ErrorHandler.Handle(context, HttpStatusCode.NotFound);
-			}
-			return;
+			goto Respond;
 		}
-
+		// DefaultMessage
 		Logger.Error($"Exception: {e} trying to handle request: {context.Request.Url}");
-		if (context is not null) {
-			this.ErrorHandler.Handle(context, HttpStatusCode.InternalServerError);
+	Respond:
+		if (context is null) { return; }
+		try {
+			this.ErrorHandler.Handle(context, errorCode ?? HttpStatusCode.InternalServerError);
+		}
+		catch (ObjectDisposedException) {
+			Logger.Error("context was already disposed!");
 		}
 	}
 	private void HandleRequest(HttpListenerContext context) {
@@ -94,7 +107,11 @@ public sealed class HttpServer {
 			}
 
 			IRequestHandler? mapResult = this.RouteMatcher.MatchRoute(context.Request);
-			if (mapResult is null) { this.ErrorHandler.Handle(context, HttpStatusCode.NotFound); } else { mapResult.Handle(context); }
+			if (mapResult is null) {
+				HandleException(context, new RouteNotFoundException(context));
+				this.ErrorHandler.Handle(context, HttpStatusCode.NotFound);
+			}
+			else { mapResult.Handle(context); }
 
 			for (int i = 0; i < this.OutgoingMiddleware.Count; i++) {
 				// Returning here still runs the finally block
@@ -103,6 +120,9 @@ public sealed class HttpServer {
 		}
 		catch (Exception e) {
 			HandleException(context, e);
+#if DEBUG
+			throw;
+#endif
 		}
 		finally {
 			if (context is not null) {
@@ -127,6 +147,8 @@ public sealed class HttpServer {
 
 			while (Listener.IsListening && this.ShouldRun) {
 				HttpListenerContext context = Listener.GetContext();
+				context.Response.SendChunked = false;
+				context.Response.Headers.Add("Server", ""); // This is the only way to remove the Server field
 				ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);
 			}
 			if (Listener.IsListening) { Listener.Stop(); }

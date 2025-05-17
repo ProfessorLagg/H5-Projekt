@@ -12,7 +12,7 @@ public sealed class ConsoleLog : ILogDestination {
 
 	public void Write(LogMessage logMessage) {
 		lock (WriteLock) {
-			string msg = $"{logMessage.Scope.Name}:{logMessage.Level.Name()}{Environment.NewLine}{logMessage.Message}{Environment.NewLine}";
+			string msg = $"{Environment.NewLine}{logMessage.Scope.Name}:{logMessage.Level.Name()}{Environment.NewLine}{logMessage.Message}{Environment.NewLine}";
 			byte[] msgBytes = Console.OutputEncoding.GetBytes(msg);
 			StdOut.Write(msgBytes);
 			StdOut.Flush();

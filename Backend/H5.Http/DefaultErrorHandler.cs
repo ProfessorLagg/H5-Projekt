@@ -10,8 +10,7 @@ public class DefaultErrorHandler : IRequestErrorHandler {
 	}
 
 	private void Html(HttpListenerContext context, HttpStatusCode statusCode) {
-		context.Response.SetStatus(statusCode);
-		context.Response.Html($"<h3>Error: {((int)statusCode).ToString("0")} - {statusCode.ToString()}</h3>");
+		context.WriteHtml($"<h3>Error: {((int)statusCode).ToString("0")} - {statusCode.ToString()}</h3>", statusCode);
 	}
 
 	public void Handle(HttpListenerContext context, HttpStatusCode statusCode) {
