@@ -56,6 +56,7 @@ class GameElement extends HTMLElement {
 
         this.restart();
     }
+    
     constructor() {
         super();
         this.template = loadTemplate();

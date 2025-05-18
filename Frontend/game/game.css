@@ -1,3 +1,4 @@
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -21,6 +22,7 @@
     padding-bottom: var(--baseunit) !important;
     /* debug settings */
     /* background-color: magenta; */
+    outline: 1px solid red;
 }
 
 @media (min-aspect-ratio: 1/2) {
@@ -51,17 +53,18 @@
 }
 
 :host>* {
-    outline: 1px solid magenta;
+    background-color: rgba(255, 0, 255, 10%);
 }
 
 #game-board {
     aspect-ratio: 1/1;
     width: 100%;
+    background-image: url("./board.svg");
 
 }
 
 #game-score {
-    font-size: 2em;
+    font-size: 3vh;
     text-align: center;
     font-weight: bold;
 }
