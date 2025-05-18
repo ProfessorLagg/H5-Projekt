@@ -5,8 +5,6 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="js/TypeChecker.js"></script>
-        <script src="js/sfc32.js"></script>
-        <script src="js/game.js"></script>
         <link rel="stylesheet" href="css/root.css">
         <link rel="stylesheet" href="css/backgrounds.css">
         <link rel="prefetch" href="/img/block_white.svg" />
@@ -14,9 +12,15 @@
     </head>
 
     <body>
+        <script type="module">
+            import * as gameNs from "/game/game.js"
+            window.gameNs = gameNs;
+        </script>
         <div class="background-pattern2"></div>
         <game-wrap id="game"></game-wrap>
-        <script hx-get="js/postbody.js"></script>
+        <script>
+
+        </script>
     </body>
 
 </html>

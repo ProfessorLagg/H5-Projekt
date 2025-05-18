@@ -1,4 +1,4 @@
-class sfc32 {
+export class sfc32 {
     static getSeed() {
         const buffer = new ArrayBuffer((32 / 8) * 4);
         const view = new Uint32Array(buffer);
