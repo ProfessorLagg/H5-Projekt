@@ -4,32 +4,19 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js -->
-        <script src="js/htmx.min.js"></script>
-        <script src="js/head.js"></script>
+        <script src="js/TypeChecker.js"></script>
+        <script src="js/sfc32.js"></script>
+        <script src="js/game.js"></script>
         <link rel="stylesheet" href="css/root.css">
+        <link rel="stylesheet" href="css/backgrounds.css">
         <link rel="prefetch" href="/img/block_white.svg" />
         <title>Laggdoku</title>
     </head>
 
     <body>
         <div class="background-pattern2"></div>
-        <template hx-get="components/game.html" hx-swap="outerHTML" hx-trigger="load"></template>
         <game-wrap id="game"></game-wrap>
-        <script hx-get="js/postbody.js" hx-swap="innerHTML" hx-trigger="load"></script>
-        <script>
-            async function enableCheats() {
-                var i = 0;
-                var shapeKeys = Object.keys(shapes);
-                game.pieces[0].shapeId = i;
-                i += 1;
-                window.addEventListener("keydown", e => {
-                    if (e.key == "Enter") {
-                        game.pieces[0].shapeId = i;
-                        i = (i + 1) % shapeIds.length;
-                    }
-                })
-            }
-        </script>
+        <script hx-get="js/postbody.js"></script>
     </body>
+
 </html>

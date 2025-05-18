@@ -1,0 +1,32 @@
+.background-pattern {
+    width: 100vw;
+    height: 100vh;
+    background-image: url("/img/topography_inverse.svg");
+    background-color: rgb(0, 255, 255, 50%);
+    background-blend-mode: hue;
+    background-repeat: repeat;
+    background-origin: border-box;
+    opacity: 50%;
+    z-index: -9998;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.background-pattern2 {
+    width: 100vw;
+    height: 100vh;
+    background-image: url("/img/parkay-floor.svg");
+    background-color: hsla(180, 100%, 33%, 0.5);
+    background-blend-mode: hue;
+    background-repeat: repeat;
+    background-origin: border-box;
+    background-size: 1em;
+    opacity: 50%;
+    z-index: -9998;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+}
