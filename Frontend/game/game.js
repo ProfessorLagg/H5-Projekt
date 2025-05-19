@@ -147,7 +147,7 @@ class GameElement extends HTMLElement {
         console.debug(this.localName, "restart()");
         this.seed = prng.sfc32.getSeed();
         this.rand = new prng.sfc32(this.seed);
-        this.fillPieceBuffer();
+        this.refill_piece_buffer();
 
     }
     get startButton() {
@@ -302,18 +302,26 @@ class GameElement extends HTMLElement {
         const shape = shapes[shapeId];
         piece.setAttribute("shapeId", shapeId);
         piece.style.backgroundImage = `url(${urlEncodeSvg(shapeRender)})`;
-
-        // const piece_img = this.shadowRoot.getElementById(piece.id + '-shape')
-        // console.debug("piece_img:", piece_img)
-        // piece_img.src = urlEncodeSvg(renderShape(shapeId));
-
-        // piece.childNodes.forEach(child => piece.removeChild(child));
-        // piece.appendChild(renderShape(shapeId).cloneNode(true));
+        // TODO Write move log
     }
-    fillPieceBuffer() {
+    /**
+     * Refills the piece buffer with 3 new pieces. Does not check if it's overwriting not-spent pieces
+     */
+    refill_piece_buffer() {
         this.fillPiece(this.piece1);
         this.fillPiece(this.piece2);
         this.fillPiece(this.piece3);
+    }
+    /**
+     * Refills the piece buffer if it's empty
+     */
+    refill_piece_buffer_if_empty() {
+        const id1 = parseInt(this.piece1.getAttribute("shapeId"));
+        const id2 = parseInt(this.piece2.getAttribute("shapeId"));
+        const id3 = parseInt(this.piece3.getAttribute("shapeId"));
+        if (id1 === -1 && id2 === -1 && id3 === -1) {
+            this.refill_piece_buffer();
+        }
     }
     //#endregion
 
@@ -324,15 +332,22 @@ class GameElement extends HTMLElement {
     gameIntersectingCells = [];
     placeSelectedPiece() {
         console.debug(this.localName, "placeSelectedPiece()")
-        // TODO Check if i can place the piece at the current position
-        while (this.gameIntersectingCells.length > 0) {
-            // TODO Assert that the cells are all unset
-            const cell = this.gameIntersectingCells.pop();
-            cell.classList.remove('highlight');
-            cell.setAttribute("state", 1);
-            this.score++;
+        if (this.gameIntersectingCells.length > 0) {
+            // TODO write move log
+            while (this.gameIntersectingCells.length > 0) {
+                // TODO Assert that the cells are all unset
+                const cell = this.gameIntersectingCells.pop();
+                cell.classList.remove('highlight');
+                cell.setAttribute("state", 1);
+                this.score++;
+            }
+            this.gameSelectedPiece.style = '';
+            this.gameSelectedPiece.setAttribute("shapeId", -1);
+            this.refill_piece_buffer_if_empty();
         }
-        // Clear selected piece variables
+        this.clearSelectedPiece();
+    }
+    clearSelectedPiece() {
         this.gameSelectedPiece.style.top = '';
         this.gameSelectedPiece.style.left = '';
         this.gameSelectedPiece.style.width = '';
@@ -340,7 +355,6 @@ class GameElement extends HTMLElement {
         this.gameSelectedPiece = undefined;
         this.gameSelectedShapeId = -1;
         this.gameSelectedShape = undefined;
-        this.gameIntersectingCells.length = 0;
     }
     /**
      * Sets the piece as the currently selected piece (the one the user is dragging around trying to place)
