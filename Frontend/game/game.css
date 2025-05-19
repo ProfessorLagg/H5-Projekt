@@ -3,6 +3,7 @@
     margin: 0;
     padding: 0;
     overflow: none;
+    touch-action: none !important;
 }
 
 :host {
@@ -126,8 +127,8 @@
     grid-template-areas: "p1 p2 p3";
     gap: 0em 0.5vw;
     /**/
-    /* padding-left: 0.5vw;
-    padding-right: 0.5vw; */
+    padding-left: 1px;
+    padding-right: 1px;
     /**/
     /* outline: 1px solid magenta; */
 }
@@ -159,7 +160,6 @@
 }
 
 .dragging {
-    touch-action: none !important;
     position: absolute !important;
     left: 0px;
     right: 0px;

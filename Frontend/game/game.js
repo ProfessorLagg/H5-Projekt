@@ -318,8 +318,7 @@ class GameElement extends HTMLElement {
      * @param {TouchEvent} event 
      */
     async piece_touchmove(event) {
-        console.debug("piece_touchmove:", "this.currentDragPiece.id:", this.currentDragPiece.id, "event.target.id:", event.target.id);
-        if (this.currentDragPiece === undefined) { return; }
+        if (this.currentDragPiece === undefined || event.target !== this.currentDragPiece) { return; }
 
         const gameBounds = this.getBoundingClientRect();
         const touchpos = event.touches[0];
@@ -339,6 +338,7 @@ class GameElement extends HTMLElement {
      * @param {TouchEvent} event 
      */
     async piece_touchend(event) {
+        if (this.currentDragPiece === undefined || event.target !== this.currentDragPiece) { return; }
         console.log("piece_touchend", "\n\tthis:", this, "\n\event.target:", event.target);
         // TODO trigger piece placement
         await this.piece_touchcancel(event)
@@ -347,6 +347,7 @@ class GameElement extends HTMLElement {
      * @param {TouchEvent} event 
      */
     async piece_touchcancel(event) {
+        if (this.currentDragPiece === undefined || event.target !== this.currentDragPiece) { return; }
         this.currentDragPiece.removeEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
         this.currentDragPiece.removeEventListener("touchend", e => this.piece_touchend(e), { passive: true });
         this.currentDragPiece.removeEventListener("touchcancel", e => this.piece_touchend(e), { passive: true });
