@@ -217,8 +217,8 @@ class GameElement extends HTMLElement {
         ]
     }
 
-    /** clears all clearable cells. returns the delta score*/
-    clear() {
+    /** returns all clearable rows, columns & groups*/
+    getClearableSections() {
         let clearableSections = [];
         let section = undefined;
         // GROUPS
@@ -268,8 +268,13 @@ class GameElement extends HTMLElement {
             if (filled) { clearableSections.push(section); }
         }
         section = undefined;
+        return clearableSections;
+    }
 
-        // DISABLING
+    /** clears all clearable cells. returns the delta score*/
+    clear() {
+        const clearableSections = this.getClearableSections();
+        let section = undefined;
         let result = 0;
         for (let i = 0; i < clearableSections.length; i++) {
             section = clearableSections[i];
