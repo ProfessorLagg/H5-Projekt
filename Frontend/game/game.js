@@ -301,22 +301,21 @@ class GameElement extends HTMLElement {
      */
     window_mousemove(event) {
         if (this.currentDragPiece === undefined) { return; }
-        this.currentDragPiece.style.top = (event.clientY) + 'px';
-        this.currentDragPiece.style.left = (event.clientX) + 'px';
+        this.currentDragPiece.style.top = (event.clientY - this.currentDragPiece.clientHeight / 2) + 'px';
+        this.currentDragPiece.style.left = (event.clientX - this.currentDragPiece.clientWidth / 2) + 'px';
         this.currentDragPiece.style.width = ((this.clientWidth / 9) * 5) + 'px';
-        // console.debug("window_mousemove", "\n\tthis:", this, "\n\event.target:", event.target);
     }
     /**
      * 
      * @param {DragEvent} event 
      */
     window_mouseup(event) {
+        if (this.currentDragPiece === undefined) { return; }
         console.debug("window_mouseup", "\n\tthis:", this, "\n\event.target:", event.target);
-        window.removeEventListener("mousemove", e => this.window_mousemove(e));
-        window.removeEventListener("mouseup", e => this.window_mouseup(e));
-        this.currentDragPiece.style.top = '';
-        this.currentDragPiece.style.left = '';
-        this.currentDragPiece.style.width = '';
+        window.removeEventListener("mousemove", e => this.window_mousemove(e), true);
+        window.removeEventListener("mouseup", e => this.window_mouseup(e), true);
+
+        this.currentDragPiece.removeAttribute("style");
         this.currentDragPiece.classList.remove('dragging');
         this.currentDragPiece = undefined;
     }
