@@ -1,4 +1,4 @@
-export { GameElement, syncGet, renderShape }
+export { GameElement, user_can_hover }
 // Imports https://html.spec.whatwg.org/multipage/webappapis.html#module-type-allowed
 import { TypeChecker } from "./typechecker.mjs"
 import * as prng from "./prng.mjs";
@@ -17,7 +17,6 @@ function syncGet(url) {
     xhttp.send();
     return xhttp.response;
 }
-
 /**
  * Converts 2D board index to 1D board index
  * @param {Number} row 
@@ -66,6 +65,14 @@ function calcGroup(row, col) {
     const gc = Math.floor(c / 3);
     return gr + gc;
 }
+function urlEncodeSvg(svg) {
+    return `data:image/svg+xml;base64,${btoa(svg.outerHTML)}`;
+}
+/**
+ * Checks for any device capable of hovering. In most cases this is a mouse.
+ * @returns true if a device exists, otherwise
+ */
+function user_can_hover() { return matchMedia('(hover: hover)').matches; }
 //#endregion
 
 //#region game template
@@ -79,7 +86,7 @@ function loadTemplate() {
 }
 //#endregion
 
-//#region shapes
+//#region Shapes
 import shapes from "./shapes.json" with { type: "json" };
 const shapeIds = Object.keys(shapes).flatMap(x => Number(x)).filter(x => TypeChecker.isInteger(x) && x >= 0);
 const block_url = import.meta.resolve("./block-e.svg");
@@ -116,6 +123,8 @@ function renderShape(shapeId) {
 }
 //#endregion
 
+
+
 // -- GameElement --
 const GameElementTagName = 'game-wrap';
 class GameElement extends HTMLElement {
@@ -128,7 +137,9 @@ class GameElement extends HTMLElement {
         this.fillPieceBuffer();
     }
 
-    //#region cell funcs
+    //#region Board
+
+    get board() { return this.shadowRoot.getElementById('game-board') }
     /**
      * 
      * @returns All the cells on the game-board
@@ -253,12 +264,15 @@ class GameElement extends HTMLElement {
     get piece3() { return this.shadowRoot.getElementById('piece-3') }
     get pieces() { return [this.piece1, this.piece2, this.piece3] }
 
+    /**
+     * 
+     * @param {HTMLDivElement} piece 
+     */
     fillPiece(piece) {
         const shapeId = this.rand.nextInt() % shapeIds.length;
         piece.setAttribute("shapeId", shapeId);
-
-        const shapeRender = renderShape(shapeId).cloneNode(true);
-        piece.appendChild(shapeRender);
+        piece.childNodes.forEach(child => piece.removeChild(child));
+        piece.appendChild(renderShape(shapeId).cloneNode(true));
     }
     fillPieceBuffer() {
         this.fillPiece(this.piece1);
@@ -267,14 +281,66 @@ class GameElement extends HTMLElement {
     }
     //#endregion
 
+    //#region Dragging
+    currentDragPiece = undefined;
+    /**
+     * 
+     * @param {DragEvent} event 
+     */
+    piece_mousedown(event) {
+        let piece = event.target;
+        console.debug("piece_mousedown", "\n\tthis:", this, "\n\event.target:", event.target);
+        this.currentDragPiece = piece;
+        window.addEventListener("mousemove", e => this.window_mousemove(e), true);
+        window.addEventListener("mouseup", e => this.window_mouseup(e), true);
+        this.currentDragPiece.classList.add('dragging');
+    }
+    /**
+     * 
+     * @param {DragEvent} event 
+     */
+    window_mousemove(event) {
+        if (this.currentDragPiece === undefined) { return; }
+        this.currentDragPiece.style.top = (event.clientY) + 'px';
+        this.currentDragPiece.style.left = (event.clientX) + 'px';
+        this.currentDragPiece.style.width = ((this.clientWidth / 9) * 5) + 'px';
+        // console.debug("window_mousemove", "\n\tthis:", this, "\n\event.target:", event.target);
+    }
+    /**
+     * 
+     * @param {DragEvent} event 
+     */
+    window_mouseup(event) {
+        console.debug("window_mouseup", "\n\tthis:", this, "\n\event.target:", event.target);
+        window.removeEventListener("mousemove", e => this.window_mousemove(e));
+        window.removeEventListener("mouseup", e => this.window_mouseup(e));
+        this.currentDragPiece.style.top = '';
+        this.currentDragPiece.style.left = '';
+        this.currentDragPiece.style.width = '';
+        this.currentDragPiece.classList.remove('dragging');
+        this.currentDragPiece = undefined;
+    }
+    boardcell_dragover(event) {
+
+    }
+
+    // TODO Touch events
+    //#endregion
+
     //#region Initialization
     initBoard() {
         const game = this;
         const cells = this.getCells();
         for (let i = 0; i < cells.length; i++) {
-            cells[i].addEventListener("click", e => {
-                game.toggleCell(e.target);
-            });
+            // TODO Drag over and Drop events
+        }
+    }
+
+    initPieces() {
+        const pieces = this.pieces;
+        for (let i = 0; i < pieces.length; i++) {
+            console.debug("init piece:", pieces[i]);
+            pieces[i].addEventListener("mousedown", e => this.piece_mousedown(e));
         }
     }
 
@@ -286,6 +352,7 @@ class GameElement extends HTMLElement {
 
         shadowRoot.appendChild(this.template.content.cloneNode(true));
         this.initBoard();
+        this.initPieces();
         this.restart();
     }
 

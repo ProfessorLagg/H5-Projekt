@@ -2,6 +2,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    overflow: none;
 }
 
 :host {
@@ -31,7 +32,7 @@
     padding-bottom: var(--baseunit) !important;
     /* debug settings */
     /* background-color: magenta; */
-    outline: 1px solid red;
+    /* outline: 1px solid red; */
 }
 
 @media (min-aspect-ratio: 1/2) {
@@ -131,9 +132,12 @@
     aspect-ratio: 1/1;
     /**/
     /* background-color: rgba(255, 0, 255, 10%); */
-    /* outline: 1px solid white; */
+    outline: 1px solid white;
+    z-index: 1;
 }
 
-.game-piece > * {
-    max-width: 100%;
+.dragging {
+    position: absolute;
+    left: 0px;
+    right: 0px;
 }
