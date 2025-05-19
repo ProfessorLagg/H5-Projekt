@@ -136,11 +136,11 @@
 .game-piece {
     aspect-ratio: 1/1;
     background-size: contain;
-
-    /**/
-    /* background-color: rgba(255, 0, 255, 10%); */
     outline: 1px solid white;
+}
 
+.game-piece[shapeId="-1"] {
+    outline: none;
 }
 
 #piece-1 {
@@ -157,7 +157,7 @@
 
 .game-piece.dragging {
     width: calc((100% / 9) * 5);
-    /* outline: 0px solid rgba(0, 0, 0, 0); */
+    outline: 1px solid rgba(255, 0, 255, 0.1%);
 }
 
 .dragging {
