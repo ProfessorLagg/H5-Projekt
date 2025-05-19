@@ -1,3 +1,4 @@
+export { TypeChecker }
 class TypeChecker {
     // === Basic typeof checks ===
     static isUndefined(v) { return typeof (v) === "undefined"; }
