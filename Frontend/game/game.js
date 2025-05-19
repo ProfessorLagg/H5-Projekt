@@ -1,4 +1,4 @@
-export { GameElement, syncGet }
+export { GameElement, syncGet, renderShape }
 // Imports https://html.spec.whatwg.org/multipage/webappapis.html#module-type-allowed
 import { TypeChecker } from "./typechecker.mjs"
 import * as prng from "./prng.mjs";

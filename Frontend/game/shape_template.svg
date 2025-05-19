@@ -1,1 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg"><defs><pattern id="prefix__block" patternUnits="userSpaceOnUse" width="10" height="10"><image href="{block_url}" width="10" height="10"/></pattern></defs>{content}</svg>
+<svg xmlns="http://www.w3.org/2000/svg"><defs><pattern id="block" patternUnits="userSpaceOnUse" width="10" height="10"><image href="{block_url}" width="10" height="10"/></pattern></defs>{content}</svg>
