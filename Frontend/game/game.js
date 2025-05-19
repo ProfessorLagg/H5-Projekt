@@ -16,7 +16,6 @@ import game_css from "./game.css" with { type: "css" };
  * @returns Number
  */
 function rangeMapNumber(x, srcMin, srcMax, dstMin, dstMax) {
-    console.debug(`rangeMapNumber(x: ${x}, srcMin: ${srcMin}, srcMax: ${srcMax}, dstMin: ${dstMin}, dstMax: ${dstMax})`);
     return (x - srcMin) / (srcMax - srcMin) * (dstMax - dstMin) + dstMin;
 }
 /**
@@ -159,6 +158,12 @@ class GameElement extends HTMLElement {
         this.startButton.style.display = "none";
         this.restart();
     }
+
+    //#region score
+    set score(v) {
+        // TODO
+    }
+    //#endregion
 
     //#region Board
 
@@ -318,8 +323,24 @@ class GameElement extends HTMLElement {
     gameSelectedShape = undefined;
     gameIntersectingCells = [];
     placeSelectedPiece() {
+        console.debug(this.localName, "placeSelectedPiece()")
         // TODO Check if i can place the piece at the current position
-        // TODO Clear selected piece variables
+        while (this.gameIntersectingCells.length > 0) {
+            // TODO Assert that the cells are all unset
+            const cell = this.gameIntersectingCells.pop();
+            cell.classList.remove('highlight');
+            cell.setAttribute("state", 1);
+            this.score++;
+        }
+        // Clear selected piece variables
+        this.gameSelectedPiece.style.top = '';
+        this.gameSelectedPiece.style.left = '';
+        this.gameSelectedPiece.style.width = '';
+        this.gameSelectedPiece.classList.remove('dragging');
+        this.gameSelectedPiece = undefined;
+        this.gameSelectedShapeId = -1;
+        this.gameSelectedShape = undefined;
+        this.gameIntersectingCells.length = 0;
     }
     /**
      * Sets the piece as the currently selected piece (the one the user is dragging around trying to place)
@@ -335,27 +356,19 @@ class GameElement extends HTMLElement {
      * returns all the cells that intersect the currently selected piece
      */
     async getIntersectingCells() {
-        console.debug("getIntersectingCells()");
         if (this.gameSelectedPiece === undefined) { return; }
         const pieceBounds = this.gameSelectedPiece.getBoundingClientRect();
         const boardBounds = this.board.getBoundingClientRect();
-        const pCol = Math.floor(rangeMapNumber(pieceBounds.x, boardBounds.left, boardBounds.right, 0, 9));
-        const pRow = Math.floor(rangeMapNumber(pieceBounds.y, boardBounds.top, boardBounds.bottom, 0, 9));
+        const pCol = Math.round(rangeMapNumber(pieceBounds.x, boardBounds.left, boardBounds.right, 0, 9));
+        const pRow = Math.round(rangeMapNumber(pieceBounds.y, boardBounds.top, boardBounds.bottom, 0, 9));
 
         let intersectingCells = []
         for (let i = 0; i < this.gameSelectedShape.length; i++) {
-            // quantize piece shape offset to 2D board cell indexes
             const offset = this.gameSelectedShape[i];
-            const cell_row = offset.r + pRow;
-            const cell_col = offset.c + pCol;
-            console.debug("cell_row:", cell_row, "cell_col:", cell_col)
-            try {
-                const cell = this.getCellByRowCol(cell_row, cell_col);
-                intersectingCells.push(cell);
-            } catch (e) {
-                console.debug("skipping cell due to error: " + e)
-            }
-
+            const row = offset.r + pRow;
+            const col = offset.c + pCol;
+            if (row < 0 || row > 8 || col < 0 || col > 8) { continue; }
+            intersectingCells.push(this.getCellByRowCol(row, col));
         }
 
         return intersectingCells;
@@ -372,14 +385,12 @@ class GameElement extends HTMLElement {
 
         const intersectingCells = (await this.getIntersectingCells()).filter(c => parseInt(c.getAttribute("state")) === 0);
         if (intersectingCells.length !== this.gameSelectedShape.length) { return; }
-        console.log("intersectingCells:", intersectingCells)
         for (let i = 0; i < intersectingCells.length; i++) {
             intersectingCells[i].classList.add("highlight");
             this.gameIntersectingCells.push(intersectingCells[i]);
         }
     }
     async updateSelectedPiecePosition(top, left) {
-        console.debug("updateSelectedPiecePosition()", "top:", top, "left:", left);
         this.gameSelectedPiece.style.top = top + 'px';
         this.gameSelectedPiece.style.left = left + 'px';
         await this.updateSelectedCells();
@@ -404,13 +415,12 @@ class GameElement extends HTMLElement {
         const touchpos = event.touches[0];
         const mouseX = touchpos.clientX - gameBounds.x;
         const mouseY = touchpos.clientY - gameBounds.y;
-
         const pieceBounds = this.gameSelectedPiece.getBoundingClientRect();
         const centerX = pieceBounds.width / 2;
         const centerY = pieceBounds.height / 2;
         const top = (mouseY - centerY);
         const left = (mouseX - centerX);
-        this.updateSelectedPiecePosition(top, left);
+        await this.updateSelectedPiecePosition(top, left);
     }
     /**
      * @param {TouchEvent} event 
@@ -418,22 +428,21 @@ class GameElement extends HTMLElement {
     async piece_touchend(event) {
         if (this.gameSelectedPiece === undefined || event.target !== this.gameSelectedPiece) { return; }
         console.log("piece_touchend", "\n\tthis:", this, "\n\event.target:", event.target);
-        // TODO trigger piece placement
-        await this.piece_touchcancel(event)
+        this.gameSelectedPiece.removeEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
+        this.gameSelectedPiece.removeEventListener("touchend", e => this.piece_touchend(e), { passive: true });
+        this.gameSelectedPiece.removeEventListener("touchcancel", e => this.piece_touchend(e), { passive: true });
+
+        this.placeSelectedPiece();
     }
     /**
      * @param {TouchEvent} event 
      */
     async piece_touchcancel(event) {
         if (this.gameSelectedPiece === undefined || event.target !== this.gameSelectedPiece) { return; }
-        this.gameSelectedPiece.removeEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
-        this.gameSelectedPiece.removeEventListener("touchend", e => this.piece_touchend(e), { passive: true });
-        this.gameSelectedPiece.removeEventListener("touchcancel", e => this.piece_touchend(e), { passive: true });
-        this.gameSelectedPiece.style.top = '';
-        this.gameSelectedPiece.style.left = '';
-        this.gameSelectedPiece.style.width = '';
-        this.gameSelectedPiece.classList.remove('dragging');
-        this.gameSelectedPiece = undefined;
+        const boardBounds = this.board.getBoundingClientRect();
+        // Move the piece WAY outside the board, and THEN do the touchend
+        await this.updateSelectedPiecePosition(boardBounds.bottom * 2, boardBounds.right * 2);
+        await this.piece_touchend(event);
     }
     //#endregion
     //#region PointerEvent
@@ -452,16 +461,13 @@ class GameElement extends HTMLElement {
      */
     async window_pointermove(event) {
         if (this.gameSelectedPiece === undefined || event.pointerId !== this.currentDragPointer) { return; }
-        console.debug("window_pointermove", "\n\tthis:", this, "\n\event.target:", event.target);
-
         const gameBounds = this.getBoundingClientRect();
         const mouseX = event.clientX - gameBounds.x;
         const mouseY = event.clientY - gameBounds.y;
-
         const pieceBounds = this.gameSelectedPiece.getBoundingClientRect();
         const top = (mouseY - (pieceBounds.width / 2));
         const left = (mouseX - (pieceBounds.height / 2));
-        this.updateSelectedPiecePosition(top, left);
+        await this.updateSelectedPiecePosition(top, left);
     }
     /**
      * 
@@ -473,11 +479,14 @@ class GameElement extends HTMLElement {
         window.removeEventListener("pointerup", e => this.window_pointerup(e), true);
         window.removeEventListener("pointermove", e => this.window_pointermove(e), true);
 
-        this.gameSelectedPiece.style.top = '';
-        this.gameSelectedPiece.style.left = '';
-        this.gameSelectedPiece.style.width = '';
-        this.gameSelectedPiece.classList.remove('dragging');
-        this.gameSelectedPiece = undefined;
+        const gameBounds = this.getBoundingClientRect();
+        const mouseX = event.clientX - gameBounds.x;
+        const mouseY = event.clientY - gameBounds.y;
+        const pieceBounds = this.gameSelectedPiece.getBoundingClientRect();
+        const top = (mouseY - (pieceBounds.width / 2));
+        const left = (mouseX - (pieceBounds.height / 2));
+        await this.updateSelectedPiecePosition(top, left);
+        this.placeSelectedPiece();
     }
     //#endregion
     //#endregion
