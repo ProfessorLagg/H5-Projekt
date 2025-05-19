@@ -145,7 +145,6 @@ class GameElement extends HTMLElement {
         console.debug("startButton_click");
         this.startButton.style.display = "none";
         this.restart();
-
     }
 
     //#region Board
@@ -281,8 +280,10 @@ class GameElement extends HTMLElement {
      */
     fillPiece(piece) {
         const shapeId = this.rand.nextInt() % shapeIds.length;
+        const shapeRender = renderShape(shapeId);
+        const shape = shapes[shapeId];
         piece.setAttribute("shapeId", shapeId);
-        piece.style.backgroundImage = `url(${urlEncodeSvg(renderShape(shapeId))})`;
+        piece.style.backgroundImage = `url(${urlEncodeSvg(shapeRender)})`;
 
         // const piece_img = this.shadowRoot.getElementById(piece.id + '-shape')
         // console.debug("piece_img:", piece_img)
@@ -300,59 +301,85 @@ class GameElement extends HTMLElement {
 
     //#region Dragging
     currentDragPiece = undefined;
-    //#region MouseEvent
-    /**
-     * 
-     * @param {DragEvent} event 
-     */
-    async piece_mousedown(event) {
-        console.debug("piece_mousedown", "\n\tthis:", this, "\n\event.target:", event.target);
+
+
+
+    //#endregion
+    //#region TouchEvent
+    async piece_touchstart(event) {
+        console.debug("piece_touchstart", "\n\tthis:", this, "\n\event.target:", event.target);
         this.currentDragPiece = event.target;
-        window.addEventListener("mousemove", e => this.window_mousemove(e), true);
-        window.addEventListener("mouseup", e => this.window_mouseup(e), true);
         this.currentDragPiece.classList.add('dragging');
     }
-    /**
-     * 
-     * @param {DragEvent} event 
-     */
-    async window_mousemove(event) {
-        if (this.currentDragPiece === undefined) { return; }
+    async piece_touchmove(event) {
+        if (this.currentDragPiece !== undefined || this.currentDragPiece !== event.target) { return; }
 
         const gameBounds = this.getBoundingClientRect();
         const mouseX = event.clientX - gameBounds.x;
         const mouseY = event.clientY - gameBounds.y;
 
-        const bounds = this.currentDragPiece.getBoundingClientRect();
-        const top = (mouseY - (bounds.height / 2));
-        const left = (mouseX - (bounds.width / 2))
+        const pieceBounds = this.currentDragPiece.getBoundingClientRect();
+        const centerX = pieceBounds.width / 2;
+        const centerY = pieceBounds.height / 2;
+        const top = (mouseY - centerY);
+        const left = (mouseX - centerX)
         this.currentDragPiece.style.top = top + 'px';
         this.currentDragPiece.style.left = left + 'px';
+    }
+    async piece_touchend(event) {
+        console.debug("piece_touchend", "\n\tthis:", this, "\n\event.target:", event.target);
+    }
+    async piece_touchcancel(event) {
+        console.debug("piece_touchcancel", "\n\tthis:", this, "\n\event.target:", event.target);
+    }
+    //#endregion
+    //#region PointerEvent
+    currentDragPointer = undefined;
+    async piece_pointerdown(event) {
+        console.debug("piece_pointerdown", "\n\tthis:", this, "\n\event.target:", event.target);
+        this.currentDragPiece = event.target;
+        this.currentDragPointer = event.pointerId;
+        window.addEventListener("pointermove", e => this.window_pointermove(e), true);
 
+        window.addEventListener("pointerup", e => this.window_pointerup(e), true);
+        this.currentDragPiece.classList.add('dragging');
+        console.log(event);
     }
     /**
      * 
      * @param {DragEvent} event 
      */
-    async window_mouseup(event) {
-        if (this.currentDragPiece === undefined) { return; }
-        console.debug("window_mouseup", "\n\tthis:", this, "\n\event.target:", event.target);
-        window.removeEventListener("mousemove", e => this.window_mousemove(e), true);
-        window.removeEventListener("mouseup", e => this.window_mouseup(e), true);
+    async window_pointermove(event) {
+        if (this.currentDragPiece === undefined || event.pointerId !== this.currentDragPointer) { return; }
+        console.debug("window_pointermove", "\n\tthis:", this, "\n\event.target:", event.target);
+
+        const gameBounds = this.getBoundingClientRect();
+        const mouseX = event.clientX - gameBounds.x;
+        const mouseY = event.clientY - gameBounds.y;
+
+        const pieceBounds = this.currentDragPiece.getBoundingClientRect();
+        const centerX = pieceBounds.width / 2;
+        const centerY = pieceBounds.height / 2;
+        const top = (mouseY - centerY);
+        const left = (mouseX - centerX)
+        this.currentDragPiece.style.top = top + 'px';
+        this.currentDragPiece.style.left = left + 'px';
+    }
+    /**
+     * 
+     * @param {DragEvent} event 
+     */
+    async window_pointerup(event) {
+        if (this.currentDragPiece === undefined || event.pointerId !== this.currentDragPointer) { return; }
+        console.debug("window_pointerup", "\n\tthis:", this, "\n\event.target:", event.target);
+        window.removeEventListener("pointerup", e => this.window_pointerup(e), true);
+        window.removeEventListener("pointermove", e => this.window_pointermove(e), true);
 
         this.currentDragPiece.style.top = '';
         this.currentDragPiece.style.left = '';
         this.currentDragPiece.style.width = '';
         this.currentDragPiece.classList.remove('dragging');
         this.currentDragPiece = undefined;
-    }
-    boardcell_dragover(event) {
-
-    }
-    //#endregion
-    //#region TouchEvent
-    piece_touchstart(event) {
-        console.debug("piece_touchstart", "\n\tthis:", this, "\n\event.target:", event.target);
     }
     //#endregion
     //#endregion
@@ -370,12 +397,15 @@ class GameElement extends HTMLElement {
         if (user_can_hover()) {
             for (let i = 0; i < pieces.length; i++) {
                 console.debug("init piece:", pieces[i]);
-                pieces[i].addEventListener("mousedown", e => this.piece_mousedown(e));
+                pieces[i].addEventListener("pointerdown", e => this.piece_pointerdown(e));
             }
         } else {
             for (let i = 0; i < pieces.length; i++) {
                 console.debug("init piece:", pieces[i]);
-                pieces[i].addEventListener("touchstart", e => this.piece_touchstart(e), true);
+                pieces[i].addEventListener("touchstart", e => this.piece_touchstart(e), { passive: true });
+                pieces[i].addEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
+                pieces[i].addEventListener("touchend", e => this.piece_touchend(e), { passive: true });
+                pieces[i].addEventListener("touchcancel", e => this.piece_touchcancel(e), { passive: true });
             }
         }
 
