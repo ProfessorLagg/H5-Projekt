@@ -98,16 +98,15 @@
 
 .board-cell {
     background-color: rgba(0, 0, 0, 0%);
-    margin: 10%;
+    margin: 0;
 }
 
 .board-cell:hover {
     background-color: rgba(255, 255, 0, 50%);
-    background-blend-mode: multiply;
 }
 
 .board-cell[state="1"] {
-    background-image: url("./block.svg");
+    background-image: url("./block-e.svg");
     background-size: contain;
 }
 
