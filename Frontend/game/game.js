@@ -131,10 +131,21 @@ class GameElement extends HTMLElement {
     seed = prng.sfc32.getSeed();
     rand = new prng.sfc32(this.seed);
     restart() {
+        if (!this.init_called) { this.init(); }
         console.debug(this.localName, "restart()");
         this.seed = prng.sfc32.getSeed();
         this.rand = new prng.sfc32(this.seed);
         this.fillPieceBuffer();
+
+    }
+    get startButton() {
+        return this.shadowRoot.getElementById('start-button');
+    }
+    startButton_click(e) {
+        console.debug("startButton_click");
+        this.startButton.style.display = "none";
+        this.restart();
+
     }
 
     //#region Board
@@ -271,8 +282,14 @@ class GameElement extends HTMLElement {
     fillPiece(piece) {
         const shapeId = this.rand.nextInt() % shapeIds.length;
         piece.setAttribute("shapeId", shapeId);
-        piece.childNodes.forEach(child => piece.removeChild(child));
-        piece.appendChild(renderShape(shapeId).cloneNode(true));
+        piece.style.backgroundImage = `url(${urlEncodeSvg(renderShape(shapeId))})`;
+
+        // const piece_img = this.shadowRoot.getElementById(piece.id + '-shape')
+        // console.debug("piece_img:", piece_img)
+        // piece_img.src = urlEncodeSvg(renderShape(shapeId));
+
+        // piece.childNodes.forEach(child => piece.removeChild(child));
+        // piece.appendChild(renderShape(shapeId).cloneNode(true));
     }
     fillPieceBuffer() {
         this.fillPiece(this.piece1);
@@ -283,14 +300,14 @@ class GameElement extends HTMLElement {
 
     //#region Dragging
     currentDragPiece = undefined;
+    //#region MouseEvent
     /**
      * 
      * @param {DragEvent} event 
      */
-    piece_mousedown(event) {
-        let piece = event.target;
+    async piece_mousedown(event) {
         console.debug("piece_mousedown", "\n\tthis:", this, "\n\event.target:", event.target);
-        this.currentDragPiece = piece;
+        this.currentDragPiece = event.target;
         window.addEventListener("mousemove", e => this.window_mousemove(e), true);
         window.addEventListener("mouseup", e => this.window_mouseup(e), true);
         this.currentDragPiece.classList.add('dragging');
@@ -299,31 +316,45 @@ class GameElement extends HTMLElement {
      * 
      * @param {DragEvent} event 
      */
-    window_mousemove(event) {
+    async window_mousemove(event) {
         if (this.currentDragPiece === undefined) { return; }
-        this.currentDragPiece.style.top = (event.clientY - this.currentDragPiece.clientHeight / 2) + 'px';
-        this.currentDragPiece.style.left = (event.clientX - this.currentDragPiece.clientWidth / 2) + 'px';
-        this.currentDragPiece.style.width = ((this.clientWidth / 9) * 5) + 'px';
+
+        const gameBounds = this.getBoundingClientRect();
+        const mouseX = event.clientX - gameBounds.x;
+        const mouseY = event.clientY - gameBounds.y;
+
+        const bounds = this.currentDragPiece.getBoundingClientRect();
+        const top = (mouseY - (bounds.height / 2));
+        const left = (mouseX - (bounds.width / 2))
+        this.currentDragPiece.style.top = top + 'px';
+        this.currentDragPiece.style.left = left + 'px';
+
     }
     /**
      * 
      * @param {DragEvent} event 
      */
-    window_mouseup(event) {
+    async window_mouseup(event) {
         if (this.currentDragPiece === undefined) { return; }
         console.debug("window_mouseup", "\n\tthis:", this, "\n\event.target:", event.target);
         window.removeEventListener("mousemove", e => this.window_mousemove(e), true);
         window.removeEventListener("mouseup", e => this.window_mouseup(e), true);
 
-        this.currentDragPiece.removeAttribute("style");
+        this.currentDragPiece.style.top = '';
+        this.currentDragPiece.style.left = '';
+        this.currentDragPiece.style.width = '';
         this.currentDragPiece.classList.remove('dragging');
         this.currentDragPiece = undefined;
     }
     boardcell_dragover(event) {
 
     }
-
-    // TODO Touch events
+    //#endregion
+    //#region TouchEvent
+    piece_touchstart(event) {
+        console.debug("piece_touchstart", "\n\tthis:", this, "\n\event.target:", event.target);
+    }
+    //#endregion
     //#endregion
 
     //#region Initialization
@@ -334,31 +365,40 @@ class GameElement extends HTMLElement {
             // TODO Drag over and Drop events
         }
     }
-
     initPieces() {
         const pieces = this.pieces;
-        for (let i = 0; i < pieces.length; i++) {
-            console.debug("init piece:", pieces[i]);
-            pieces[i].addEventListener("mousedown", e => this.piece_mousedown(e));
+        if (user_can_hover()) {
+            for (let i = 0; i < pieces.length; i++) {
+                console.debug("init piece:", pieces[i]);
+                pieces[i].addEventListener("mousedown", e => this.piece_mousedown(e));
+            }
+        } else {
+            for (let i = 0; i < pieces.length; i++) {
+                console.debug("init piece:", pieces[i]);
+                pieces[i].addEventListener("touchstart", e => this.piece_touchstart(e), true);
+            }
         }
+
     }
+
+
+
 
     connectedCallback() {
         console.debug(this.localName, "connectedCallback()");
 
         let shadowRoot = this.attachShadow({ mode: "open" });
         shadowRoot.adoptedStyleSheets = [game_css];
-
         shadowRoot.appendChild(this.template.content.cloneNode(true));
-        this.initBoard();
+        this.startButton.addEventListener("click", e => this.startButton_click(e));
         this.initPieces();
-        this.restart();
+        this.initBoard();
+        this.init_called = true;
     }
 
     constructor() {
         super();
         this.template = loadTemplate();
-
     }
     //#endregion
 }

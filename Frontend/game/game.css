@@ -133,11 +133,15 @@
     /**/
     /* background-color: rgba(255, 0, 255, 10%); */
     outline: 1px solid white;
-    z-index: 1;
+
+}
+
+.game-piece.dragging{
+    width: calc((100% / 9) * 5);
 }
 
 .dragging {
-    position: absolute;
+    position: absolute !important;
     left: 0px;
     right: 0px;
 }
