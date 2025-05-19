@@ -166,8 +166,111 @@ class GameElement extends HTMLElement {
     //#endregion
 
     //#region Board
-
     get board() { return this.shadowRoot.getElementById('game-board') }
+    get groups() {
+        return [
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="0"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="1"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="2"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="3"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="4"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="5"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="6"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="7"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[grp="8"]')),
+        ]
+    }
+    get rows() {
+        return [
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="0"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="1"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="2"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="3"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="4"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="5"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="6"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="7"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[row="8"]')),
+        ]
+    }
+    get columns() {
+        return [
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="0"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="1"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="2"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="3"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="4"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="5"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="6"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="7"]')),
+            Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="8"]')),
+        ]
+    }
+
+    /** clears all clearable cells. returns the delta score*/
+    clear() {
+        let clearableSections = [];
+        let section = undefined;
+        // GROUPS
+        const grps = this.groups;
+        for (let i = 0; i < grps.length; i++) {
+            section = grps[i];
+            let filled = true;
+            for (let j = 0; j < section.length; j++) {
+                const state = parseInt(section[j].getAttribute("state"));
+                if (state !== 1) {
+                    filled = false;
+                    break;
+                }
+            }
+            if (filled) { clearableSections.push(section); }
+        }
+        section = undefined;
+
+        // ROWS
+        const rows = this.rows;
+        for (let i = 0; i < rows.length; i++) {
+            section = rows[i];
+            let filled = true;
+            for (let j = 0; j < section.length; j++) {
+                const state = parseInt(section[j].getAttribute("state"));
+                if (state !== 1) {
+                    filled = false;
+                    break;
+                }
+            }
+            if (filled) { clearableSections.push(section); }
+        }
+        section = undefined;
+
+        // COLUMNS
+        const cols = this.columns;
+        for (let i = 0; i < cols.length; i++) {
+            section = cols[i];
+            let filled = true;
+            for (let j = 0; j < section.length; j++) {
+                const state = parseInt(section[j].getAttribute("state"));
+                if (state !== 1) {
+                    filled = false;
+                    break;
+                }
+            }
+            if (filled) { clearableSections.push(section); }
+        }
+        section = undefined;
+
+        // DISABLING
+        let result = 0;
+        for (let i = 0; i < clearableSections.length; i++) {
+            section = clearableSections[i];
+            for (let j = 0; j < section.length; j++) {
+                result += 1;
+                section[j].setAttribute("state", 0);
+            }
+        }
+        return result;
+    }
+    //#region cells
     /**
      * 
      * @returns All the cells on the game-board
@@ -285,6 +388,7 @@ class GameElement extends HTMLElement {
         cell.setAttribute("state", state);
     }
     //#endregion
+    //#endregion
 
     //#region pieces
     get piece1() { return this.shadowRoot.getElementById('piece-1') }
@@ -343,6 +447,7 @@ class GameElement extends HTMLElement {
             }
             this.gameSelectedPiece.style = '';
             this.gameSelectedPiece.setAttribute("shapeId", -1);
+            this.score += this.clear();
             this.refill_piece_buffer_if_empty();
         }
         this.clearSelectedPiece();
