@@ -1,4 +1,4 @@
-export { GameElement, renderShape }
+export { GameElement, syncGet }
 // Imports https://html.spec.whatwg.org/multipage/webappapis.html#module-type-allowed
 import { TypeChecker } from "./typechecker.mjs"
 import * as prng from "./prng.mjs";
@@ -12,10 +12,10 @@ import game_css from "./game.css" with { type: "css" };
  * @returns The text content of the response
  */
 function syncGet(url) {
-    let httpRequest = new XMLHttpRequest();
-    httpRequest.open("GET", url, false);
-    httpRequest.send();
-    return httpRequest.response;
+    let xhttp = new XMLHttpRequest();
+    xhttp.open("GET", url, false);
+    xhttp.send();
+    return xhttp.response;
 }
 /**
  * Converts 2D board index to 1D board index
@@ -82,8 +82,10 @@ function loadTemplate() {
 import shapes from "./shapes.json" with { type: "json" };
 const shapeIds = Object.keys(shapes).flatMap(x => Number(x)).filter(x => TypeChecker.isInteger(x) && x >= 0);
 const block_url = import.meta.resolve("./block-e.svg");
+const block_data = syncGet(block_url);
+const block_data_url = `data:image/svg+xml;base64,${btoa(block_data)}`
 const shape_template_url = import.meta.resolve("./shape_template.svg");
-const shape_template_string = syncGet(shape_template_url);
+const shape_template_string = syncGet(shape_template_url).replaceAll('{block_url}', block_data_url);
 const shape_block_string_template = `<rect x="{x}" y="{y}" width="10" height="10" fill="url(#block)" />`
 const shapeRenderCache = {};
 function renderShape(shapeId) {
@@ -105,6 +107,7 @@ function renderShape(shapeId) {
                 .replaceAll('{y}', y);
         }
         let svgString = shape_template_string.replace('{content}', shapeContent);
+        console.debug("svgString:", svgString);
         svg = new DOMParser().parseFromString(svgString, "image/svg+xml").firstChild
         shapeRenderCache[shapeId] = svg;
     }
