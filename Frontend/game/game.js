@@ -160,8 +160,18 @@ class GameElement extends HTMLElement {
     }
 
     //#region score
-    set score(v) {
-        // TODO
+    set score(new_score) {
+        TypeChecker.assertIsInteger(new_score);
+        const old_score = this.score;
+        console.log(`updated score: ${old_score} -> ${new_score}`)
+        this.scoreElem.setAttribute("value", new_score);
+        this.scoreElem.textContent = new_score.toString();
+    }
+    get score() {
+        return parseInt(this.scoreElem.getAttribute("value"));
+    }
+    get scoreElem() {
+        return this.shadowRoot.getElementById('game-score');
     }
     //#endregion
 
@@ -443,7 +453,7 @@ class GameElement extends HTMLElement {
                 const cell = this.gameIntersectingCells.pop();
                 cell.classList.remove('highlight');
                 cell.setAttribute("state", 1);
-                this.score++;
+                this.score += 1;
             }
             this.gameSelectedPiece.style = '';
             this.gameSelectedPiece.setAttribute("shapeId", -1);
@@ -546,7 +556,7 @@ class GameElement extends HTMLElement {
      */
     async piece_touchend(event) {
         if (this.gameSelectedPiece === undefined || event.target !== this.gameSelectedPiece) { return; }
-        console.log("piece_touchend", "\n\tthis:", this, "\n\event.target:", event.target);
+        console.debug("piece_touchend", "\n\tthis:", this, "\n\event.target:", event.target);
         this.gameSelectedPiece.removeEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
         this.gameSelectedPiece.removeEventListener("touchend", e => this.piece_touchend(e), { passive: true });
         this.gameSelectedPiece.removeEventListener("touchcancel", e => this.piece_touchend(e), { passive: true });
