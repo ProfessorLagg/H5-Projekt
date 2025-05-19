@@ -1,23 +1,45 @@
-export { GameElement, syncGet }
+export { GameElement, renderShape }
 // Imports https://html.spec.whatwg.org/multipage/webappapis.html#module-type-allowed
 import { TypeChecker } from "./typechecker.mjs"
 import * as prng from "./prng.mjs";
 import game_css from "./game.css" with { type: "css" };
-import shapes from "./shapes.json" with { type: "json" };
 
-// -- utils --
+
+//#region utils
+/**
+ * Sends a non-async get request
+ * @param {String} url 
+ * @returns The text content of the response
+ */
 function syncGet(url) {
     let httpRequest = new XMLHttpRequest();
     httpRequest.open("GET", url, false);
     httpRequest.send();
     return httpRequest.response;
 }
+/**
+ * Converts 2D board index to 1D board index
+ * @param {Number} row 
+ * @param {Number} col 
+ * @returns The result 1D index in the range [0-80]
+ */
 function indexTo1D(row, col) {
+    TypeChecker.assertIsInteger(row);
+    TypeChecker.assertIsInteger(col);
+    if (row < 0 || row > 8) { throw Error("row must be in the range [0 - 8], but was: " + row) }
+    if (col < 0 || col > 8) { throw Error("col must be in the range [0 - 8], but was: " + col) }
     const r = Math.max(0, Math.min(9, row));
     const c = Math.max(0, Math.min(9, col));
     return r * 9 + c;
 }
+/**
+ * Converts 1D board index to 2D board index
+ * @param {Number} index 
+ * @returns The resulting 2D index row and col
+ */
 function indexTo2D(index) {
+    TypeChecker.assertIsInteger(index);
+    if (index < 0 || index > 80) { throw Error("index must be in the range [0 - 80], but was: " + index) }
     const idx = Math.max(0, Math.min(80, index));
     const col = idx % 9;
     const row = (idx - col) / 9
@@ -26,8 +48,26 @@ function indexTo2D(index) {
         col: col,
     }
 }
+/**
+ * Calculates board group from 2D board index
+ * @param {Number} row 
+ * @param {Number} col 
+ * @returns The resulting board group index
+ */
+function calcGroup(row, col) {
+    TypeChecker.assertIsInteger(row);
+    TypeChecker.assertIsInteger(col);
+    if (row < 0 || row > 8) { throw Error("row must be in the range [0 - 8], but was: " + row) }
+    if (col < 0 || col > 8) { throw Error("col must be in the range [0 - 8], but was: " + col) }
+    const r = Math.max(0, Math.min(9, row));
+    const c = Math.max(0, Math.min(9, col));
+    const gr = Math.floor(r / 3) * 3;
+    const gc = Math.floor(c / 3);
+    return gr + gc;
+}
+//#endregion
 
-// -- game template --
+//#region game template
 const template_url = import.meta.resolve("./game.html");
 function loadTemplate() {
     console.debug("loadTemplate()");
@@ -36,16 +76,54 @@ function loadTemplate() {
     elem.id = "tmpl-" + GameElementTagName;
     return elem;
 }
+//#endregion
+
+//#region shapes
+import shapes from "./shapes.json" with { type: "json" };
+const shapeIds = Object.keys(shapes).flatMap(x => Number(x)).filter(x => TypeChecker.isInteger(x) && x >= 0);
+const block_url = import.meta.resolve("./block-e.svg");
+const shape_template_url = import.meta.resolve("./shape_template.svg");
+const shape_template_string = syncGet(shape_template_url);
+const shape_block_string_template = `<rect x="{x}" y="{y}" width="10" height="10" fill="url(#block)" />`
+const shapeRenderCache = {};
+function renderShape(shapeId) {
+    console.time(`renderShape(${shapeId})`);
+    TypeChecker.assertIsInteger(shapeId);
+    if (shapeId < 0 || shapeId >= shapeIds.length) { throw Error("Invalid shapeId: " + shapeId) }
+
+    let svg = shapeRenderCache[shapeId];
+    if (svg === undefined) {
+        // Update the render cache
+        const shape = shapes[shapeId];
+        let shapeContent = "";
+        for (let i = 0; i < shape.length; i++) {
+            const offset = shape[i];
+            const x = offset.c * 10;
+            const y = offset.r * 10;
+            shapeContent += shape_block_string_template
+                .replaceAll('{x}', x)
+                .replaceAll('{y}', y);
+        }
+        let svgString = shape_template_string.replace('{content}', shapeContent);
+        svg = new DOMParser().parseFromString(svgString, "image/svg+xml").firstChild
+        shapeRenderCache[shapeId] = svg;
+    }
+
+    console.timeEnd(`renderShape(${shapeId})`);
+    return svg;
+}
+//#endregion
 
 // -- GameElement --
 const GameElementTagName = 'game-wrap';
 class GameElement extends HTMLElement {
-
-
+    seed = prng.sfc32.getSeed();
+    rand = new prng.sfc32(this.seed);
     restart() {
         console.debug(this.localName, "restart()");
         this.seed = prng.sfc32.getSeed();
         this.rand = new prng.sfc32(this.seed);
+        this.fillPieceBuffer();
     }
 
     //#region cell funcs
@@ -63,7 +141,7 @@ class GameElement extends HTMLElement {
      * @returns The cell at the specified 1D index
      */
     getCellByIndex(index) {
-        if (!TypeChecker.isInteger(index)) { throw Error(`Expected integer, but found: ${index}`) }
+        TypeChecker.assertIsInteger(index);
         if (index < 0 || index > 80) { throw Error("index must be in the range [0 - 80], but was: " + index) }
         return this.shadowRoot.querySelector(`.board-cell[idx="${index}"`);
     }
@@ -75,8 +153,8 @@ class GameElement extends HTMLElement {
      * @returns The cell at the specified row, coloumn 2D index
      */
     getCellByRowCol(row, col) {
-        if (!TypeChecker.isInteger(row)) { throw Error(`Expected integer, but found: ${row}`) }
-        if (!TypeChecker.isInteger(col)) { throw Error(`Expected integer, but found: ${col}`) }
+        TypeChecker.assertIsInteger(row);
+        TypeChecker.assertIsInteger(col);
         if (row < 0 || row > 8) { throw Error("row must be in the range [0 - 8], but was: " + row) }
         if (col < 0 || col > 8) { throw Error("col must be in the range [0 - 8], but was: " + col) }
         return this.shadowRoot.querySelector(`.board-cell[row="${row}"][col="${col}"]`)
@@ -88,7 +166,7 @@ class GameElement extends HTMLElement {
      * @returns All the cells in the specified row
      */
     getRow(row) {
-        if (!TypeChecker.isInteger(row)) { throw Error(`Expected integer, but found: ${row}`) }
+        TypeChecker.assertIsInteger(row);
         if (row < 0 || row > 8) { throw Error("row must be in the range [0 - 8], but was: " + row) }
         return Array.from(this.shadowRoot.querySelectorAll(`.board-cell[row="${row}"]`));
     }
@@ -99,7 +177,7 @@ class GameElement extends HTMLElement {
      * @returns All the cells in the specified column
      */
     getColumn(col) {
-        if (!TypeChecker.isInteger(col)) { throw Error(`Expected integer, but found: ${col}`) }
+        TypeChecker.assertIsInteger(col);
         if (col < 0 || col > 8) { throw Error("col must be in the range [0 - 8], but was: " + col) }
         return Array.from(this.shadowRoot.querySelectorAll(`.board-cell[col="${col}"]`));
     }
@@ -110,7 +188,7 @@ class GameElement extends HTMLElement {
      * @returns All the cells in the specified group
      */
     getGroup(grp) {
-        if (!TypeChecker.isInteger(grp)) { throw Error(`Expected integer, but found: ${grp}`) }
+        TypeChecker.assertIsInteger(grp);
         if (grp < 0 || grp > 8) { throw Error("grp must be in the range [0 - 8], but was: " + grp) }
         return Array.from(this.shadowRoot.querySelectorAll(`.board-cell[grp="${grp}"]`));
     }
@@ -167,6 +245,23 @@ class GameElement extends HTMLElement {
     }
     //#endregion
 
+    //#region pieces
+    get piece1() { return this.shadowRoot.getElementById('piece-1') }
+    get piece2() { return this.shadowRoot.getElementById('piece-2') }
+    get piece3() { return this.shadowRoot.getElementById('piece-3') }
+    get pieces() { return [this.piece1, this.piece2, this.piece3] }
+
+    fillPiece(piece) {
+        const shapeId = this.rand.nextInt() % shapeIds.length;
+        piece.setAttribute("shapeId", shapeId);
+    }
+    fillPieceBuffer() {
+        this.fillPiece(this.piece1);
+        this.fillPiece(this.piece2);
+        this.fillPiece(this.piece3);
+    }
+    //#endregion
+
     //#region Initialization
     initBoard() {
         const game = this;
@@ -192,8 +287,7 @@ class GameElement extends HTMLElement {
     constructor() {
         super();
         this.template = loadTemplate();
-        this.seed = prng.sfc32.getSeed();
-        this.rand = new prng.sfc32(this.seed);
+
     }
     //#endregion
 }

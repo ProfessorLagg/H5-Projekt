@@ -61,10 +61,6 @@
     }
 }
 
-:host>* {
-    background-color: rgba(255, 0, 255, 10%);
-}
-
 #game-board {
     aspect-ratio: 1/1;
     width: 100%;
@@ -114,4 +110,26 @@
     font-size: 3vh;
     text-align: center;
     font-weight: bold;
+}
+
+#piece-buffer {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    height: min-content;
+    margin-top: auto;
+    padding-left: 0.5vw;
+    padding-right: 0.5vw;
+    /**/
+    outline: 1px solid magenta;
+}
+
+.game-piece {
+    margin-left: 0.5vw;
+    margin-right: 0.5vw;
+    width: 100%;
+    aspect-ratio: 1/1;
+    /**/
+    background-color: rgba(255, 0, 255, 10%);
+    outline: 1px solid white;
 }

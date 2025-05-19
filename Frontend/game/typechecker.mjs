@@ -29,4 +29,9 @@ class TypeChecker {
     constructor() {
         throw new Error(TypeChecker.name, " is a static class");
     }
+
+    // === Assertions ===
+    static assertIsInteger(v) {
+        if (!TypeChecker.isInteger(v)) { throw Error("Expected integer, but found " + v) }
+    }
 }
