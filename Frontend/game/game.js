@@ -17,6 +17,7 @@ function syncGet(url) {
     xhttp.send();
     return xhttp.response;
 }
+
 /**
  * Converts 2D board index to 1D board index
  * @param {Number} row 
@@ -107,11 +108,9 @@ function renderShape(shapeId) {
                 .replaceAll('{y}', y);
         }
         let svgString = shape_template_string.replace('{content}', shapeContent);
-        console.debug("svgString:", svgString);
         svg = new DOMParser().parseFromString(svgString, "image/svg+xml").firstChild
         shapeRenderCache[shapeId] = svg;
     }
-
     console.timeEnd(`renderShape(${shapeId})`);
     return svg;
 }
@@ -257,6 +256,9 @@ class GameElement extends HTMLElement {
     fillPiece(piece) {
         const shapeId = this.rand.nextInt() % shapeIds.length;
         piece.setAttribute("shapeId", shapeId);
+
+        const shapeRender = renderShape(shapeId).cloneNode(true);
+        piece.appendChild(shapeRender);
     }
     fillPieceBuffer() {
         this.fillPiece(this.piece1);
