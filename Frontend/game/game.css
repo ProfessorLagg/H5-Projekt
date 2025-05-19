@@ -136,11 +136,12 @@
 
 }
 
-.game-piece.dragging{
+.game-piece.dragging {
     width: calc((100% / 9) * 5);
 }
 
 .dragging {
+    touch-action: none;
     position: absolute !important;
     left: 0px;
     right: 0px;

@@ -310,13 +310,21 @@ class GameElement extends HTMLElement {
         console.debug("piece_touchstart", "\n\tthis:", this, "\n\event.target:", event.target);
         this.currentDragPiece = event.target;
         this.currentDragPiece.classList.add('dragging');
+        this.currentDragPiece.addEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
+        this.currentDragPiece.addEventListener("touchend", e => this.piece_touchend(e), { passive: true });
+        this.currentDragPiece.addEventListener("touchcancel", e => this.piece_touchcancel(e), { passive: true });
     }
+    /**
+     * @param {TouchEvent} event 
+     */
     async piece_touchmove(event) {
-        if (this.currentDragPiece !== undefined || this.currentDragPiece !== event.target) { return; }
+        console.debug("piece_touchmove:", "this.currentDragPiece.id:", this.currentDragPiece.id, "event.target.id:", event.target.id);
+        if (this.currentDragPiece === undefined) { return; }
 
         const gameBounds = this.getBoundingClientRect();
-        const mouseX = event.clientX - gameBounds.x;
-        const mouseY = event.clientY - gameBounds.y;
+        const touchpos = event.touches[0];
+        const mouseX = touchpos.clientX - gameBounds.x;
+        const mouseY = touchpos.clientY - gameBounds.y;
 
         const pieceBounds = this.currentDragPiece.getBoundingClientRect();
         const centerX = pieceBounds.width / 2;
@@ -325,12 +333,28 @@ class GameElement extends HTMLElement {
         const left = (mouseX - centerX)
         this.currentDragPiece.style.top = top + 'px';
         this.currentDragPiece.style.left = left + 'px';
+
     }
+    /**
+     * @param {TouchEvent} event 
+     */
     async piece_touchend(event) {
-        console.debug("piece_touchend", "\n\tthis:", this, "\n\event.target:", event.target);
+        console.log("piece_touchend", "\n\tthis:", this, "\n\event.target:", event.target);
+        // TODO trigger piece placement
+        await this.piece_touchcancel(event)
     }
+    /**
+     * @param {TouchEvent} event 
+     */
     async piece_touchcancel(event) {
-        console.debug("piece_touchcancel", "\n\tthis:", this, "\n\event.target:", event.target);
+        this.currentDragPiece.removeEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
+        this.currentDragPiece.removeEventListener("touchend", e => this.piece_touchend(e), { passive: true });
+        this.currentDragPiece.removeEventListener("touchcancel", e => this.piece_touchend(e), { passive: true });
+        this.currentDragPiece.style.top = '';
+        this.currentDragPiece.style.left = '';
+        this.currentDragPiece.style.width = '';
+        this.currentDragPiece.classList.remove('dragging');
+        this.currentDragPiece = undefined;
     }
     //#endregion
     //#region PointerEvent
@@ -403,9 +427,6 @@ class GameElement extends HTMLElement {
             for (let i = 0; i < pieces.length; i++) {
                 console.debug("init piece:", pieces[i]);
                 pieces[i].addEventListener("touchstart", e => this.piece_touchstart(e), { passive: true });
-                pieces[i].addEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
-                pieces[i].addEventListener("touchend", e => this.piece_touchend(e), { passive: true });
-                pieces[i].addEventListener("touchcancel", e => this.piece_touchcancel(e), { passive: true });
             }
         }
 
