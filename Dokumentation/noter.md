@@ -2,8 +2,8 @@
 ## Performance Krav
 En vigtig del af spiloplevelsen er performance. Hvis performance halter og brugeren f.eks skal vente længe på at spillet loader eller kommunikere med serveren, så er spillet simpelthen mindre sjovt.
 Der stilles derfor følgende krav til performance:
-- [ ] Der må ikke forkomme ventetider for brugeren på over `1000 ms`, og skal i gennemsnit være under `20ms`
-- [ ] Web-Responstid må ikke overstige `ping + 1000ms`, og skal i gennemsnit være under `ping + 20ms`
+- [x] Der må ikke forkomme ventetider for brugeren på over `1000 ms`, og skal i gennemsnit være under `20ms`
+- [x] Web-Responstid må ikke overstige `ping + 1000ms`, og skal i gennemsnit være under `ping + 20ms`
 
 ## Krav til gameplay
 - [ ] Det skal være muligt at starte et nyt spil, også selvom du har gang i et eksisterende
