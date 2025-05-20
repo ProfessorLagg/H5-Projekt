@@ -251,3 +251,7 @@
 #resume-button[canLoad="false"] {
     display: none;
 }
+
+#last-score[value="0"] {
+    display: none;
+}
