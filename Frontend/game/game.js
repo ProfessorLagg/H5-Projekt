@@ -206,6 +206,7 @@ const saveFileKey = 'savefile';
 class GameElement extends HTMLElement {
     rand = new prng.sfc32(new Uint32Array(4));
     start() {
+
         this.uiOverlay.classList.add("hidden");
         this.gameplayWrap.setAttribute("over", "false");
         this.gameplayWrap.classList.add("running");
@@ -220,6 +221,7 @@ class GameElement extends HTMLElement {
         this.rand = new prng.sfc32(prng.sfc32.generateSeed());
         this.start();
         this.refill_piece_buffer();
+        this.score = 0;
         this.save();
     }
     get gameplayWrap() { return this.shadowRoot.getElementById('gamplay-wrap') }
