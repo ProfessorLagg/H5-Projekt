@@ -3,6 +3,8 @@ export { GameElement, shapes, rangeMapNumber }
 import { TypeChecker } from "./typechecker.mjs"
 import * as prng from "./prng.mjs";
 import game_css from "./game.css" with { type: "css" };
+import font_Roboto from "./fonts/Roboto/Roboto.css" with { type: "css" };
+import font_Open_Sans from "./fonts/Open_Sans/Open_Sans.css" with { type: "css" };
 
 
 //#region utils
@@ -1013,7 +1015,7 @@ class GameElement extends HTMLElement {
     connectedCallback() {
         console.debug(this.localName, "connectedCallback()");
         let shadowRoot = this.attachShadow({ mode: "open" });
-        shadowRoot.adoptedStyleSheets = [game_css];
+        shadowRoot.adoptedStyleSheets = [font_Roboto, font_Open_Sans, game_css];
         shadowRoot.appendChild(this.template.content.cloneNode(true));
         this.init()
     }
