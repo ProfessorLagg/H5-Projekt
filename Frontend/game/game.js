@@ -314,8 +314,7 @@ class GameElement extends HTMLElement {
         this.uiOverlay.classList.remove("hidden");
         this.uiOverlay.classList.add("gameover");
         localStorage.removeItem("savefile");
-        this.resumeButton.setAttribute("canLoad", this.can_load());
-        // TODO save game high-scores
+        this.resumeButton.setAttribute("canLoad", false);
     }
     get over() { return parseBool(this.gameplayWrap.getAttribute("over")); }
     set over(v) { this.gameplayWrap.setAttribute("over", parseBool(v)) }
@@ -420,12 +419,32 @@ class GameElement extends HTMLElement {
         console.debug(`updated score: ${old_score} -> ${new_score}`)
         this.scoreElem.setAttribute("value", new_score);
         this.scoreElem.textContent = new_score.toString();
+
+        // save game high-scores
+        this.lastScore = this.score;
+        this.highscore = this.score; // Highscore setter checks for score > highscore
     }
     get score() {
         return parseInt(this.scoreElem.getAttribute("value"));
     }
     get scoreElem() {
         return this.shadowRoot.getElementById('game-score');
+    }
+    get highscoreElem() { return this.shadowRoot.getElementById('high-score') }
+    get highscore() { return parseInt(localStorage["high-score"] ?? "0") }
+    set highscore(v) {
+        TypeChecker.assertIsInteger(v);
+        const highscore = Math.max(this.highscore, v);
+        localStorage["high-score"] = highscore;
+        this.highscoreElem.textContent = "HIGH SCORE: " + highscore;
+    }
+    get lastScoreElem() { return this.shadowRoot.getElementById('last-score') }
+    get lastScore() { return parseInt(localStorage["last-score"] ?? "0"); }
+    set lastScore(new_score) {
+        TypeChecker.assertIsInteger(new_score);
+        localStorage["high-score"] = new_score;
+        this.lastScoreElem.setAttribute("value", new_score);
+        this.lastScoreElem.textContent = "LAST SCORE: " + new_score.toString();
     }
     //#endregion
 
@@ -718,7 +737,8 @@ class GameElement extends HTMLElement {
         // TODO Log this in replay
         const shapeId_1 = this.rand.nextInt() % shapeIds.length;
         const shapeId_2 = this.rand.nextInt() % shapeIds.length;
-        const shapeId_3 = this.rand.nextInt() % shapeIds.length;
+        let shapeId_3 = this.rand.nextInt() % shapeIds.length;
+        // The game won't end at generation
         while (!this.canPlaceShapeAnywhere(shapeId_3)) {
             shapeId_3 = this.rand.nextInt() % shapeIds.length;
         }
@@ -983,6 +1003,8 @@ class GameElement extends HTMLElement {
         this.resumeButton.addEventListener("click", e => this.reloadButton_click(e));
         this.resumeButton.setAttribute("canLoad", this.can_load());
         this.initPieces();
+        this.highscore = this.highscore;
+        this.lastScore = this.lastScore;
         this.init_called = true;
     }
 

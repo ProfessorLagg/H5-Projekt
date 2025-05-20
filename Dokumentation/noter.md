@@ -1,3 +1,4 @@
+# Kravspec Checklist
 - [ ] Det skal være muligt at starte et nyt spil, også selvom du har gang i et eksisterende
 - [x] Brikkerne skal kunne trækkes ud på brættet, både på mobil og desktop
 - Før en brik placeres skal det tydeligt fremgå:
@@ -7,7 +8,7 @@
 - [ ] Det skal fremgå af ikke placerede brikker hvorvidt de kan placeres på brættet eller ej
 - [x] Spilleren præsenteres for 3 brikker af gangen, som alle sammen skal placeres på brættet før 3 nye brikker præsenteres.
 - [x] Kan splilleren ikke placere en brik ikke placeres er spillet slut
-- [ ] Når nye brikker generes skal mindst 1 af de 3 nye brikker kunne placeres på brættet
+- [x] Når nye brikker generes skal mindst 1 af de 3 nye brikker kunne placeres på brættet
 - [ ] Når en bruge slår sin personlige highscore skal de have mulighed for at uploade den til leaderboard
 - [x] Det skal være muligt at genoptage ikke-færdiggjorte spil
 - [ ] Spillet skal huske brugerens high-score

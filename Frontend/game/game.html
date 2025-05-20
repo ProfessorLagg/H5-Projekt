@@ -1,11 +1,13 @@
 <template>
     <div id="ui-overlay">
+        <span id="high-score" class="score-display">HIGH SCORE: 0</span>
+        <span id="last-score" class="score-display" value="0">LAST SCORE: 0</span>
         <button id="resume-button" class="ui-button" canLoad="false">RESUME GAME</button>
         <button id="start-button" class="ui-button">NEW GAME</button>
     </div>
     <div id="gamplay-wrap" over="true">
         <div class="spacer"></div>
-        <span id="game-score" value="0">0</span>
+        <span id="game-score" value="0" class="score-display">0</span>
         <div id="game-board">
             <div idx="0" grp="0" row="0" col="0" state="0" class="board-cell"></div>
             <div idx="1" grp="0" row="0" col="1" state="0" class="board-cell"></div>
