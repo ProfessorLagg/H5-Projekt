@@ -230,6 +230,7 @@ class GameElement extends HTMLElement {
     get uiOverlay() { return this.shadowRoot.getElementById('ui-overlay'); }
     get startButton() { return this.shadowRoot.getElementById('start-button') }
     get resumeButton() { return this.shadowRoot.getElementById('resume-button') }
+    get restartButton() { return this.shadowRoot.getElementById('restart-button') }
     startButton_click(e) {
         console.debug("startButton_click");
         this.restart();
@@ -1005,6 +1006,7 @@ class GameElement extends HTMLElement {
         if (this.init_called) { return; }
         this.startButton.addEventListener("click", e => this.startButton_click(e));
         this.resumeButton.addEventListener("click", e => this.reloadButton_click(e));
+        this.restartButton.addEventListener("click", e => this.startButton_click(e));
         this.resumeButton.setAttribute("canLoad", this.can_load());
         this.initPieces();
         this.highscore = this.highscore;
