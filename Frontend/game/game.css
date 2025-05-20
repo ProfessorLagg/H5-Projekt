@@ -229,3 +229,7 @@
     font-weight: bold;
     font-family: 'Roboto';
 }
+
+#reload-button[canLoad="false"] {
+    display: none;
+}

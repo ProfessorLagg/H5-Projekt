@@ -209,7 +209,7 @@ class GameElement extends HTMLElement {
         this.uiOverlay.classList.add("hidden");
         this.gameplayWrap.setAttribute("over", "false");
         this.gameplayWrap.classList.add("running");
-        if (!this.init_called) { this.init(); }
+        this.init();
     }
     restart() {
         console.debug(this.localName, "restart()");
@@ -221,9 +221,13 @@ class GameElement extends HTMLElement {
     get gameplayWrap() { return this.shadowRoot.getElementById('gamplay-wrap') }
     get uiOverlay() { return this.shadowRoot.getElementById('ui-overlay'); }
     get startButton() { return this.shadowRoot.getElementById('start-button') }
+    get reloadButton() { return this.shadowRoot.getElementById('reload-button') }
     startButton_click(e) {
         console.debug("startButton_click");
         this.restart();
+    }
+    reloadButton_click(e) {
+        if (this.can_load()) { this.load(); }
     }
     /**
      * Checks if this game is over
@@ -360,7 +364,7 @@ class GameElement extends HTMLElement {
         }
     }
     /**Checks for valid savefile to load*/
-    canResume() {
+    can_load() {
         const savefileJSON = localStorage.getItem(saveFileKey);
         if (TypeChecker.isNullOrUndefined(savefileJSON)) { return false; }
         const savefile = JSON.parse(savefileJSON);
@@ -933,13 +937,6 @@ class GameElement extends HTMLElement {
     //#endregion
 
     //#region Initialization
-    initBoard() {
-        const game = this;
-        const cells = this.getCells();
-        for (let i = 0; i < cells.length; i++) {
-            // TODO Drag over and Drop events
-        }
-    }
     initPieces() {
         const pieces = this.pieces;
         if (user_can_hover()) {
@@ -953,7 +950,16 @@ class GameElement extends HTMLElement {
                 pieces[i].addEventListener("touchstart", e => this.piece_touchstart(e), { passive: true });
             }
         }
-
+    }
+    init_called = false;
+    /**Initializes event handlers and more*/
+    init() {
+        if (this.init_called) { return; }
+        this.startButton.addEventListener("click", e => this.startButton_click(e));
+        this.reloadButton.addEventListener("click", e => this.reloadButton_click(e));
+        this.reloadButton.setAttribute("canLoad", this.can_load());
+        this.initPieces();
+        this.init_called = true;
     }
 
     connectedCallback() {
@@ -961,10 +967,7 @@ class GameElement extends HTMLElement {
         let shadowRoot = this.attachShadow({ mode: "open" });
         shadowRoot.adoptedStyleSheets = [game_css];
         shadowRoot.appendChild(this.template.content.cloneNode(true));
-        this.startButton.addEventListener("click", e => this.startButton_click(e));
-        this.initPieces();
-        this.initBoard();
-        this.init_called = true;
+        this.init()
     }
 
     constructor() {
