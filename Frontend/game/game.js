@@ -88,6 +88,30 @@ function urlEncodeSvg(svg) {
  * @returns true if a device exists, otherwise
  */
 function user_can_hover() { return matchMedia('(hover: hover)').matches; }
+function parseBool(v) {
+    if (TypeChecker.isBoolean(v)) { return v; }
+    else if (TypeChecker.isInteger(v)) {
+        switch (v) {
+            case 0: return false;
+            case 1: return true;
+        }
+    } else if (TypeChecker.isBigint(v)) {
+        switch (v) {
+            case BigInt(false): return false;
+            case BigInt(true): return true;
+        }
+    } else if (TypeChecker.isString(v)) {
+        const str = v.toLowerCase();
+        switch (str) {
+            case "true": return true;
+            case "false": return false;
+            case "1": return true;
+            case "0": return false;
+        }
+    }
+
+    throw new Error(`could not parse ${v} as a boolean value`)
+}
 //#endregion
 
 //#region game template
@@ -142,13 +166,16 @@ function renderShape(shapeId) {
     console.timeEnd(`renderShape(${shapeId})`);
     return svg;
 }
-/** * Checks that the input is a valid shapeId */
-function validShapeId(shapeId) {
+/**
+ * @param {Boolean} [allow_empty] enables the empty shape (-1) counting as valid
+ */
+function validShapeId(shapeId, allow_empty = false) {
+    console.debug(`validShapeId(shapeId:${shapeId}, allow_empty: ${allow_empty})`);
     if (!TypeChecker.isInteger(shapeId)) {
         console.debug("Invalid shapeId: shapeId must be an integer")
         return false;
     }
-    if (shapeId < 0) {
+    if (shapeId < (0 - allow_empty)) {
         console.debug("Invalid shapeId: shapeId must be >= 0")
         return false;
     }
@@ -158,9 +185,16 @@ function validShapeId(shapeId) {
     }
     return true;
 }
-/** * Throws and error if input is not a valid shapeId */
-function assertValidShapeId(shapeId) {
-    if (!validShapeId(shapeId)) { throw new Error("Invalid shapeId: " + shapeId); }
+/** 
+ * Throws if invalid shapeId
+ * @param {Boolean} [allow_empty] enables the empty shape (-1) counting as valid
+ */
+function assertValidShapeId(shapeId, allow_empty = false) {
+    console.debug(`assertValidShapeId(shapeId:${shapeId}, allow_empty: ${allow_empty})`);
+    if (!TypeChecker.isInteger(shapeId)) { throw new Error("Invalid shapeId: shapeId must be an integer") }
+    if (shapeId < (0 - allow_empty)) { throw new Error("Invalid shapeId: shapeId must be >= 0") }
+    if (shapeId >= shapes.length) { throw new Error("Invalid shapeId: shapeId must be < " + shapes.length) }
+    if (!validShapeId(shapeId, allow_empty)) { throw new Error("Invalid shapeId: " + shapeId); }
 }
 //#endregion
 
@@ -168,25 +202,27 @@ function assertValidShapeId(shapeId) {
 
 // -- GameElement --
 const GameElementTagName = 'game-wrap';
+const saveFileKey = 'savefile';
 class GameElement extends HTMLElement {
-    seed = prng.sfc32.getSeed();
-    rand = new prng.sfc32(this.seed);
-    restart() {
-        this.gameplayWrap.classList.remove("over");
+    rand = new prng.sfc32(new Uint32Array(4));
+    start() {
+        this.uiOverlay.classList.add("hidden");
+        this.gameplayWrap.setAttribute("over", "false");
         this.gameplayWrap.classList.add("running");
         if (!this.init_called) { this.init(); }
+    }
+    restart() {
         console.debug(this.localName, "restart()");
-        this.seed = prng.sfc32.getSeed();
-        this.rand = new prng.sfc32(this.seed);
+        this.rand = new prng.sfc32(prng.sfc32.generateSeed());
         this.refill_piece_buffer();
-
+        this.start();
+        this.save();
     }
     get gameplayWrap() { return this.shadowRoot.getElementById('gamplay-wrap') }
     get uiOverlay() { return this.shadowRoot.getElementById('ui-overlay'); }
     get startButton() { return this.shadowRoot.getElementById('start-button') }
     startButton_click(e) {
         console.debug("startButton_click");
-        this.uiOverlay.classList.add("hidden");
         this.restart();
     }
     /**
@@ -218,7 +254,7 @@ class GameElement extends HTMLElement {
     }
     /**
      * Attempts to place a piece from the piecebuffer at the specified 1D board-cell index (idx attribute on cell element)
-     * @param {String} pieceId css id of the piece to place from the piece-buffer
+     * @param {string} pieceId css id of the piece to place from the piece-buffer
      * @param {Number} index 1D board-cell index (idx attribute on cell element)
      * @returns true if the piece was placed, otherwise false
      */
@@ -258,14 +294,78 @@ class GameElement extends HTMLElement {
         this.refill_piece_buffer_if_empty();
         if (this.checkGameover()) {
             console.log("GAMEOVER!")
-            // TODO handle gameover
+            this.endGame();
+        } else {
+            this.save();
         }
         return true;
     }
-
-    handleGameover() {
+    /**Marks this game as over*/
+    endGame() {
+        this.gameplayWrap.setAttribute("over", "true")
         this.uiOverlay.classList.remove("hidden");
         this.uiOverlay.classList.add("gameover");
+        localStorage.removeItem("savefile");
+        // TODO save game high-scores
+    }
+    get over() { return parseBool(this.gameplayWrap.getAttribute("over")); }
+    set over(v) { this.gameplayWrap.setAttribute("over", parseBool(v)) }
+    /**Saves this game to localstorage*/
+    save() {
+        if (this.over) { return; }
+        const savefile = {
+            shapes_version: shapes.version,
+            rand: {
+                seed: this.rand.seed,
+                count: this.rand.count,
+                state: this.rand.state,
+            },
+            score: this.score,
+            board: Array.from(game.getBoardStateArray()),
+            pieces: [
+                this.piece1.getAttribute("shapeId"),
+                this.piece2.getAttribute("shapeId"),
+                this.piece3.getAttribute("shapeId")
+            ],
+
+        }
+        localStorage.setItem(saveFileKey, JSON.stringify(savefile));
+    }
+    /**
+     * Loads the current save.
+     * Throws if no savefile or invalid savefile
+     */
+    load() {
+        const savefileJSON = localStorage.getItem(saveFileKey);
+        if (TypeChecker.isNullOrUndefined(savefileJSON)) { throw Error("No save file found") }
+        const savefile = JSON.parse(savefileJSON);
+        if (savefile.shapes_version != shapes.version) { throw Error("Savefile uses a different shapes version than is currently loaded") }
+        this.start();
+
+        this.rand.seed = savefile.rand.seed;
+        this.rand.count = savefile.rand.count;
+        this.rand.state = savefile.rand.state;
+
+        this.score = savefile.score;
+
+        for (let i = 0; i < savefile.board.length; i++) {
+            const cell = this.getCellByIndex(i);
+            cell.setAttribute("state", savefile.board[i]);
+        }
+
+        for (let i = 0; i < savefile.pieces.length; i++) {
+            const shapeId = parseInt(savefile.pieces[i]);
+            const pieceId = `piece-${i + 1}`
+            this.setPieceShape(pieceId, shapeId);
+        }
+    }
+    /**Checks for valid savefile to load*/
+    canResume() {
+        const savefileJSON = localStorage.getItem(saveFileKey);
+        if (TypeChecker.isNullOrUndefined(savefileJSON)) { return false; }
+        const savefile = JSON.parse(savefileJSON);
+        if (savefile.shapes_version != shapes.version) { return false; }
+        return true;
     }
 
     /**
@@ -589,25 +689,31 @@ class GameElement extends HTMLElement {
     get pieces() { return [this.piece1, this.piece2, this.piece3] }
 
     /**
-     * 
-     * @param {HTMLDivElement} piece 
+     * Sets a piece to the given shape
+     * @param {string} pieceId css id of the piece to place from the piece-buffer
+     * @param {Number} shapeId Id of the shape to check
      */
-    fillPiece(piece) {
-        // TODO Log This
-        const shapeId = this.rand.nextInt() % shapeIds.length;
-        const shapeRender = renderShape(shapeId);
-        const shape = shapes[shapeId];
+    setPieceShape(pieceId, shapeId) {
+        assertValidShapeId(shapeId, true)
+        const piece = this.shadowRoot.getElementById(pieceId);
         piece.setAttribute("shapeId", shapeId);
+        if (shapeId === -1) { return }
+        // Only render non-empty shapes
+        const shapeRender = renderShape(shapeId);
         piece.style.backgroundImage = `url(${urlEncodeSvg(shapeRender)})`;
-        // TODO Write move log
     }
     /**
      * Refills the piece buffer with 3 new pieces. Does not check if it's overwriting not-spent pieces
      */
     refill_piece_buffer() {
-        this.fillPiece(this.piece1);
-        this.fillPiece(this.piece2);
-        this.fillPiece(this.piece3);
+        // TODO Log this in replay
+        const shapeId_1 = this.rand.nextInt() % shapeIds.length;
+        const shapeId_2 = this.rand.nextInt() % shapeIds.length;
+        const shapeId_3 = this.rand.nextInt() % shapeIds.length;
+
+        this.setPieceShape('piece-1', shapeId_1);
+        this.setPieceShape('piece-2', shapeId_2);
+        this.setPieceShape('piece-3', shapeId_3);
     }
     /**
      * Refills the piece buffer if it's empty
@@ -850,12 +956,8 @@ class GameElement extends HTMLElement {
 
     }
 
-
-
-
     connectedCallback() {
         console.debug(this.localName, "connectedCallback()");
-
         let shadowRoot = this.attachShadow({ mode: "open" });
         shadowRoot.adoptedStyleSheets = [game_css];
         shadowRoot.appendChild(this.template.content.cloneNode(true));

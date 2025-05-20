@@ -80,7 +80,7 @@
     background-color: rgba(255, 0, 0, 10%);
 }
 
-#gameplay-wrap.over>* {
+#gameplay-wrap[over="true"]>* {
     display: none;
 }
 
