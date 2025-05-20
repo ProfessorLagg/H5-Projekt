@@ -1,4 +1,4 @@
-export { GameElement, user_can_hover }
+export { GameElement, user_can_hover, shapes }
 // Imports https://html.spec.whatwg.org/multipage/webappapis.html#module-type-allowed
 import { TypeChecker } from "./typechecker.mjs"
 import * as prng from "./prng.mjs";
@@ -32,14 +32,16 @@ function syncGet(url) {
 /**
  * Converts 2D board index to 1D board index
  * @param {Number} row 
- * @param {Number} col 
+ * @param {Number} col
+ * @param {Boolean} [skip_range_check] Flag to allow out out range input
  * @returns The result 1D index in the range [0-80]
  */
-function indexTo1D(row, col) {
+function indexTo1D(row, col, skip_range_check = false) {
     TypeChecker.assertIsInteger(row);
     TypeChecker.assertIsInteger(col);
-    if (row < 0 || row > 8) { throw Error("row must be in the range [0 - 8], but was: " + row) }
-    if (col < 0 || col > 8) { throw Error("col must be in the range [0 - 8], but was: " + col) }
+    if (!skip_range_check && (row < 0 || row > 8)) { throw Error("row must be in the range [0 - 8], but was: " + row) }
+    if (!skip_range_check && (col < 0 || col > 8)) { throw Error("col must be in the range [0 - 8], but was: " + col) }
+
     const r = Math.max(0, Math.min(9, row));
     const c = Math.max(0, Math.min(9, col));
     return r * 9 + c;
@@ -47,11 +49,12 @@ function indexTo1D(row, col) {
 /**
  * Converts 1D board index to 2D board index
  * @param {Number} index 
+ * @param {Boolean} [skip_range_check] Flag to allow out out range input
  * @returns The resulting 2D index row and col
  */
-function indexTo2D(index) {
+function indexTo2D(index, skip_range_check = false) {
     TypeChecker.assertIsInteger(index);
-    if (index < 0 || index > 80) { throw Error("index must be in the range [0 - 80], but was: " + index) }
+    if (!skip_range_check && (index < 0 || index > 80)) { throw Error("index must be in the range [0 - 80], but was: " + index) }
     const idx = Math.max(0, Math.min(80, index));
     const col = idx % 9;
     const row = (idx - col) / 9
@@ -108,7 +111,13 @@ const shape_template_url = import.meta.resolve("./shape_template.svg");
 const shape_template_string = syncGet(shape_template_url).replaceAll('{block_url}', block_data_url);
 const shape_block_string_template = `<rect x="{x}" y="{y}" width="10" height="10" fill="url(#block)" />`
 const shapeRenderCache = {};
+/**
+ * Renders a shape as SVG
+ * @param {Number} shapeId id of the shape to render
+ * @returns SVG element containing the shape render
+ */
 function renderShape(shapeId) {
+    assertValidShapeId(shapeId);
     console.time(`renderShape(${shapeId})`);
     TypeChecker.assertIsInteger(shapeId);
     if (shapeId < 0 || shapeId >= shapeIds.length) { throw Error("Invalid shapeId: " + shapeId) }
@@ -132,6 +141,26 @@ function renderShape(shapeId) {
     }
     console.timeEnd(`renderShape(${shapeId})`);
     return svg;
+}
+/** * Checks that the input is a valid shapeId */
+function validShapeId(shapeId) {
+    if (!TypeChecker.isInteger(shapeId)) {
+        console.debug("Invalid shapeId: shapeId must be an integer")
+        return false;
+    }
+    if (shapeId < 0) {
+        console.debug("Invalid shapeId: shapeId must be >= 0")
+        return false;
+    }
+    if (shapeId >= shapes.length) {
+        console.debug("Invalid shapeId: shapeId must be < " + shapes.length)
+        return false;
+    }
+    return true;
+}
+/** * Throws and error if input is not a valid shapeId */
+function assertValidShapeId(shapeId) {
+    if (!validShapeId(shapeId)) { throw new Error("Invalid shapeId: " + shapeId); }
 }
 //#endregion
 
@@ -158,12 +187,117 @@ class GameElement extends HTMLElement {
         this.startButton.style.display = "none";
         this.restart();
     }
+    /**
+     * Checks if this game is over
+     * @returns true if there is no placeable, non-empty, piece in the piece-buffer, otherwise false
+     */
+    checkGameover() {
+        const shapeId_1 = parseInt(this.piece1.getAttribute("shapeId"));
+        const shapeId_2 = parseInt(this.piece2.getAttribute("shapeId"));
+        const shapeId_3 = parseInt(this.piece3.getAttribute("shapeId"));
 
+        // Check if the pieces are empty / spent
+        const isEmpty_1 = shapeId_1 === -1;
+        const isEmpty_2 = shapeId_2 === -1;
+        const isEmpty_3 = shapeId_3 === -1;
+        if (isEmpty_1 && isEmpty_2 && isEmpty_3) {
+            // the game is not over since the piece-buffer is empty and should therefore just be filled
+            console.log("Game not over due to empty piece-buffer");
+            return false;
+        }
+
+        // check if the un-spent pieces can be placed anywhere
+        let canPlace_1 = !isEmpty_1;
+        let canPlace_2 = !isEmpty_2;
+        let canPlace_3 = !isEmpty_3;
+        if (canPlace_1) { canPlace_1 = this.canPlaceShapeAnywhere(shapeId_1); }
+        if (canPlace_2) { canPlace_2 = this.canPlaceShapeAnywhere(shapeId_2); }
+        if (canPlace_3) { canPlace_3 = this.canPlaceShapeAnywhere(shapeId_3); }
+        return canPlace_1 || canPlace_2 || canPlace_3;
+    }
+    /**
+     * Attempts to place a piece from the piecebuffer at the specified 1D board-cell index (idx attribute on cell element)
+     * @param {String} pieceId css id of the piece to place from the piece-buffer
+     * @param {Number} index 1D board-cell index (idx attribute on cell element)
+     * @returns true if the piece was placed, otherwise false
+     */
+    tryPlacePiece(pieceId, index) {
+        console.debug(this.localName, "tryPlacePiece()")
+        const piece = this.shadowRoot.getElementById(pieceId);
+        let idx2D = -1;
+        try {
+            idx2D = indexTo2D(index);
+        } catch {
+            console.log("tryPlacePiece():", "invalid board-cell index: ", index);
+            return false;
+        }
+
+        if (TypeChecker.isNullOrUndefined(piece)) { throw Error("Invalid piece id: " + pieceId); }
+
+        const shapeId = parseInt(piece.getAttribute("shapeId"));
+
+        const boardState = this.getBoardStateArray();
+        const canPlace = this.canPlaceShape(shapeId, index);
+        if (!canPlace) {
+            console.log("tryPlacePiece():", "Could not place piece", pieceId, "at board-cell index", index)
+            return false;
+        }
+
+        let intersectingCells = this.getIntersectingCells(shapeId, index)
+        // TODO write move log
+        while (intersectingCells.length > 0) {
+            const cell = intersectingCells.pop();
+            cell.classList.remove('highlight');
+            cell.setAttribute("state", 1);
+            this.score += 1;
+        }
+        piece.setAttribute("shapeId", -1);
+        piece.style.backgroundImage = '';
+        this.score += this.clear();
+        this.refill_piece_buffer_if_empty();
+        if (this.checkGameover()) {
+            // TODO handle gameover
+        }
+        return true;
+    }
+    /**
+     * Checks if a shape, specified by it's id, can be placed at a 1D board-cell index (idx attribute on cell element)
+     * @param {Number} shapeId Id of the shape to check
+     * @param {Number} index 1D board-cell index (idx attribute on cell element)
+     * @param {Uint8Array} [boardState] Optional pre-generated boardState (output from this.getBoardStateArray())
+     */
+    canPlaceShape(shapeId, index, boardState = null) {
+        assertValidShapeId(shapeId);
+        const shape = shapes[shapeId];
+        const idx2D = indexTo2D(index);
+        const state = TypeChecker.isNullOrUndefined(boardState) ? this.getBoardStateArray() : boardState;
+        for (let i = 0; i < shape.length; i++) {
+            const idx = indexTo1D(shape[i].r + idx2D.row, shape[i].c + idx2D.col);
+            if (state[idx] === 1) { return false; }
+        }
+        return true;
+    }
+    /**
+     * Checks if a shape, specified by it's id, can be placed on the current board
+     * @param {Number} shapeId Id of the shape to check placement for
+     * @param {Uint8Array} [boardState] Optional pre-generated boardState (output from this.getBoardStateArray())
+     * @returns true if the shape can be placed, otherwise false
+     */
+    canPlaceShapeAnywhere(shapeId, boardState = null) {
+        assertValidShapeId(shapeId);
+        const state = TypeChecker.isNullOrUndefined(boardState) ? this.getBoardStateArray() : boardState;
+        for (let idx1D = 0; idx1D < state.length; idx1D++) {
+            if (this.canPlaceShape(shapeId, idx1D, state)) {
+                return true;
+            }
+        }
+        return false;
+    }
     //#region score
     set score(new_score) {
         TypeChecker.assertIsInteger(new_score);
         const old_score = this.score;
-        console.log(`updated score: ${old_score} -> ${new_score}`)
+        console.debug(`updated score: ${old_score} -> ${new_score}`)
         this.scoreElem.setAttribute("value", new_score);
         this.scoreElem.textContent = new_score.toString();
     }
@@ -216,7 +350,23 @@ class GameElement extends HTMLElement {
             Array.from(this.shadowRoot.querySelectorAll('.board-cell[col="8"]')),
         ]
     }
+    /**
+     * Gets the curent board state as a Uint8Array
+     * @returns The curent board state as a Uint8Array
+     */
+    getBoardStateArray() {
+        let arr = new Uint8Array(81);
+        const cells = this.getCells();
+        for (let i = 0; i < cells.length; i++) {
+            const idx = parseInt(cells[i].getAttribute("idx"));
+            const state = parseInt(cells[i].getAttribute("state"));
 
+            if (idx < 0 || idx > 80) { throw Error("Invalid cell index: " + idx) }
+            if (!(state === 1 || state === 0)) { throw Error("Invalid cell state: " + state) }
+            arr[idx] = state;
+        }
+        return arr;
+    }
     /** returns all clearable rows, columns & groups*/
     getClearableSections() {
         let clearableSections = [];
@@ -270,7 +420,6 @@ class GameElement extends HTMLElement {
         section = undefined;
         return clearableSections;
     }
-
     /** clears all clearable cells. returns the delta score*/
     clear() {
         const clearableSections = this.getClearableSections();
@@ -285,6 +434,7 @@ class GameElement extends HTMLElement {
         }
         return result;
     }
+
     //#region cells
     /**
      * 
@@ -293,7 +443,6 @@ class GameElement extends HTMLElement {
     getCells() {
         return Array.from(this.shadowRoot.querySelectorAll(".board-cell"));
     }
-
     /**
      * 
      * @param {Number} index 
@@ -304,7 +453,6 @@ class GameElement extends HTMLElement {
         if (index < 0 || index > 80) { throw Error("index must be in the range [0 - 80], but was: " + index) }
         return this.shadowRoot.querySelector(`.board-cell[idx="${index}"`);
     }
-
     /**
      * 
      * @param {Number} row 
@@ -318,7 +466,6 @@ class GameElement extends HTMLElement {
         if (col < 0 || col > 8) { throw Error("col must be in the range [0 - 8], but was: " + col) }
         return this.shadowRoot.querySelector(`.board-cell[row="${row}"][col="${col}"]`)
     }
-
     /**
      * 
      * @param {Number} row 
@@ -329,7 +476,6 @@ class GameElement extends HTMLElement {
         if (row < 0 || row > 8) { throw Error("row must be in the range [0 - 8], but was: " + row) }
         return Array.from(this.shadowRoot.querySelectorAll(`.board-cell[row="${row}"]`));
     }
-
     /**
      * 
      * @param {Number} col 
@@ -340,7 +486,6 @@ class GameElement extends HTMLElement {
         if (col < 0 || col > 8) { throw Error("col must be in the range [0 - 8], but was: " + col) }
         return Array.from(this.shadowRoot.querySelectorAll(`.board-cell[col="${col}"]`));
     }
-
     /**
      * 
      * @param {Number} grp 
@@ -351,13 +496,14 @@ class GameElement extends HTMLElement {
         if (grp < 0 || grp > 8) { throw Error("grp must be in the range [0 - 8], but was: " + grp) }
         return Array.from(this.shadowRoot.querySelectorAll(`.board-cell[grp="${grp}"]`));
     }
-
     /**
      * Throws an error if elem is not a board cell in this game.
      * @param {HTMLElement} elem 
      */
     assertIsCell(elem) {
         const errorMsg = `${elem} is not a valid board cell`;
+        if (TypeChecker.isNullOrUndefined(elem)) { throw errorMsg; }
+
         let idx = elem.getAttribute("idx");
         let row = elem.getAttribute("row");
         let col = elem.getAttribute("col");
@@ -391,7 +537,6 @@ class GameElement extends HTMLElement {
         const foundCell = this.getCellByIndex(idx);
         if (elem !== foundCell) { throw Error(errorMsg) }
     }
-
     /**
      * Toggles the cell on/off
      * @param {HTMLElement} cell 
@@ -401,6 +546,27 @@ class GameElement extends HTMLElement {
         let state = parseInt(cell.getAttribute("state"));
         state = 1 * (state === 0); // branchless flip
         cell.setAttribute("state", state);
+    }
+    /**
+     * Returns the cells that would be filled if a shape would be placed at a 1D board-cell index (idx attribute on cell element)
+     * Warning! Does not validate that the shape can be placed at the index, and may return fewer cells than the shape needs
+     * @param {Number} shapeId Id of the shape to check
+     * @param {Number} index 1D board-cell index (idx attribute on cell element)
+     */
+    getIntersectingCells(shapeId, index) {
+        assertValidShapeId(shapeId);
+        const shape = shapes[shapeId];
+        const idx2D = indexTo2D(index, true);
+        const cells = []
+        let row = -99;
+        let col = -99;
+        for (let i = 0; i < shape.length; i++) {
+            row = shape[i].r + idx2D.row;
+            col = shape[i].c + idx2D.col;
+            if (row < 0 || row > 8 || col < 0 || col > 8) { continue }
+            cells.push(this.getCellByRowCol(row, col));
+        }
+        return cells;
     }
     //#endregion
     //#endregion
@@ -416,6 +582,7 @@ class GameElement extends HTMLElement {
      * @param {HTMLDivElement} piece 
      */
     fillPiece(piece) {
+        // TODO Log This
         const shapeId = this.rand.nextInt() % shapeIds.length;
         const shapeRender = renderShape(shapeId);
         const shape = shapes[shapeId];
@@ -446,88 +613,112 @@ class GameElement extends HTMLElement {
 
     //#region Drag 'n Drop
     gameSelectedPiece = undefined;
-    gameSelectedShapeId = -1;
+    gameSelectedShapeId = undefined;
     gameSelectedShape = undefined;
     gameIntersectingCells = [];
+    /**
+     * Places this.gameSelectedPiece by using the information in this.gameIntersectingCells.
+     * Warning! does not check validity of placement
+     */
     placeSelectedPiece() {
         console.debug(this.localName, "placeSelectedPiece()")
-        if (this.gameIntersectingCells.length > 0) {
-            // TODO write move log
-            while (this.gameIntersectingCells.length > 0) {
-                // TODO Assert that the cells are all unset
-                const cell = this.gameIntersectingCells.pop();
-                cell.classList.remove('highlight');
-                cell.setAttribute("state", 1);
-                this.score += 1;
-            }
-            this.gameSelectedPiece.style = '';
-            this.gameSelectedPiece.setAttribute("shapeId", -1);
-            this.score += this.clear();
-            this.refill_piece_buffer_if_empty();
-        }
+        const pieceId = this.gameSelectedPiece.id;
+        const index = this.getSelectedPieceHoveringIndex();
         this.clearSelectedPiece();
+        this.tryPlacePiece(pieceId, index)
     }
+    /**
+     * Clears and resets this.gameSelectedPiece
+     */
     clearSelectedPiece() {
         this.gameSelectedPiece.style.top = '';
         this.gameSelectedPiece.style.left = '';
         this.gameSelectedPiece.style.width = '';
         this.gameSelectedPiece.classList.remove('dragging');
         this.gameSelectedPiece = undefined;
-        this.gameSelectedShapeId = -1;
+        this.gameSelectedShapeId = undefined;
         this.gameSelectedShape = undefined;
     }
     /**
-     * Sets the piece as the currently selected piece (the one the user is dragging around trying to place)
-     * @param {HTMLElement} piece 
+     * Sets the piece as the currently selected piece (the one the user is dragging around trying to place).
+     * Overwrites information in this.gameSelectedPiece, this.gameSelectedShapeId, this.gameSelectedShape and this.gameIntersectingCells
+     * @param {HTMLElement} piece
      */
     selectPiece(piece) {
         this.gameSelectedPiece = piece;
         this.gameSelectedPiece.classList.add('dragging');
         this.gameSelectedShapeId = parseInt(this.gameSelectedPiece.getAttribute("shapeId"));
+        assertValidShapeId(this.gameSelectedShapeId);
         this.gameSelectedShape = shapes[this.gameSelectedShapeId]
+        this.gameIntersectingCells.length = 0;
     }
     /**
-     * returns all the cells that intersect the currently selected piece
+     * Calculates the 1D board-cell index (idx attribute on cell element) that the currently selected piece (this.gameSelectedPiece) is hovering over
+     * Warning! Can be out of bounds
+     * @returns The calculated 1D board-cell index (idx attribute on cell element)
      */
-    async getIntersectingCells() {
+    getSelectedPieceHoveringIndex() {
         if (this.gameSelectedPiece === undefined) { return; }
         const pieceBounds = this.gameSelectedPiece.getBoundingClientRect();
         const boardBounds = this.board.getBoundingClientRect();
-        const pCol = Math.round(rangeMapNumber(pieceBounds.x, boardBounds.left, boardBounds.right, 0, 9));
-        const pRow = Math.round(rangeMapNumber(pieceBounds.y, boardBounds.top, boardBounds.bottom, 0, 9));
+        let col = rangeMapNumber(pieceBounds.x, boardBounds.left, boardBounds.right, 0, 9);
+        let row = rangeMapNumber(pieceBounds.y, boardBounds.top, boardBounds.bottom, 0, 9);
 
-        let intersectingCells = []
-        for (let i = 0; i < this.gameSelectedShape.length; i++) {
-            const offset = this.gameSelectedShape[i];
-            const row = offset.r + pRow;
-            const col = offset.c + pCol;
-            if (row < 0 || row > 8 || col < 0 || col > 8) { continue; }
-            intersectingCells.push(this.getCellByRowCol(row, col));
-        }
+        // Round towards board
+        if (col < 0) { col = Math.ceil(col); }
+        else if (col > 8) { col = Math.floor(col); }
+        else { col = Math.round(col); }
 
-        return intersectingCells;
+        if (row < 0) { row = Math.ceil(row); }
+        else if (row > 8) { row = Math.floor(row); }
+        else { row = Math.round(row); }
+
+        return indexTo1D(row, col, true);
     }
+    /**
+     * returns all the cells that intersect the currently selected piece (this.gameSelectedPiece)
+     */
+    getSelectedPieceIntersectingCells() {
+        if (this.gameSelectedPiece === undefined) { return; }
+        const index = this.getSelectedPieceHoveringIndex();
+
+        return this.getIntersectingCells(this.gameSelectedShapeId, index);
+    }
+    /** * Clears highlight of every cell in this.gameIntersectingCells, and empties it */
     clearSelectedCells() {
         while (this.gameIntersectingCells.length > 0) {
             const cell = this.gameIntersectingCells.pop();
             cell.classList.remove("highlight");
         }
     }
-    async updateSelectedCells() {
+    /** * Updates cell highlighting and the content of this.gameIntersectingCells based on selected piece hovering position*/
+    updateSelectedCells() {
         // clear old intersection
         this.clearSelectedCells();
 
-        const intersectingCells = (await this.getIntersectingCells()).filter(c => parseInt(c.getAttribute("state")) === 0);
+        const intersectingCells = this.getSelectedPieceIntersectingCells();
         if (intersectingCells.length !== this.gameSelectedShape.length) { return; }
+        let cell_state = -1;
+        for (let i = 0; i < intersectingCells.length; i++) {
+            cell_state = parseInt(intersectingCells[i].getAttribute("state"));
+            if (cell_state !== 0) { return }
+        }
+        this.gameIntersectingCells.length = intersectingCells.length;
         for (let i = 0; i < intersectingCells.length; i++) {
             intersectingCells[i].classList.add("highlight");
-            this.gameIntersectingCells.push(intersectingCells[i]);
+            this.gameIntersectingCells[i] = intersectingCells[i];
         }
     }
-    async updateSelectedPiecePosition(top, left) {
+    /**
+     * Repositions the currently selected piece and updates highlighted cells
+     * @param {Number} top
+     * @param {Number} left 
+     */
+    updateSelectedPiecePosition(top, left) {
+        if (this.gameSelectedPiece === undefined) { return }
         this.gameSelectedPiece.style.top = top + 'px';
         this.gameSelectedPiece.style.left = left + 'px';
-        await this.updateSelectedCells();
+        this.updateSelectedCells();
     }
 
     //#endregion
@@ -566,7 +757,7 @@ class GameElement extends HTMLElement {
         this.gameSelectedPiece.removeEventListener("touchend", e => this.piece_touchend(e), { passive: true });
         this.gameSelectedPiece.removeEventListener("touchcancel", e => this.piece_touchend(e), { passive: true });
 
-        this.placeSelectedPiece();
+        await this.placeSelectedPiece();
     }
     /**
      * @param {TouchEvent} event 
@@ -583,10 +774,9 @@ class GameElement extends HTMLElement {
     currentDragPointer = undefined;
     async piece_pointerdown(event) {
         console.debug("piece_pointerdown", "\n\tthis:", this, "\n\event.target:", event.target);
-        this.selectPiece(event.target);
+        await this.selectPiece(event.target);
         this.currentDragPointer = event.pointerId;
         window.addEventListener("pointermove", e => this.window_pointermove(e), true);
-
         window.addEventListener("pointerup", e => this.window_pointerup(e), true);
     }
     /**
