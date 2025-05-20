@@ -159,7 +159,8 @@
 .game-piece {
     aspect-ratio: 1/1;
     background-size: contain;
-    outline: 1px solid white;
+    /* outline: 1px solid white; */
+    outline: 1px solid rgba(255, 0, 255, 0.1%);
 }
 
 .game-piece[shapeId="-1"] {
@@ -181,7 +182,7 @@
 
 .game-piece.dragging {
     width: calc((100% / 9) * 5);
-    outline: 1px solid rgba(255, 0, 255, 0.1%);
+    /* outline: 1px solid rgba(255, 0, 255, 0.1%); */
 }
 
 .dragging {
@@ -230,6 +231,6 @@
     font-family: 'Roboto';
 }
 
-#reload-button[canLoad="false"] {
+#resume-button[canLoad="false"] {
     display: none;
 }

@@ -1,4 +1,4 @@
-export { GameElement, user_can_hover, shapes }
+export { GameElement, shapes, rangeMapNumber }
 // Imports https://html.spec.whatwg.org/multipage/webappapis.html#module-type-allowed
 import { TypeChecker } from "./typechecker.mjs"
 import * as prng from "./prng.mjs";
@@ -170,7 +170,7 @@ function renderShape(shapeId) {
  * @param {Boolean} [allow_empty] enables the empty shape (-1) counting as valid
  */
 function validShapeId(shapeId, allow_empty = false) {
-    console.debug(`validShapeId(shapeId:${shapeId}, allow_empty: ${allow_empty})`);
+    // console.debug(`validShapeId(shapeId:${shapeId}, allow_empty: ${allow_empty})`);
     if (!TypeChecker.isInteger(shapeId)) {
         console.debug("Invalid shapeId: shapeId must be an integer")
         return false;
@@ -190,7 +190,7 @@ function validShapeId(shapeId, allow_empty = false) {
  * @param {Boolean} [allow_empty] enables the empty shape (-1) counting as valid
  */
 function assertValidShapeId(shapeId, allow_empty = false) {
-    console.debug(`assertValidShapeId(shapeId:${shapeId}, allow_empty: ${allow_empty})`);
+    // console.debug(`assertValidShapeId(shapeId:${shapeId}, allow_empty: ${allow_empty})`);
     if (!TypeChecker.isInteger(shapeId)) { throw new Error("Invalid shapeId: shapeId must be an integer") }
     if (shapeId < (0 - allow_empty)) { throw new Error("Invalid shapeId: shapeId must be >= 0") }
     if (shapeId >= shapes.length) { throw new Error("Invalid shapeId: shapeId must be < " + shapes.length) }
@@ -221,7 +221,7 @@ class GameElement extends HTMLElement {
     get gameplayWrap() { return this.shadowRoot.getElementById('gamplay-wrap') }
     get uiOverlay() { return this.shadowRoot.getElementById('ui-overlay'); }
     get startButton() { return this.shadowRoot.getElementById('start-button') }
-    get reloadButton() { return this.shadowRoot.getElementById('reload-button') }
+    get resumeButton() { return this.shadowRoot.getElementById('resume-button') }
     startButton_click(e) {
         console.debug("startButton_click");
         this.restart();
@@ -310,6 +310,7 @@ class GameElement extends HTMLElement {
         this.uiOverlay.classList.remove("hidden");
         this.uiOverlay.classList.add("gameover");
         localStorage.removeItem("savefile");
+        this.resumeButton.setAttribute("canLoad", this.can_load());
         // TODO save game high-scores
     }
     get over() { return parseBool(this.gameplayWrap.getAttribute("over")); }
@@ -736,7 +737,9 @@ class GameElement extends HTMLElement {
     gameSelectedPiece = undefined;
     gameSelectedShapeId = undefined;
     gameSelectedShape = undefined;
+    gameSelectedGrab = undefined;
     gameIntersectingCells = [];
+
     /**
      * Places this.gameSelectedPiece by using the information in this.gameIntersectingCells.
      * Warning! does not check validity of placement
@@ -765,13 +768,18 @@ class GameElement extends HTMLElement {
      * Overwrites information in this.gameSelectedPiece, this.gameSelectedShapeId, this.gameSelectedShape and this.gameIntersectingCells
      * @param {HTMLElement} piece
      */
-    selectPiece(piece) {
+    selectPiece(piece, grab_top = null, grab_left = null) {
         this.gameSelectedPiece = piece;
         this.gameSelectedPiece.classList.add('dragging');
         this.gameSelectedShapeId = parseInt(this.gameSelectedPiece.getAttribute("shapeId"));
         assertValidShapeId(this.gameSelectedShapeId);
         this.gameSelectedShape = shapes[this.gameSelectedShapeId]
         this.gameIntersectingCells.length = 0;
+
+        const pieceBounds = this.gameSelectedPiece.getBoundingClientRect();
+        grab_top = grab_top ?? pieceBounds.height / 2;
+        grab_left = grab_left ?? pieceBounds.width / 2;
+        this.gameSelectedGrab = { Y: grab_top, X: grab_left }
     }
     /**
      * Calculates the 1D board-cell index (idx attribute on cell element) that the currently selected piece (this.gameSelectedPiece) is hovering over
@@ -832,24 +840,45 @@ class GameElement extends HTMLElement {
     }
     /**
      * Repositions the currently selected piece and updates highlighted cells
-     * @param {Number} top
-     * @param {Number} left 
+     * @param {Number} mouseY
+     * @param {Number} mouseX 
      */
-    updateSelectedPiecePosition(top, left) {
+    updateSelectedPiecePosition(mouseY, mouseX) {
         if (this.gameSelectedPiece === undefined) { return }
+        const top = mouseY - this.gameSelectedGrab.Y;
+        const left = mouseX - this.gameSelectedGrab.X;
         this.gameSelectedPiece.style.top = top + 'px';
         this.gameSelectedPiece.style.left = left + 'px';
-        this.updateSelectedCells();
+        this.updateSelectedCells()
     }
 
-    //#endregion
-    //#region TouchEvent
+    // TOUCH
     async piece_touchstart(event) {
         console.debug("piece_touchstart", "\n\tthis:", this, "\n\event.target:", event.target);
-        this.selectPiece(event.target);
+
+        const targetBounds = event.target.getBoundingClientRect();
+        const targetTouch = event.targetTouches[0];
+        const grab_left = rangeMapNumber(targetTouch.clientX, targetBounds.left, targetBounds.right, 0.0, 1.0) * targetBounds.width;
+        const grab_top = rangeMapNumber(targetTouch.clientY, targetBounds.top, targetBounds.bottom, 0.0, 1.0) * targetBounds.height;
+
+        this.selectPiece(event.target, grab_top, grab_left);
+        console.log("piece_touchstart", "\n\tevent:", event, "\n\ttouch:", {
+            target: event.target,
+            targetBounds: event.target.getBoundingClientRect(),
+            clientX: event.targetTouches[0].clientX,
+            clientY: event.targetTouches[0].clientY,
+            pageX: event.targetTouches[0].pageX,
+            pageY: event.targetTouches[0].pageY,
+            radiusX: event.targetTouches[0].radiusX,
+            radiusY: event.targetTouches[0].radiusY,
+            screenX: event.targetTouches[0].screenX,
+            screenY: event.targetTouches[0].screenY,
+        });
+
         this.gameSelectedPiece.addEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
         this.gameSelectedPiece.addEventListener("touchend", e => this.piece_touchend(e), { passive: true });
         this.gameSelectedPiece.addEventListener("touchcancel", e => this.piece_touchcancel(e), { passive: true });
+        await this.piece_touchmove(event);
     }
     /**
      * @param {TouchEvent} event 
@@ -861,12 +890,7 @@ class GameElement extends HTMLElement {
         const touchpos = event.touches[0];
         const mouseX = touchpos.clientX - gameBounds.x;
         const mouseY = touchpos.clientY - gameBounds.y;
-        const pieceBounds = this.gameSelectedPiece.getBoundingClientRect();
-        const centerX = pieceBounds.width / 2;
-        const centerY = pieceBounds.height / 2;
-        const top = (mouseY - centerY);
-        const left = (mouseX - centerX);
-        await this.updateSelectedPiecePosition(top, left);
+        await this.updateSelectedPiecePosition(mouseY, mouseX);
     }
     /**
      * @param {TouchEvent} event 
@@ -877,6 +901,12 @@ class GameElement extends HTMLElement {
         this.gameSelectedPiece.removeEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
         this.gameSelectedPiece.removeEventListener("touchend", e => this.piece_touchend(e), { passive: true });
         this.gameSelectedPiece.removeEventListener("touchcancel", e => this.piece_touchend(e), { passive: true });
+
+        // const gameBounds = this.getBoundingClientRect();
+        // const touchpos = event.touches[0];
+        // const mouseX = touchpos.clientX - gameBounds.x;
+        // const mouseY = touchpos.clientY - gameBounds.y;
+        // await this.updateSelectedPiecePosition(mouseY, mouseX);
 
         await this.placeSelectedPiece();
     }
@@ -890,9 +920,9 @@ class GameElement extends HTMLElement {
         await this.updateSelectedPiecePosition(boardBounds.bottom * 2, boardBounds.right * 2);
         await this.piece_touchend(event);
     }
-    //#endregion
-    //#region PointerEvent
-    currentDragPointer = undefined;
+
+    // POINTER
+    currentDragPointer = undefined; // pointer id to currently dragging pointer
     async piece_pointerdown(event) {
         console.debug("piece_pointerdown", "\n\tthis:", this, "\n\event.target:", event.target);
         await this.selectPiece(event.target);
@@ -909,10 +939,7 @@ class GameElement extends HTMLElement {
         const gameBounds = this.getBoundingClientRect();
         const mouseX = event.clientX - gameBounds.x;
         const mouseY = event.clientY - gameBounds.y;
-        const pieceBounds = this.gameSelectedPiece.getBoundingClientRect();
-        const top = (mouseY - (pieceBounds.width / 2));
-        const left = (mouseX - (pieceBounds.height / 2));
-        await this.updateSelectedPiecePosition(top, left);
+        await this.updateSelectedPiecePosition(mouseY, mouseX);
     }
     /**
      * 
@@ -927,13 +954,10 @@ class GameElement extends HTMLElement {
         const gameBounds = this.getBoundingClientRect();
         const mouseX = event.clientX - gameBounds.x;
         const mouseY = event.clientY - gameBounds.y;
-        const pieceBounds = this.gameSelectedPiece.getBoundingClientRect();
-        const top = (mouseY - (pieceBounds.width / 2));
-        const left = (mouseX - (pieceBounds.height / 2));
-        await this.updateSelectedPiecePosition(top, left);
+        await this.updateSelectedPiecePosition(mouseY, mouseX)
+
         this.placeSelectedPiece();
     }
-    //#endregion
     //#endregion
 
     //#region Initialization
@@ -956,8 +980,8 @@ class GameElement extends HTMLElement {
     init() {
         if (this.init_called) { return; }
         this.startButton.addEventListener("click", e => this.startButton_click(e));
-        this.reloadButton.addEventListener("click", e => this.reloadButton_click(e));
-        this.reloadButton.setAttribute("canLoad", this.can_load());
+        this.resumeButton.addEventListener("click", e => this.reloadButton_click(e));
+        this.resumeButton.setAttribute("canLoad", this.can_load());
         this.initPieces();
         this.init_called = true;
     }
