@@ -209,13 +209,17 @@ class GameElement extends HTMLElement {
         this.uiOverlay.classList.add("hidden");
         this.gameplayWrap.setAttribute("over", "false");
         this.gameplayWrap.classList.add("running");
+        const cells = this.getCells();
+        for (let i = 0; i < cells.length; i++) {
+            cells[i].setAttribute("state", 0);
+        }
         this.init();
     }
     restart() {
         console.debug(this.localName, "restart()");
         this.rand = new prng.sfc32(prng.sfc32.generateSeed());
-        this.refill_piece_buffer();
         this.start();
+        this.refill_piece_buffer();
         this.save();
     }
     get gameplayWrap() { return this.shadowRoot.getElementById('gamplay-wrap') }
@@ -862,18 +866,6 @@ class GameElement extends HTMLElement {
         const grab_top = rangeMapNumber(targetTouch.clientY, targetBounds.top, targetBounds.bottom, 0.0, 1.0) * targetBounds.height;
 
         this.selectPiece(event.target, grab_top, grab_left);
-        console.log("piece_touchstart", "\n\tevent:", event, "\n\ttouch:", {
-            target: event.target,
-            targetBounds: event.target.getBoundingClientRect(),
-            clientX: event.targetTouches[0].clientX,
-            clientY: event.targetTouches[0].clientY,
-            pageX: event.targetTouches[0].pageX,
-            pageY: event.targetTouches[0].pageY,
-            radiusX: event.targetTouches[0].radiusX,
-            radiusY: event.targetTouches[0].radiusY,
-            screenX: event.targetTouches[0].screenX,
-            screenY: event.targetTouches[0].screenY,
-        });
 
         this.gameSelectedPiece.addEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
         this.gameSelectedPiece.addEventListener("touchend", e => this.piece_touchend(e), { passive: true });
@@ -925,10 +917,16 @@ class GameElement extends HTMLElement {
     currentDragPointer = undefined; // pointer id to currently dragging pointer
     async piece_pointerdown(event) {
         console.debug("piece_pointerdown", "\n\tthis:", this, "\n\event.target:", event.target);
-        await this.selectPiece(event.target);
+        const targetBounds = event.target.getBoundingClientRect();
+        const grab_left = rangeMapNumber(event.clientX, targetBounds.left, targetBounds.right, 0.0, 1.0) * targetBounds.width;
+        const grab_top = rangeMapNumber(event.clientY, targetBounds.top, targetBounds.bottom, 0.0, 1.0) * targetBounds.height;
+
+        this.selectPiece(event.target, grab_top, grab_left);
+
         this.currentDragPointer = event.pointerId;
         window.addEventListener("pointermove", e => this.window_pointermove(e), true);
         window.addEventListener("pointerup", e => this.window_pointerup(e), true);
+        await this.window_pointermove(event);
     }
     /**
      * 
