@@ -31,7 +31,18 @@ class TypeChecker {
     }
 
     // === Assertions ===
-    static assertIsInteger(v) {
-        if (!TypeChecker.isInteger(v)) { throw Error("Expected integer, but found " + v) }
-    }
+    static assertIsUndefined(v) { if (!TypeChecker.isUndefined(v)) { throw Error("Expected undefined, but found " + v) } }
+    static assertIsBoolean(v) { if (!TypeChecker.isBoolean(v)) { throw Error("Expected boolean, but found " + v) } }
+    static assertIsNumber(v) { if (!TypeChecker.isNumber(v)) { throw Error("Expected number, but found " + v) } }
+    static assertIsBigint(v) { if (!TypeChecker.isBigint(v)) { throw Error("Expected bigint, but found " + v) } }
+    static assertIsString(v) { if (!TypeChecker.isString(v)) { throw Error("Expected string, but found " + v) } }
+    static assertIsSymbol(v) { if (!TypeChecker.isSymbol(v)) { throw Error("Expected symbol, but found " + v) } }
+    static assertIsFunction(v) { if (!TypeChecker.isFunction(v)) { throw Error("Expected function, but found " + v) } }
+
+    static assertIsNull(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected null, but found " + v) } }
+    static assertIsNullOrUndefined(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected null or undefined, but found " + v) } }
+
+    static assertIsInteger(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected integer, but found " + v) } }
+    static assertIsFloat(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected float, but found " + v) } }
+    static assertIsFinite(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected finite number, but found " + v) } }
 }
