@@ -172,6 +172,8 @@ class GameElement extends HTMLElement {
     seed = prng.sfc32.getSeed();
     rand = new prng.sfc32(this.seed);
     restart() {
+        this.gameplayWrap.classList.remove("over");
+        this.gameplayWrap.classList.add("running");
         if (!this.init_called) { this.init(); }
         console.debug(this.localName, "restart()");
         this.seed = prng.sfc32.getSeed();
@@ -179,6 +181,7 @@ class GameElement extends HTMLElement {
         this.refill_piece_buffer();
 
     }
+    get gameplayWrap() { return this.shadowRoot.getElementById('gamplay-wrap') }
     get uiOverlay() { return this.shadowRoot.getElementById('ui-overlay'); }
     get startButton() { return this.shadowRoot.getElementById('start-button') }
     startButton_click(e) {
@@ -259,6 +262,12 @@ class GameElement extends HTMLElement {
         }
         return true;
     }
+
+    handleGameover() {
+        this.uiOverlay.classList.remove("hidden");
+        this.uiOverlay.classList.add("gameover");
+    }
+
     /**
      * Checks if a shape, specified by it's id, can be placed at a 1D board-cell index (idx attribute on cell element)
      * @param {Number} shapeId Id of the shape to check
