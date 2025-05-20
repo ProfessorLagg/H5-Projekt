@@ -719,7 +719,9 @@ class GameElement extends HTMLElement {
         const shapeId_1 = this.rand.nextInt() % shapeIds.length;
         const shapeId_2 = this.rand.nextInt() % shapeIds.length;
         const shapeId_3 = this.rand.nextInt() % shapeIds.length;
-
+        while (!this.canPlaceShapeAnywhere(shapeId_3)) {
+            shapeId_3 = this.rand.nextInt() % shapeIds.length;
+        }
         this.setPieceShape('piece-1', shapeId_1);
         this.setPieceShape('piece-2', shapeId_2);
         this.setPieceShape('piece-3', shapeId_3);
