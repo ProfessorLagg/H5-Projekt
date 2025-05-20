@@ -17,7 +17,7 @@
     height: 0;
     overflow: hidden;
     z-index: -999;
-    content: url("./block.svg") url("./block-e.svg");
+    content: url("./block.svg") url("./block.svg");
 }
 
 :host {
@@ -28,6 +28,10 @@
     gap: var(--baseunit);
     /*non-grid setings*/
     aspect-ratio: 1/2;
+    max-height: 100vh;
+    max-width: 100vw;
+    height: var(--host-height);
+    width: var(--host-width);
     position: relative;
     padding-top: var(--baseunit) !important;
     padding-bottom: var(--baseunit) !important;
@@ -40,15 +44,15 @@
     :host {
         top: 0;
         left: calc(50% - 25vh);
-        height: 100vh;
-        width: 50vh;
+        --host-height: 100vh;
+        --host-width: 50vh;
     }
 }
 
 @media (aspect-ratio: 1/2) {
     :host {
-        width: 100vw;
-        height: 200vw;
+        --host-width: 100vw;
+        --host-height: 200vw;
         top: calc(100% - 200vw);
         left: 0;
     }
@@ -56,20 +60,29 @@
 
 @media (max-aspect-ratio: 1/2) {
     :host {
-        width: 100vw;
-        height: 200vw;
+        --host-width: 100vw;
+        --host-height: 200vw;
         top: calc(100% - 200vw);
         left: 0;
     }
+}
+
+#gamplay-wrap {
+    display: grid;
+    grid-auto-flow: row dense;
+    grid-template-columns: 100%;
+    grid-template-rows: auto 9fr 5fr;
+    gap: var(--baseunit);
+    /*non-grid setings*/
+    height: var(--host-height);
+    width: var(--host-width);
 }
 
 #game-board {
     aspect-ratio: 1/1;
     width: 100%;
     background-image: url("./board.svg");
-
     /**/
-    aspect-ratio: 1/1;
     display: grid;
     grid-auto-flow: row dense;
     grid-auto-columns: 1fr;
@@ -87,8 +100,10 @@
         ". . . . . . . . ."
         ". . . . . . . . ."
         ". . . . . . . . .";
+    /**/
     background-color: rgba(0, 0, 0, 0%);
     background-blend-mode: multiply;
+    /**/
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
@@ -104,7 +119,7 @@
 }
 
 .board-cell[state="1"] {
-    background-image: url("./block-e.svg");
+    background-image: url("./block.svg");
     background-size: contain;
 }
 
@@ -115,14 +130,14 @@
 }
 
 #piece-buffer {
-    width: 100%;
+    width: var(--host-width);
     height: min-content;
     /**/
     display: grid;
     grid-auto-flow: row dense;
     grid-auto-columns: 1fr;
     grid-auto-rows: 1fr;
-    grid-template-columns: 33% 33% 33%;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr;
     grid-template-areas: "p1 p2 p3";
     gap: 0em 0.5vw;
@@ -141,6 +156,7 @@
 
 .game-piece[shapeId="-1"] {
     outline: none;
+    display: none;
 }
 
 #piece-1 {
@@ -164,4 +180,44 @@
     position: absolute !important;
     left: 0px;
     right: 0px;
+}
+
+/* UI */
+#ui-overlay {
+    /**/
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    /**/
+    position: absolute;
+    z-index: 2;
+    height: 100%;
+    width: 100%;
+    height: var(--host-height) !important;
+    width: var(--host-width) !important;
+    /**/
+    background-color: rgba(0, 0, 0, 80%);
+    /**/
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#ui-overlay.hidden {
+    display: none;
+    width: 0px;
+    height: 0px;
+    left: calc(-1 * var(--host-width));
+    top: calc(-1 * var(--host-height));
+}
+
+.ui-button {
+    width: fit-content;
+    align-self: center;
+    font-size: calc((var(--host-height) / 100) * 4);
+
+    padding-left: 1vw;
+    padding-right: 1vw;
+    font-weight: bold;
+    font-family: 'Roboto';
 }

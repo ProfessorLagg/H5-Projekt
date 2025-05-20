@@ -1,92 +1,96 @@
 <template>
-    <span id="game-score" value="0">0</span>
-    <div id="game-board">
-        <div idx="0" grp="0" row="0" col="0" state="0" class="board-cell"></div>
-        <div idx="1" grp="0" row="0" col="1" state="0" class="board-cell"></div>
-        <div idx="2" grp="0" row="0" col="2" state="0" class="board-cell"></div>
-        <div idx="3" grp="1" row="0" col="3" state="0" class="board-cell"></div>
-        <div idx="4" grp="1" row="0" col="4" state="0" class="board-cell"></div>
-        <div idx="5" grp="1" row="0" col="5" state="0" class="board-cell"></div>
-        <div idx="6" grp="2" row="0" col="6" state="0" class="board-cell"></div>
-        <div idx="7" grp="2" row="0" col="7" state="0" class="board-cell"></div>
-        <div idx="8" grp="2" row="0" col="8" state="0" class="board-cell"></div>
-        <div idx="9" grp="0" row="1" col="0" state="0" class="board-cell"></div>
-        <div idx="10" grp="0" row="1" col="1" state="0" class="board-cell"></div>
-        <div idx="11" grp="0" row="1" col="2" state="0" class="board-cell"></div>
-        <div idx="12" grp="1" row="1" col="3" state="0" class="board-cell"></div>
-        <div idx="13" grp="1" row="1" col="4" state="0" class="board-cell"></div>
-        <div idx="14" grp="1" row="1" col="5" state="0" class="board-cell"></div>
-        <div idx="15" grp="2" row="1" col="6" state="0" class="board-cell"></div>
-        <div idx="16" grp="2" row="1" col="7" state="0" class="board-cell"></div>
-        <div idx="17" grp="2" row="1" col="8" state="0" class="board-cell"></div>
-        <div idx="18" grp="0" row="2" col="0" state="0" class="board-cell"></div>
-        <div idx="19" grp="0" row="2" col="1" state="0" class="board-cell"></div>
-        <div idx="20" grp="0" row="2" col="2" state="0" class="board-cell"></div>
-        <div idx="21" grp="1" row="2" col="3" state="0" class="board-cell"></div>
-        <div idx="22" grp="1" row="2" col="4" state="0" class="board-cell"></div>
-        <div idx="23" grp="1" row="2" col="5" state="0" class="board-cell"></div>
-        <div idx="24" grp="2" row="2" col="6" state="0" class="board-cell"></div>
-        <div idx="25" grp="2" row="2" col="7" state="0" class="board-cell"></div>
-        <div idx="26" grp="2" row="2" col="8" state="0" class="board-cell"></div>
-        <div idx="27" grp="3" row="3" col="0" state="0" class="board-cell"></div>
-        <div idx="28" grp="3" row="3" col="1" state="0" class="board-cell"></div>
-        <div idx="29" grp="3" row="3" col="2" state="0" class="board-cell"></div>
-        <div idx="30" grp="4" row="3" col="3" state="0" class="board-cell"></div>
-        <div idx="31" grp="4" row="3" col="4" state="0" class="board-cell"></div>
-        <div idx="32" grp="4" row="3" col="5" state="0" class="board-cell"></div>
-        <div idx="33" grp="5" row="3" col="6" state="0" class="board-cell"></div>
-        <div idx="34" grp="5" row="3" col="7" state="0" class="board-cell"></div>
-        <div idx="35" grp="5" row="3" col="8" state="0" class="board-cell"></div>
-        <div idx="36" grp="3" row="4" col="0" state="0" class="board-cell"></div>
-        <div idx="37" grp="3" row="4" col="1" state="0" class="board-cell"></div>
-        <div idx="38" grp="3" row="4" col="2" state="0" class="board-cell"></div>
-        <div idx="39" grp="4" row="4" col="3" state="0" class="board-cell"></div>
-        <div idx="40" grp="4" row="4" col="4" state="0" class="board-cell"></div>
-        <div idx="41" grp="4" row="4" col="5" state="0" class="board-cell"></div>
-        <div idx="42" grp="5" row="4" col="6" state="0" class="board-cell"></div>
-        <div idx="43" grp="5" row="4" col="7" state="0" class="board-cell"></div>
-        <div idx="44" grp="5" row="4" col="8" state="0" class="board-cell"></div>
-        <div idx="45" grp="3" row="5" col="0" state="0" class="board-cell"></div>
-        <div idx="46" grp="3" row="5" col="1" state="0" class="board-cell"></div>
-        <div idx="47" grp="3" row="5" col="2" state="0" class="board-cell"></div>
-        <div idx="48" grp="4" row="5" col="3" state="0" class="board-cell"></div>
-        <div idx="49" grp="4" row="5" col="4" state="0" class="board-cell"></div>
-        <div idx="50" grp="4" row="5" col="5" state="0" class="board-cell"></div>
-        <div idx="51" grp="5" row="5" col="6" state="0" class="board-cell"></div>
-        <div idx="52" grp="5" row="5" col="7" state="0" class="board-cell"></div>
-        <div idx="53" grp="5" row="5" col="8" state="0" class="board-cell"></div>
-        <div idx="54" grp="6" row="6" col="0" state="0" class="board-cell"></div>
-        <div idx="55" grp="6" row="6" col="1" state="0" class="board-cell"></div>
-        <div idx="56" grp="6" row="6" col="2" state="0" class="board-cell"></div>
-        <div idx="57" grp="7" row="6" col="3" state="0" class="board-cell"></div>
-        <div idx="58" grp="7" row="6" col="4" state="0" class="board-cell"></div>
-        <div idx="59" grp="7" row="6" col="5" state="0" class="board-cell"></div>
-        <div idx="60" grp="8" row="6" col="6" state="0" class="board-cell"></div>
-        <div idx="61" grp="8" row="6" col="7" state="0" class="board-cell"></div>
-        <div idx="62" grp="8" row="6" col="8" state="0" class="board-cell"></div>
-        <div idx="63" grp="6" row="7" col="0" state="0" class="board-cell"></div>
-        <div idx="64" grp="6" row="7" col="1" state="0" class="board-cell"></div>
-        <div idx="65" grp="6" row="7" col="2" state="0" class="board-cell"></div>
-        <div idx="66" grp="7" row="7" col="3" state="0" class="board-cell"></div>
-        <div idx="67" grp="7" row="7" col="4" state="0" class="board-cell"></div>
-        <div idx="68" grp="7" row="7" col="5" state="0" class="board-cell"></div>
-        <div idx="69" grp="8" row="7" col="6" state="0" class="board-cell"></div>
-        <div idx="70" grp="8" row="7" col="7" state="0" class="board-cell"></div>
-        <div idx="71" grp="8" row="7" col="8" state="0" class="board-cell"></div>
-        <div idx="72" grp="6" row="8" col="0" state="0" class="board-cell"></div>
-        <div idx="73" grp="6" row="8" col="1" state="0" class="board-cell"></div>
-        <div idx="74" grp="6" row="8" col="2" state="0" class="board-cell"></div>
-        <div idx="75" grp="7" row="8" col="3" state="0" class="board-cell"></div>
-        <div idx="76" grp="7" row="8" col="4" state="0" class="board-cell"></div>
-        <div idx="77" grp="7" row="8" col="5" state="0" class="board-cell"></div>
-        <div idx="78" grp="8" row="8" col="6" state="0" class="board-cell"></div>
-        <div idx="79" grp="8" row="8" col="7" state="0" class="board-cell"></div>
-        <div idx="80" grp="8" row="8" col="8" state="0" class="board-cell"></div>
+    <div id="ui-overlay">
+        <button id="start-button" class="ui-button">START GAME</button>
     </div>
-    <button id="start-button">START!</button>
-    <div id="piece-buffer">
-        <div id="piece-1" class="game-piece"></div>
-        <div id="piece-2" class="game-piece"></div>
-        <div id="piece-3" class="game-piece"></div>
+    <div id="gamplay-wrap">
+        <span id="game-score" value="0">0</span>
+        <div id="game-board">
+            <div idx="0" grp="0" row="0" col="0" state="0" class="board-cell"></div>
+            <div idx="1" grp="0" row="0" col="1" state="0" class="board-cell"></div>
+            <div idx="2" grp="0" row="0" col="2" state="0" class="board-cell"></div>
+            <div idx="3" grp="1" row="0" col="3" state="0" class="board-cell"></div>
+            <div idx="4" grp="1" row="0" col="4" state="0" class="board-cell"></div>
+            <div idx="5" grp="1" row="0" col="5" state="0" class="board-cell"></div>
+            <div idx="6" grp="2" row="0" col="6" state="0" class="board-cell"></div>
+            <div idx="7" grp="2" row="0" col="7" state="0" class="board-cell"></div>
+            <div idx="8" grp="2" row="0" col="8" state="0" class="board-cell"></div>
+            <div idx="9" grp="0" row="1" col="0" state="0" class="board-cell"></div>
+            <div idx="10" grp="0" row="1" col="1" state="0" class="board-cell"></div>
+            <div idx="11" grp="0" row="1" col="2" state="0" class="board-cell"></div>
+            <div idx="12" grp="1" row="1" col="3" state="0" class="board-cell"></div>
+            <div idx="13" grp="1" row="1" col="4" state="0" class="board-cell"></div>
+            <div idx="14" grp="1" row="1" col="5" state="0" class="board-cell"></div>
+            <div idx="15" grp="2" row="1" col="6" state="0" class="board-cell"></div>
+            <div idx="16" grp="2" row="1" col="7" state="0" class="board-cell"></div>
+            <div idx="17" grp="2" row="1" col="8" state="0" class="board-cell"></div>
+            <div idx="18" grp="0" row="2" col="0" state="0" class="board-cell"></div>
+            <div idx="19" grp="0" row="2" col="1" state="0" class="board-cell"></div>
+            <div idx="20" grp="0" row="2" col="2" state="0" class="board-cell"></div>
+            <div idx="21" grp="1" row="2" col="3" state="0" class="board-cell"></div>
+            <div idx="22" grp="1" row="2" col="4" state="0" class="board-cell"></div>
+            <div idx="23" grp="1" row="2" col="5" state="0" class="board-cell"></div>
+            <div idx="24" grp="2" row="2" col="6" state="0" class="board-cell"></div>
+            <div idx="25" grp="2" row="2" col="7" state="0" class="board-cell"></div>
+            <div idx="26" grp="2" row="2" col="8" state="0" class="board-cell"></div>
+            <div idx="27" grp="3" row="3" col="0" state="0" class="board-cell"></div>
+            <div idx="28" grp="3" row="3" col="1" state="0" class="board-cell"></div>
+            <div idx="29" grp="3" row="3" col="2" state="0" class="board-cell"></div>
+            <div idx="30" grp="4" row="3" col="3" state="0" class="board-cell"></div>
+            <div idx="31" grp="4" row="3" col="4" state="0" class="board-cell"></div>
+            <div idx="32" grp="4" row="3" col="5" state="0" class="board-cell"></div>
+            <div idx="33" grp="5" row="3" col="6" state="0" class="board-cell"></div>
+            <div idx="34" grp="5" row="3" col="7" state="0" class="board-cell"></div>
+            <div idx="35" grp="5" row="3" col="8" state="0" class="board-cell"></div>
+            <div idx="36" grp="3" row="4" col="0" state="0" class="board-cell"></div>
+            <div idx="37" grp="3" row="4" col="1" state="0" class="board-cell"></div>
+            <div idx="38" grp="3" row="4" col="2" state="0" class="board-cell"></div>
+            <div idx="39" grp="4" row="4" col="3" state="0" class="board-cell"></div>
+            <div idx="40" grp="4" row="4" col="4" state="0" class="board-cell"></div>
+            <div idx="41" grp="4" row="4" col="5" state="0" class="board-cell"></div>
+            <div idx="42" grp="5" row="4" col="6" state="0" class="board-cell"></div>
+            <div idx="43" grp="5" row="4" col="7" state="0" class="board-cell"></div>
+            <div idx="44" grp="5" row="4" col="8" state="0" class="board-cell"></div>
+            <div idx="45" grp="3" row="5" col="0" state="0" class="board-cell"></div>
+            <div idx="46" grp="3" row="5" col="1" state="0" class="board-cell"></div>
+            <div idx="47" grp="3" row="5" col="2" state="0" class="board-cell"></div>
+            <div idx="48" grp="4" row="5" col="3" state="0" class="board-cell"></div>
+            <div idx="49" grp="4" row="5" col="4" state="0" class="board-cell"></div>
+            <div idx="50" grp="4" row="5" col="5" state="0" class="board-cell"></div>
+            <div idx="51" grp="5" row="5" col="6" state="0" class="board-cell"></div>
+            <div idx="52" grp="5" row="5" col="7" state="0" class="board-cell"></div>
+            <div idx="53" grp="5" row="5" col="8" state="0" class="board-cell"></div>
+            <div idx="54" grp="6" row="6" col="0" state="0" class="board-cell"></div>
+            <div idx="55" grp="6" row="6" col="1" state="0" class="board-cell"></div>
+            <div idx="56" grp="6" row="6" col="2" state="0" class="board-cell"></div>
+            <div idx="57" grp="7" row="6" col="3" state="0" class="board-cell"></div>
+            <div idx="58" grp="7" row="6" col="4" state="0" class="board-cell"></div>
+            <div idx="59" grp="7" row="6" col="5" state="0" class="board-cell"></div>
+            <div idx="60" grp="8" row="6" col="6" state="0" class="board-cell"></div>
+            <div idx="61" grp="8" row="6" col="7" state="0" class="board-cell"></div>
+            <div idx="62" grp="8" row="6" col="8" state="0" class="board-cell"></div>
+            <div idx="63" grp="6" row="7" col="0" state="0" class="board-cell"></div>
+            <div idx="64" grp="6" row="7" col="1" state="0" class="board-cell"></div>
+            <div idx="65" grp="6" row="7" col="2" state="0" class="board-cell"></div>
+            <div idx="66" grp="7" row="7" col="3" state="0" class="board-cell"></div>
+            <div idx="67" grp="7" row="7" col="4" state="0" class="board-cell"></div>
+            <div idx="68" grp="7" row="7" col="5" state="0" class="board-cell"></div>
+            <div idx="69" grp="8" row="7" col="6" state="0" class="board-cell"></div>
+            <div idx="70" grp="8" row="7" col="7" state="0" class="board-cell"></div>
+            <div idx="71" grp="8" row="7" col="8" state="0" class="board-cell"></div>
+            <div idx="72" grp="6" row="8" col="0" state="0" class="board-cell"></div>
+            <div idx="73" grp="6" row="8" col="1" state="0" class="board-cell"></div>
+            <div idx="74" grp="6" row="8" col="2" state="0" class="board-cell"></div>
+            <div idx="75" grp="7" row="8" col="3" state="0" class="board-cell"></div>
+            <div idx="76" grp="7" row="8" col="4" state="0" class="board-cell"></div>
+            <div idx="77" grp="7" row="8" col="5" state="0" class="board-cell"></div>
+            <div idx="78" grp="8" row="8" col="6" state="0" class="board-cell"></div>
+            <div idx="79" grp="8" row="8" col="7" state="0" class="board-cell"></div>
+            <div idx="80" grp="8" row="8" col="8" state="0" class="board-cell"></div>
+        </div>
+        <div id="piece-buffer">
+            <div id="piece-1" class="game-piece" shapeId="-1"></div>
+            <div id="piece-2" class="game-piece" shapeId="-1"></div>
+            <div id="piece-3" class="game-piece" shapeId="-1"></div>
+        </div>
     </div>
 </template>

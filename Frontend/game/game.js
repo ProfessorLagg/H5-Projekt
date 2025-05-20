@@ -104,7 +104,7 @@ function loadTemplate() {
 //#region Shapes
 import shapes from "./shapes.json" with { type: "json" };
 const shapeIds = Object.keys(shapes).flatMap(x => Number(x)).filter(x => TypeChecker.isInteger(x) && x >= 0);
-const block_url = import.meta.resolve("./block-e.svg");
+const block_url = import.meta.resolve("./block.svg");
 const block_data = syncGet(block_url);
 const block_data_url = `data:image/svg+xml;base64,${btoa(block_data)}`
 const shape_template_url = import.meta.resolve("./shape_template.svg");
@@ -179,19 +179,19 @@ class GameElement extends HTMLElement {
         this.refill_piece_buffer();
 
     }
-    get startButton() {
-        return this.shadowRoot.getElementById('start-button');
-    }
+    get uiOverlay() { return this.shadowRoot.getElementById('ui-overlay'); }
+    get startButton() { return this.shadowRoot.getElementById('start-button') }
     startButton_click(e) {
         console.debug("startButton_click");
-        this.startButton.style.display = "none";
+        this.uiOverlay.classList.add("hidden");
         this.restart();
     }
     /**
      * Checks if this game is over
+     * @param {Uint8Array} [boardState] Optional pre-generated boardState (output from this.getBoardStateArray())
      * @returns true if there is no placeable, non-empty, piece in the piece-buffer, otherwise false
      */
-    checkGameover() {
+    checkGameover(boardState = null) {
         const shapeId_1 = parseInt(this.piece1.getAttribute("shapeId"));
         const shapeId_2 = parseInt(this.piece2.getAttribute("shapeId"));
         const shapeId_3 = parseInt(this.piece3.getAttribute("shapeId"));
@@ -207,13 +207,11 @@ class GameElement extends HTMLElement {
         }
 
         // check if the un-spent pieces can be placed anywhere
-        let canPlace_1 = !isEmpty_1;
-        let canPlace_2 = !isEmpty_2;
-        let canPlace_3 = !isEmpty_3;
-        if (canPlace_1) { canPlace_1 = this.canPlaceShapeAnywhere(shapeId_1); }
-        if (canPlace_2) { canPlace_2 = this.canPlaceShapeAnywhere(shapeId_2); }
-        if (canPlace_3) { canPlace_3 = this.canPlaceShapeAnywhere(shapeId_3); }
-        return canPlace_1 || canPlace_2 || canPlace_3;
+        const state = TypeChecker.isNullOrUndefined(boardState) ? this.getBoardStateArray() : boardState;
+        if (!isEmpty_1 && this.canPlaceShapeAnywhere(shapeId_1, state)) { return false; }
+        if (!isEmpty_2 && this.canPlaceShapeAnywhere(shapeId_2, state)) { return false; }
+        if (!isEmpty_3 && this.canPlaceShapeAnywhere(shapeId_3, state)) { return false; }
+        return true;
     }
     /**
      * Attempts to place a piece from the piecebuffer at the specified 1D board-cell index (idx attribute on cell element)
@@ -256,6 +254,7 @@ class GameElement extends HTMLElement {
         this.score += this.clear();
         this.refill_piece_buffer_if_empty();
         if (this.checkGameover()) {
+            console.log("GAMEOVER!")
             // TODO handle gameover
         }
         return true;
@@ -272,7 +271,10 @@ class GameElement extends HTMLElement {
         const idx2D = indexTo2D(index);
         const state = TypeChecker.isNullOrUndefined(boardState) ? this.getBoardStateArray() : boardState;
         for (let i = 0; i < shape.length; i++) {
-            const idx = indexTo1D(shape[i].r + idx2D.row, shape[i].c + idx2D.col);
+            const row = shape[i].r + idx2D.row;
+            const col = shape[i].c + idx2D.col;
+            if (row < 0 || row > 8 || col < 0 || col > 8) { return false; }
+            const idx = indexTo1D(row, col);
             if (state[idx] === 1) { return false; }
         }
         return true;
