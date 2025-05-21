@@ -16,5 +16,28 @@
             Does not reset positions
             </summary>
         </member>
+        <member name="T:H5.Lib.Utils.StringUtils">
+            <summary>Utilities and extentions for strings</summary>
+        </member>
+        <member name="M:H5.Lib.Utils.StringUtils.EscapeWhitespace(System.String)">
+            <summary>
+            Escapes whitespace characters.
+            See <see cref="F:H5.Lib.Utils.StringUtils.WhitespaceEscapes"/> for which characters get escaped with what
+            </summary>
+            <param name="str">The string to escape whitespace in</param>
+            <returns>The input string with whitespace characters escaped</returns>
+        </member>
+        <member name="M:H5.Lib.Utils.StringUtils.EscapeWhitespace(System.Text.StringBuilder)">
+            <summary><inheritdoc cref="M:H5.Lib.Utils.StringUtils.EscapeWhitespace(System.String)"/></summary>
+        </member>
+        <member name="M:H5.Lib.Utils.StringUtils.ToLargestUnitString(System.TimeSpan)">
+            <summary><inheritdoc cref="M:H5.Lib.Utils.StringUtils.ToLargestUnitString(System.TimeSpan,System.Globalization.NumberFormatInfo)"/></summary>
+            <param name="timeSpan"><see cref="T:System.TimeSpan"/> to convert</param>
+        </member>
+        <member name="M:H5.Lib.Utils.StringUtils.ToLargestUnitString(System.TimeSpan,System.Globalization.NumberFormatInfo)">
+            <summary>Converts <see cref="T:System.TimeSpan"/> to largest unit string</summary>
+            <param name="timeSpan"><see cref="T:System.TimeSpan"/> to convert</param>
+            <param name="format">Number format to use</param>
+        </member>
     </members>
 </doc>

@@ -7,45 +7,55 @@ using System.Collections;
 
 
 namespace H5.API;
-/// <summary>Handles settings file for the API</summary>
+/// <summary>Handles settings for the API</summary>
 public static class ApiSettings {
+	/// <inheritdoc/>
 	public class InvalidSettingException : Exception {
+		/// <inheritdoc cref = "Exception(string?)" />
 		public InvalidSettingException(string? message) : base(message) { }
-		public static void ThrowIf(bool v, string? message = null) {
-			if (v) { throw new InvalidSettingException(message); }
-		}
+		/// <summary>Throws a new <see cref="InvalidSettingException"/> if true</summary>
+		/// <param name="v">Value indicating wether to throw or not</param>
+		/// <param name="message"><inheritdoc cref="InvalidSettingException(string?)"/></param>
+		public static void ThrowIf(bool v, string? message = null) { if (v) { throw new InvalidSettingException(message); } }
 	}
 	#region Settings File
 	private static string SettingsFilePath = Path.Join(PathUtils.ExeDirectory.FullName, "ApiSettings.ini");
 	private static FileInfo SettingsFileInfo = new(SettingsFilePath);
 	private static IniFile SettingsFile = null!;
 
+	/// <summary>Validates the current state of <see cref="ApiSettings"/>. Throws errors for invalid settings.</summary>
 	public static void Validate() {
 		HTTP.Validate();
 		Logging.Validate();
 	}
 	private static bool LoadCalled = false;
+	/// <summary>Clones current <see cref="ApiSettings"/> to dictionary</summary>
+	/// <returns>Clone of current <see cref="ApiSettings"/> in the format &lt;section, &lt;key, value&gt;&gt;</returns>
 	public static IDictionary<string, IDictionary<string, string>> ToInstance() {
 		Dictionary<string, IDictionary<string, string>> result = new();
 		result[HTTPSettings.SectionName] = HTTP.ToDictionary();
 		result[LoggingSettings.SectionName] = Logging.ToDictionary();
 		return result;
 	}
+	/// <summary>Overwrites all values in <see cref="ApiSettings"/> with defaults</summary>
 	public static void LoadDefault() {
 		_HTTP = new();
 		_Logging = new();
 		LoadCalled = true;
 	}
+	/// <summary>Loads <see cref="ApiSettings"/> from file <see cref="ApiSettings.SettingsFileInfo"/></summary>
 	public static void Load() {
 		SettingsFile = IniFile.Load(SettingsFileInfo);
 		LoadCalled = true;
 	}
+	/// <summary>Clones current <see cref="ApiSettings"/> to <see cref="IniFile"/></summary>
 	public static IniFile ToIniFile() {
 		IniFile result = new();
 		result.SetSection(HTTPSettings.SectionName, HTTP);
 		result.SetSection(LoggingSettings.SectionName, Logging);
 		return result;
 	}
+	/// <summary>Saves current <see cref="ApiSettings"/> to file <see cref="ApiSettings.SettingsFileInfo"/></summary>
 	public static void Save() {
 		SettingsFile = ToIniFile();
 		SettingsFile.Save(SettingsFilePath);
@@ -53,7 +63,9 @@ public static class ApiSettings {
 	#endregion
 
 	#region HTTP
+	/// <summary>HTTP settings section</summary>
 	public sealed class HTTPSettings : IEnumerable<KeyValuePair<string, string>> {
+		/// <summary><see cref="IniFile"/> section header for <see cref="HTTPSettings"/></summary>
 		public const string SectionName = "HTTP";
 
 		/// <summary>Should the API server respond to http:// requests</summary>
@@ -69,7 +81,13 @@ public static class ApiSettings {
 		/// <summary>Hostnames the API server listens for requests on ex. localhost, casa-blanca.com, *</summary>
 		public string[] HostNames = new string[] { "*" };
 
-		public static HTTPSettings Parse(IDictionary<string, string> kvps) {
+		/// <summary>
+		/// Parses the input key/value pairs to a new instance of <see cref="HTTPSettings"/>.
+		/// Only parses known keys, and does not check for unkown keys.
+		/// Missing keys will be set to default values
+		/// </summary>
+		/// <param name="kvps">key/value pairs to parse</param>
+		public static HTTPSettings Parse(in IDictionary<string, string> kvps) {
 			HTTPSettings r = new();
 			if (kvps.TryGetValue("EnableHttp", out string? sEnableHttp)) { r.EnableHttp = bool.Parse(sEnableHttp); }
 			if (kvps.TryGetValue("PortHttp", out string? sPortHttp)) { r.PortHttp = ushort.Parse(sPortHttp); }
@@ -84,6 +102,7 @@ public static class ApiSettings {
 			return r;
 		}
 
+		/// <inheritdoc/>
 		public IEnumerator<KeyValuePair<string, string>> GetEnumerator() {
 			yield return new KeyValuePair<string, string>("EnableHttp", this.EnableHttp.ToString().ToLowerInvariant());
 			yield return new KeyValuePair<string, string>("PortHttp", this.PortHttp.ToString());
@@ -91,8 +110,10 @@ public static class ApiSettings {
 			yield return new KeyValuePair<string, string>("PortHttps", this.PortHttps.ToString());
 			yield return new KeyValuePair<string, string>("HostNames", string.Join(',', this.HostNames));
 		}
+		/// <inheritdoc/>
 		IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
 
+		/// <summary>Validates the state of this <see cref="HTTPSettings"/>. Throws <see cref="InvalidSettingException"/> for invalid values.</summary>
 		public void Validate() {
 			InvalidSettingException.ThrowIf(!(this.EnableHttp || this.EnableHttps), "Atleast one of HTTP.EnableHttp or HTTP.EnableHttps must be enabled");
 			InvalidSettingException.ThrowIf(this.HostNames.Length == 0, "You must define atleast 1 host name in HTTP.HostNames");
@@ -101,6 +122,7 @@ public static class ApiSettings {
 	}
 
 	private static HTTPSettings? _HTTP = null;
+	/// <summary><inheritdoc cref="HTTPSettings"/></summary>
 	public static HTTPSettings HTTP {
 		get {
 			if (!LoadCalled) { throw new Exception("Load has not been called"); }
@@ -111,7 +133,9 @@ public static class ApiSettings {
 	#endregion
 
 	#region Logging
+	/// <summary>Logging settings section</summary>
 	public sealed record class LoggingSettings : IEnumerable<KeyValuePair<string, string>> {
+		/// <summary><see cref="IniFile"/> section header for <see cref="LoggingSettings"/></summary>
 		public const string SectionName = "Logging";
 
 		///<summary>Lowest level of logs that get printed to console and generic log file</summary>
@@ -126,6 +150,12 @@ public static class ApiSettings {
 		public bool LogW3 = false;
 		/// <summary>Directory logfiles are placed in when <see cref="LogW3"/> is enabled</summary>
 		public string LogW3DirPath = Path.Join(PathUtils.ExeDirectory.FullName, "LogW3");
+		/// <summary>
+		/// Parses the input key/value pairs to a new instance of <see cref="LoggingSettings"/>.
+		/// Only parses known keys, and does not check for unkown keys.
+		/// Missing keys will be set to default values
+		/// </summary>
+		/// <param name="kvps">key/value pairs to parse</param>
 		public static LoggingSettings Parse(IDictionary<string, string> kvps) {
 			LoggingSettings r = new();
 			if (kvps.TryGetValue("MaxLogLevel", out string? sMinimumLoggingLevel)) { r.MaxLogLevel = Enum.Parse<LogLevel>(sMinimumLoggingLevel); }
@@ -137,7 +167,7 @@ public static class ApiSettings {
 
 			return r;
 		}
-
+		/// <inheritdoc/>
 		public IEnumerator<KeyValuePair<string, string>> GetEnumerator() {
 			yield return new KeyValuePair<string, string>("MaxLogLevel", this.MaxLogLevel.ToString());
 			yield return new KeyValuePair<string, string>("LogToFile", this.LogToFile.ToString().ToLowerInvariant());
@@ -145,7 +175,10 @@ public static class ApiSettings {
 			yield return new KeyValuePair<string, string>("LogW3", this.LogW3.ToString().ToLowerInvariant());
 			yield return new KeyValuePair<string, string>("LogW3DirPath", this.LogW3DirPath.ToString());
 		}
+		/// <inheritdoc/>
 		IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
+		/// <summary>Validates the state of this <see cref="LoggingSettings"/>.
+		/// Throws <see cref="InvalidSettingException"/> for invalid values.</summary>
 		public void Validate() {
 			DirectoryInfo LogDir = new(this.LogDirPath);
 			InvalidSettingException.ThrowIf(this.LogToFile && !LogDir.ValidatePath(), "Could not find or access Logging.LogDirPath");
@@ -155,6 +188,7 @@ public static class ApiSettings {
 		}
 	}
 	private static LoggingSettings? _Logging = null;
+	/// <summary><inheritdoc cref="LoggingSettings"/></summary>
 	public static LoggingSettings Logging {
 		get {
 			if (!LoadCalled) { throw new Exception("Load has not been called"); }
@@ -166,7 +200,9 @@ public static class ApiSettings {
 	#endregion
 
 	#region FileServer
+	/// <summary>FileServer settings section</summary>
 	public sealed class FileServerSettings : IEnumerable<KeyValuePair<string, string>> {
+		/// <summary><see cref="IniFile"/> section header for <see cref="FileServerSettings"/></summary>
 		public const string SectionName = "FileServer";
 		/// <summary>Directory path to static content.Defaults to {exe directory}\wwwroot if empty or missing</summary>
 		public string ContentRoot = Path.Join(PathUtils.ExeDirectory.FullName, "wwwroot");
@@ -177,6 +213,12 @@ public static class ApiSettings {
 		/// <summary>Seconds a file can go untouched in the cache before it gets cleaned up. Defaults to 600 if not specified</summary>
 		public uint CacheLifetimeSeconds = 600;
 
+		/// <summary>
+		/// Parses the input key/value pairs to a new instance of <see cref="FileServerSettings"/>.
+		/// Only parses known keys, and does not check for unkown keys.
+		/// Missing keys will be set to default values
+		/// </summary>
+		/// <param name="kvps">key/value pairs to parse</param>
 		public static FileServerSettings Parse(IDictionary<string, string> kvps) {
 			FileServerSettings r = new();
 			if (kvps.TryGetValue("ContentRoot", out string? sContentRoot)) { r.ContentRoot = string.IsNullOrWhiteSpace(sContentRoot) ? r.ContentRoot : sContentRoot; }
@@ -185,15 +227,19 @@ public static class ApiSettings {
 			if (kvps.TryGetValue("CacheLifetimeSeconds", out string? sCacheLifetimeSeconds)) { r.CacheLifetimeSeconds = string.IsNullOrWhiteSpace(sCacheLifetimeSeconds) ? r.CacheLifetimeSeconds : uint.Parse(sCacheLifetimeSeconds); }
 			return r;
 		}
+		/// <summary>Validates the state of this <see cref="FileServerSettings"/>.
+		/// Throws <see cref="InvalidSettingException"/> for invalid values.</summary>
 		public void Validate() {
 			InvalidSettingException.ThrowIf(!Directory.Exists(this.ContentRoot), $"Could not find or access HTTP.ContentRoot directory \"{this.ContentRoot}\"");
 		}
+		/// <inheritdoc/>
 		public IEnumerator<KeyValuePair<string, string>> GetEnumerator() {
 			yield return new KeyValuePair<string, string>("ContentRoot", this.ContentRoot.ToString());
 		}
 		IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
 	}
 	private static FileServerSettings? _FileServer = null;
+	/// <inheritdoc cref="FileServerSettings"/>
 	public static FileServerSettings FileServer {
 		get {
 			if (!LoadCalled) { throw new Exception("Load has not been called"); }
