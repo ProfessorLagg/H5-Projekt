@@ -4,11 +4,25 @@
         <name>H5.Http</name>
     </assembly>
     <members>
+        <member name="T:H5.Http.BenchmarkHandler">
+            <summary><inheritdoc cref="M:H5.Http.BenchmarkHandler.Handle(System.Net.HttpListenerContext)"/></summary>
+            <inheritdoc cref="T:H5.Http.IRequestHandler"/>
+        </member>
+        <member name="M:H5.Http.BenchmarkHandler.Handle(System.Net.HttpListenerContext)">
+            <summary>Responds with static sized random bytes intented for performance testing</summary>
+            <inheritdoc/>
+        </member>
+        <member name="T:H5.Http.DefaultErrorHandler">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.Http.DefaultErrorHandler.Handle(System.Net.HttpListenerContext,System.Net.HttpStatusCode)">
+            <inheritdoc/>
+        </member>
         <member name="M:H5.Http.FileServer.#ctor(System.IO.DirectoryInfo,H5.Http.HttpRoute,H5.Http.FileServer.CacheSettings)">
             <summary>Creates a new FileServer request handler</summary>
             <param name="rootDirectory">The root directory where the file server looks for files</param>
             <param name="rootRoute">The root route that the file server is handling</param>
-            <param name="cacheConfig">File content cache settings. If <see cref="!:null"/> uses <see cref="F:H5.Http.FileServer.CacheSettings.Default"/></param>
+            <param name="cacheConfig">File content cache settings. If <see langword="null"/> uses <see cref="F:H5.Http.FileServer.CacheSettings.Default"/></param>
         </member>
         <member name="M:H5.Http.FileServer.#ctor(System.String)">
             <summary>Creates a new FileServer request handler</summary>
@@ -60,11 +74,43 @@
         <member name="M:H5.Http.HttpStdMethodExt.Components(H5.Http.HttpStdMethod)">
             <summary>Returns the singluar <see cref="T:H5.Http.HttpStdMethod"/>s that make up this <see cref="T:H5.Http.HttpStdMethod"/></summary>
         </member>
+        <member name="T:H5.Http.IMiddleware">
+            <summary>
+            HTTP Middleware.
+            <see cref="T:H5.Http.HttpServer"/> can run these either before the request is handled or after
+            </summary>
+        </member>
         <member name="M:H5.Http.IMiddleware.Handle(System.Net.HttpListenerContext)">
             <summary>
-            HTTP Middleware
+            Runs this <see cref="T:H5.Http.IMiddleware"/> on a <see cref="T:System.Net.HttpListenerContext"/>
             </summary>
-            <returns>True if handling of the request should continue, otherwise false</returns>
+            <returns><see langword="true"/> if handling of the request should continue, otherwise <see langword="false"/></returns>
+        </member>
+        <member name="T:H5.Http.IRequestErrorHandler">
+            <summary>
+            Request handler for Errors
+            </summary>
+        </member>
+        <member name="M:H5.Http.IRequestErrorHandler.Handle(System.Net.HttpListenerContext,System.Net.HttpStatusCode)">
+            <summary>
+            Writes error response to the input <see cref="T:System.Net.HttpListenerContext"/>
+            </summary>
+            <param name="context"><see cref="T:System.Net.HttpListenerContext"/> to write error to</param>
+            <param name="statusCode"><see cref="T:System.Net.HttpStatusCode"/> to write</param>
+        </member>
+        <member name="T:H5.Http.IRequestHandler">
+            <summary>
+            <inheritdoc cref="M:H5.Http.IRequestHandler.Handle(System.Net.HttpListenerContext)"/>
+            </summary>
+        </member>
+        <member name="M:H5.Http.IRequestHandler.Handle(System.Net.HttpListenerContext)">
+            <summary>
+            Handles <see cref="T:System.Net.HttpListenerRequest"/>'s
+            </summary>
+            <param name="context"><see cref="T:System.Net.HttpListenerContext"/> to handle request for</param>
+        </member>
+        <member name="T:H5.Http.IRouteMatcher">
+            <summary>Matches requests to routes</summary>
         </member>
         <member name="M:H5.Http.IRouteMatcher.MatchRoute(System.Net.HttpListenerRequest)">
             <summary>Matches <see cref="T:System.Net.HttpListenerRequest"/> to <see cref="T:H5.Http.IRequestHandler"/></summary>

@@ -21,7 +21,7 @@ public static class ApiSettings {
 	#region Settings File
 	private static string SettingsFilePath = Path.Join(PathUtils.ExeDirectory.FullName, "ApiSettings.ini");
 	private static FileInfo SettingsFileInfo = new(SettingsFilePath);
-	private static IniFile SettingsFile = null!;
+	private static IniDocument SettingsFile = null!;
 
 	/// <summary>Validates the current state of <see cref="ApiSettings"/>. Throws errors for invalid settings.</summary>
 	public static void Validate() {
@@ -45,12 +45,12 @@ public static class ApiSettings {
 	}
 	/// <summary>Loads <see cref="ApiSettings"/> from file <see cref="ApiSettings.SettingsFileInfo"/></summary>
 	public static void Load() {
-		SettingsFile = IniFile.Load(SettingsFileInfo);
+		SettingsFile = IniDocument.Load(SettingsFileInfo);
 		LoadCalled = true;
 	}
-	/// <summary>Clones current <see cref="ApiSettings"/> to <see cref="IniFile"/></summary>
-	public static IniFile ToIniFile() {
-		IniFile result = new();
+	/// <summary>Clones current <see cref="ApiSettings"/> to <see cref="IniDocument"/></summary>
+	public static IniDocument ToIniFile() {
+		IniDocument result = new();
 		result.SetSection(HTTPSettings.SectionName, HTTP);
 		result.SetSection(LoggingSettings.SectionName, Logging);
 		return result;
@@ -65,7 +65,7 @@ public static class ApiSettings {
 	#region HTTP
 	/// <summary>HTTP settings section</summary>
 	public sealed class HTTPSettings : IEnumerable<KeyValuePair<string, string>> {
-		/// <summary><see cref="IniFile"/> section header for <see cref="HTTPSettings"/></summary>
+		/// <summary><see cref="IniDocument"/> section header for <see cref="HTTPSettings"/></summary>
 		public const string SectionName = "HTTP";
 
 		/// <summary>Should the API server respond to http:// requests</summary>
@@ -135,7 +135,7 @@ public static class ApiSettings {
 	#region Logging
 	/// <summary>Logging settings section</summary>
 	public sealed record class LoggingSettings : IEnumerable<KeyValuePair<string, string>> {
-		/// <summary><see cref="IniFile"/> section header for <see cref="LoggingSettings"/></summary>
+		/// <summary><see cref="IniDocument"/> section header for <see cref="LoggingSettings"/></summary>
 		public const string SectionName = "Logging";
 
 		///<summary>Lowest level of logs that get printed to console and generic log file</summary>
@@ -202,7 +202,7 @@ public static class ApiSettings {
 	#region FileServer
 	/// <summary>FileServer settings section</summary>
 	public sealed class FileServerSettings : IEnumerable<KeyValuePair<string, string>> {
-		/// <summary><see cref="IniFile"/> section header for <see cref="FileServerSettings"/></summary>
+		/// <summary><see cref="IniDocument"/> section header for <see cref="FileServerSettings"/></summary>
 		public const string SectionName = "FileServer";
 		/// <summary>Directory path to static content.Defaults to {exe directory}\wwwroot if empty or missing</summary>
 		public string ContentRoot = Path.Join(PathUtils.ExeDirectory.FullName, "wwwroot");

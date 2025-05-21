@@ -23,7 +23,7 @@ public sealed class FileServer : IRequestHandler {
 	/// <summary>Creates a new FileServer request handler</summary>
 	/// <param name="rootDirectory">The root directory where the file server looks for files</param>
 	/// <param name="rootRoute">The root route that the file server is handling</param>
-	/// <param name="cacheConfig">File content cache settings. If <see cref="null"/> uses <see cref="CacheSettings.Default"/></param>
+	/// <param name="cacheConfig">File content cache settings. If <see langword="null"/> uses <see cref="CacheSettings.Default"/></param>
 	public FileServer(DirectoryInfo rootDirectory, HttpRoute? rootRoute = null, CacheSettings? cacheConfig = null) {
 		if (!rootDirectory.ValidatePath()) throw new ArgumentException($"\"{rootDirectory.FullName}\" is not a valid directory path");
 		if (!rootDirectory.Exists) throw new ArgumentException($"Could not find or access directory at \"{rootDirectory.FullName}\"");

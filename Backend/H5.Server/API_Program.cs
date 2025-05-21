@@ -27,7 +27,6 @@ internal class API_Program {
 				server.AddPrefix(httpsPrefix);
 			}
 		}
-
 		server.Run();
 	}
 }

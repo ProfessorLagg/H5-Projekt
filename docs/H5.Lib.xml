@@ -4,11 +4,310 @@
         <name>H5.Lib</name>
     </assembly>
     <members>
-        <member name="M:H5.Lib.IniFile.SetSection(System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.String}})">
+        <member name="T:H5.Lib.IniDocument">
+            <summary>Represents a .ini document</summary>
+        </member>
+        <member name="F:H5.Lib.IniDocument.KeyComparer">
+            <summary><see cref="T:System.StringComparer"/> used to sort sections and keys</summary>
+        </member>
+        <member name="M:H5.Lib.IniDocument.#ctor">
+            <summary>Creates a new <see cref="T:H5.Lib.IniDocument"/> with no data</summary>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Save(System.IO.Stream,System.Text.Encoding)">
+            <summary>Writes this <see cref="T:H5.Lib.IniDocument"/> as a string to a <see cref="T:System.IO.Stream"/></summary>
+            <param name="stream"><see cref="T:System.IO.Stream"/> to write to</param>
+            <param name="encoding"><see cref="T:System.Text.Encoding"/> to encode string as</param>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Save(System.IO.Stream)">
+            <inheritdoc cref="M:H5.Lib.IniDocument.Save(System.IO.Stream,System.Text.Encoding)"/>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Save(System.IO.FileInfo,System.Text.Encoding)">
+            <summary>Writes this <see cref="T:H5.Lib.IniDocument"/> as a string to a file. Overwrites the file!</summary>
+            <param name="file"><see cref="T:System.IO.FileInfo"/> of file to overwrite</param>
+            <param name="encoding"><inheritdoc cref="M:H5.Lib.IniDocument.Save(System.IO.Stream,System.Text.Encoding)"/></param>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Save(System.IO.FileInfo)">
+            <inheritdoc cref="M:H5.Lib.IniDocument.Save(System.IO.FileInfo,System.Text.Encoding)"/>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Save(System.String,System.Text.Encoding)">
+            <summary><inheritdoc cref="M:H5.Lib.IniDocument.Save(System.IO.FileInfo,System.Text.Encoding)"/></summary>
+            <param name="filePath">Path of file to overwrite</param>
+            <param name="encoding"><inheritdoc cref="M:H5.Lib.IniDocument.Save(System.IO.Stream,System.Text.Encoding)"/></param>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Save(System.String)">
+            <inheritdoc cref="M:H5.Lib.IniDocument.Save(System.String,System.Text.Encoding)"/>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Load(System.IO.Stream,System.Text.Encoding)">
+            <summary>Parses text content from a <see cref="T:System.IO.Stream"/> as an <see cref="T:H5.Lib.IniDocument"/> </summary>
+            <param name="stream">The <see cref="T:System.IO.Stream"/> to load from</param>
+            <param name="encoding"><see cref="T:System.Text.Encoding"/> of the input text</param>
+            <returns>A new <see cref="T:H5.Lib.IniDocument"/>The parsed <see cref="T:H5.Lib.IniDocument"/></returns>
+            <exception cref="T:System.FormatException"></exception>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Load(System.IO.Stream)">
+            <inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.Stream,System.Text.Encoding)"/>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Load(System.IO.FileInfo,System.Text.Encoding)">
+            <summary>Parses text content from a file as an <see cref="T:H5.Lib.IniDocument"/> </summary>
+            <param name="file"><see cref="T:System.IO.FileInfo"/> of the file to read</param>
+            <param name="encoding"><see cref="T:System.Text.Encoding"/><inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.Stream,System.Text.Encoding)"/></param>
+            <returns>A new <see cref="T:H5.Lib.IniDocument"/><inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.Stream,System.Text.Encoding)"/></returns>
+            <exception cref="T:System.FormatException"><inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.Stream,System.Text.Encoding)"/></exception>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Load(System.IO.FileInfo)">
+            <inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.FileInfo,System.Text.Encoding)"/>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Load(System.String,System.Text.Encoding)">
+            <summary><inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.FileInfo,System.Text.Encoding)"/></summary>
+            <param name="filePath">Path of the file to read</param>
+            <param name="encoding"><see cref="T:System.Text.Encoding"/><inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.Stream,System.Text.Encoding)"/></param>
+            <returns>A new <see cref="T:H5.Lib.IniDocument"/><inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.Stream,System.Text.Encoding)"/></returns>
+            <exception cref="T:System.FormatException"><inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.Stream,System.Text.Encoding)"/></exception>
+        </member>
+        <member name="M:H5.Lib.IniDocument.Load(System.String)">
+            <inheritdoc cref="M:H5.Lib.IniDocument.Load(System.IO.FileInfo,System.Text.Encoding)"/>
+        </member>
+        <member name="M:H5.Lib.IniDocument.GetValue(System.String,System.String)">
+            <summary>
+            Get's a value from this <see cref="T:H5.Lib.IniDocument"/>
+            </summary>
+            <param name="sectionName">Section the value is stored in</param>
+            <param name="key"></param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Thrown if key not found in section</exception>
+        </member>
+        <member name="M:H5.Lib.IniDocument.GetValue(System.String)">
+            <inheritdoc cref="M:H5.Lib.IniDocument.GetValue(System.String,System.String)"/>
+        </member>
+        <member name="M:H5.Lib.IniDocument.SetValue(System.String,System.String,System.String)">
+            <summary>
+            Adds or overwrites a value in this <see cref="T:H5.Lib.IniDocument"/>.
+            If the section does not exists, it is created
+            </summary>
+            <param name="sectionName">Section to add or overwrite value in</param>
+            <param name="key">Key of the value to add or overwrite</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:H5.Lib.IniDocument.SetValue(System.String,System.String)">
+            <inheritdoc cref="M:H5.Lib.IniDocument.SetValue(System.String,System.String,System.String)"/>
+        </member>
+        <member name="M:H5.Lib.IniDocument.SetSection(System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.String}})">
             <summary>Adds or overrides the section with the specified name</summary>
         </member>
+        <member name="M:H5.Lib.IniDocument.GetSection(System.String)">
+            <summary>
+            Get's a section from this <see cref="T:H5.Lib.IniDocument"/>
+            </summary>
+            <param name="sectionName">Name of the section to get</param>
+            <returns>Section as a <see cref="T:System.Collections.Generic.IDictionary`2"/></returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"></exception>
+        </member>
+        <member name="M:H5.Lib.IniDocument.ToString">
+            <summary>
+            Returns this <see cref="T:H5.Lib.IniDocument"/> as a string
+            </summary>
+            <returns>this <see cref="T:H5.Lib.IniDocument"/> as a string</returns>
+        </member>
+        <member name="T:H5.Lib.Logging.ConsoleLog">
+            <summary>
+            ILogDestination for logging to the console window.
+            Warning! Very slow on windows, which cannot be fixed since the slowness is in conhost
+            </summary>
+        </member>
+        <member name="M:H5.Lib.Logging.ConsoleLog.Equals(H5.Lib.Logging.ILogDestination)">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.Lib.Logging.ConsoleLog.Write(H5.Lib.Logging.LogMessage)">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.Lib.Logging.ConsoleLog.Finalize">
+            <summary>Destructor</summary>
+        </member>
+        <member name="T:H5.Lib.Logging.FileLog">
+            <summary>Writes <see cref="T:H5.Lib.Logging.LogMessage"/>'s to timestamp named files in a directory</summary>
+        </member>
+        <member name="F:H5.Lib.Logging.FileLog.DefaultDirectoryPath">
+            <summary>Path to default directory. Used when no directory was passed to constructor</summary>
+        </member>
+        <member name="F:H5.Lib.Logging.FileLog.DefaultDirectory">
+            <summary><see cref="T:System.IO.DirectoryInfo"/> of <see cref="F:H5.Lib.Logging.FileLog.DefaultDirectoryPath"/>. Used when no directory was passed to constructor</summary>
+        </member>
+        <member name="F:H5.Lib.Logging.FileLog.DefaultEncoding">
+            <summary>Default <see cref="F:H5.Lib.Logging.FileLog.Encoding"/> for log files. Used when no <see cref="F:H5.Lib.Logging.FileLog.Encoding"/> was passed constructor</summary>
+        </member>
+        <member name="M:H5.Lib.Logging.FileLog.#ctor(System.IO.DirectoryInfo,System.Text.Encoding)">
+            <summary>Creates a new instance of the <see cref="T:H5.Lib.Logging.FileLog"/> class</summary>
+            <param name="logDir"><see cref="T:System.IO.DirectoryInfo"/> of directory to place logfiles in</param>
+            <param name="encoding"><see cref="F:H5.Lib.Logging.FileLog.Encoding"/> text encoding to write logfiles in</param>
+        </member>
+        <member name="M:H5.Lib.Logging.FileLog.#ctor(System.IO.DirectoryInfo)">
+            <summary><inheritdoc cref="M:H5.Lib.Logging.FileLog.#ctor(System.IO.DirectoryInfo,System.Text.Encoding)"/> using <see cref="F:H5.Lib.Logging.FileLog.DefaultEncoding"/></summary>
+            <param name="logDir"><see cref="T:System.IO.DirectoryInfo"/> of directory to place logfiles in</param>
+        </member>
+        <member name="M:H5.Lib.Logging.FileLog.#ctor">
+            <summary><inheritdoc cref="M:H5.Lib.Logging.FileLog.#ctor(System.IO.DirectoryInfo,System.Text.Encoding)"/> using <see cref="F:H5.Lib.Logging.FileLog.DefaultDirectory"/> and <see cref="F:H5.Lib.Logging.FileLog.DefaultEncoding"/></summary>
+        </member>
+        <member name="M:H5.Lib.Logging.FileLog.#ctor(System.Text.Encoding)">
+            <summary><inheritdoc cref="M:H5.Lib.Logging.FileLog.#ctor(System.IO.DirectoryInfo,System.Text.Encoding)"/> using <see cref="F:H5.Lib.Logging.FileLog.DefaultDirectory"/></summary>
+            <param name="encoding"><see cref="F:H5.Lib.Logging.FileLog.Encoding"/> text encoding to write logfiles in</param>
+        </member>
+        <member name="M:H5.Lib.Logging.FileLog.#ctor(System.String)">
+            <summary><inheritdoc cref="M:H5.Lib.Logging.FileLog.#ctor(System.String,System.Text.Encoding)"/> using <see cref="F:H5.Lib.Logging.FileLog.DefaultEncoding"/></summary>
+            <param name="logDirPath">Path of directory to place logfiles in</param>
+        </member>
+        <member name="M:H5.Lib.Logging.FileLog.#ctor(System.String,System.Text.Encoding)">
+            <inheritdoc cref="M:H5.Lib.Logging.FileLog.#ctor(System.IO.DirectoryInfo,System.Text.Encoding)"/>
+            <param name="logDirPath">Path of directory to place logfiles in</param>
+            <param name="encoding"><inheritdoc/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.FileLog.Equals(H5.Lib.Logging.ILogDestination)">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.Lib.Logging.FileLog.Write(H5.Lib.Logging.LogMessage)">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.Lib.Logging.FileLog.Finalize">
+            <summary>Destructor</summary>
+        </member>
+        <member name="T:H5.Lib.Logging.ILogDestination">
+            <summary>Destination that <see cref="T:H5.Lib.Logging.LogMessage"/>'s can be written to</summary>
+        </member>
+        <member name="M:H5.Lib.Logging.ILogDestination.Write(H5.Lib.Logging.LogMessage)">
+            <summary>
+            Writes a <see cref="T:H5.Lib.Logging.LogMessage"/> to this <see cref="T:H5.Lib.Logging.ILogDestination"></see>
+            </summary>
+            <param name="logMessage">The <see cref="T:H5.Lib.Logging.LogMessage"/> to write</param>
+        </member>
+        <member name="T:H5.Lib.Logging.Log">
+            <summary>
+            Global class for writing <see cref="T:H5.Lib.Logging.LogMessage"/>'s
+            </summary>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Error(System.String)">
+            <summary>
+            Writes an <see cref="F:H5.Lib.Logging.LogLevel.Error"/> log message from the <see cref="F:H5.Lib.Logging.LogScope.Default"/> scope
+            </summary>
+            <param name="message"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Error(H5.Lib.Logging.LogScope,System.String)">
+            <summary>
+            Writes an <see cref="F:H5.Lib.Logging.LogLevel.Error"/> log message
+            </summary>
+            <param name="message"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+            /// <param name="scope"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Warn(System.String)">
+            <summary>
+            Writes a <see cref="F:H5.Lib.Logging.LogLevel.Warn"/> log message from the <see cref="F:H5.Lib.Logging.LogScope.Default"/> scope
+            </summary>
+            <param name="message"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Warn(H5.Lib.Logging.LogScope,System.String)">
+            <summary>
+            Writes a <see cref="F:H5.Lib.Logging.LogLevel.Warn"/> log message
+            </summary>
+            <param name="message"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+            /// <param name="scope"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Info(System.String)">
+            <summary>
+            Writes an <see cref="F:H5.Lib.Logging.LogLevel.Info"/> log message from the <see cref="F:H5.Lib.Logging.LogScope.Default"/> scope
+            </summary>
+            <param name="message"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Info(H5.Lib.Logging.LogScope,System.String)">
+            <summary>
+            Writes an <see cref="F:H5.Lib.Logging.LogLevel.Info"/> log message
+            </summary>
+            <param name="message"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+            /// <param name="scope"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Debug(System.String)">
+            <summary>
+            Writes a <see cref="F:H5.Lib.Logging.LogLevel.Debug"/> log message from the <see cref="F:H5.Lib.Logging.LogScope.Default"/> scope
+            </summary>
+            <param name="message"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Debug(H5.Lib.Logging.LogScope,System.String)">
+            <summary>
+            Writes a <see cref="F:H5.Lib.Logging.LogLevel.Debug"/> log message
+            </summary>
+            <param name="message"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+            <param name="scope"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogLevel,System.String)">
+            <summary>Writes a log message from the <see cref="F:H5.Lib.Logging.LogScope.Default"/> scope</summary>
+            <param name="level"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+            <param name="message"><inheritdoc cref="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)"/></param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.Write(H5.Lib.Logging.LogScope,H5.Lib.Logging.LogLevel,System.String)">
+            <summary>Writes a log message</summary>
+            <param name="level"><see cref="T:H5.Lib.Logging.LogLevel"/> of the message</param>
+            <param name="message">Message text to write</param>
+            <param name="scope"><see cref="T:H5.Lib.Logging.LogScope"/> to write message from</param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.AddLogDestination(H5.Lib.Logging.ILogDestination)">
+            <summary>Add's a new <see cref="T:H5.Lib.Logging.ILogDestination"/> to recieve <see cref="T:H5.Lib.Logging.LogMessage"/>'s</summary>
+            <param name="destination">The <see cref="T:H5.Lib.Logging.ILogDestination"/> to add</param>
+            <exception cref="T:System.ArgumentException"></exception>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.AddFileLog">
+            <summary>Adds a new <see cref="T:H5.Lib.Logging.FileLog"/> using default settings</summary>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.AddFileLog(System.String)">
+            <summary>Adds a new <see cref="T:H5.Lib.Logging.FileLog"/></summary>
+            <param name="logDirPath">Path of the directory file log writes to</param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.AddFileLog(System.IO.DirectoryInfo)">
+            <summary>Adds a new <see cref="T:H5.Lib.Logging.FileLog"/></summary>
+            <param name="logDir"><see cref="T:System.IO.DirectoryInfo"/> of the directory file log writes to</param>
+        </member>
+        <member name="M:H5.Lib.Logging.Log.AddConsoleLog">
+            <summary>Adds a new <see cref="T:H5.Lib.Logging.ConsoleLog"/></summary>
+        </member>
+        <member name="T:H5.Lib.Logging.LogLevel">
+            <summary>
+            Logging levels.
+            More severe levels have lower values.
+            Values match syslog values, though not all syslog values are included
+            </summary>
+        </member>
+        <member name="F:H5.Lib.Logging.LogLevel.Error">
+            <summary>Error conditions</summary>
+        </member>
+        <member name="F:H5.Lib.Logging.LogLevel.Warn">
+            <summary>Warning conditions</summary>
+        </member>
+        <member name="F:H5.Lib.Logging.LogLevel.Info">
+            <summary>Informational messages: Confirmation that the program is working as expected</summary>
+        </member>
+        <member name="F:H5.Lib.Logging.LogLevel.Debug">
+            <summary>Debug-level messages: Messages that contain information normally of use only when debugging a program.</summary>
+        </member>
+        <member name="T:H5.Lib.Logging.LogLevelExtentions">
+            <summary>Extentions for <see cref="T:H5.Lib.Logging.LogLevel"/></summary>
+        </member>
         <member name="M:H5.Lib.Logging.LogLevelExtentions.Name(H5.Lib.Logging.LogLevel)">
-            <summary>Faster version of <see cref="!:LogLevel.ToString()"/></summary>
+            <summary>Faster version of <see cref="T:H5.Lib.Logging.LogLevel"/>.ToString()</summary>
+        </member>
+        <member name="T:H5.Lib.Utils.CollectionUtils">
+            <summary>Utilities and extentions for collections</summary>
+        </member>
+        <member name="M:H5.Lib.Utils.CollectionUtils.ToStringDictionary(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.String}})">
+            <summary>
+            Creates a <see cref="T:System.Collections.Specialized.StringDictionary"/> from an <c>IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;</c> according to the default comparer for the key type.
+            </summary>
+            <returns>A <see cref="T:System.Collections.Specialized.StringDictionary"/> that contains keys and values from <paramref name="keyValuePairs"/> and uses default comparer for the key type.</returns>
+        </member>
+        <member name="T:H5.Lib.Utils.EnumUtils">
+            <summary>Utilities and extentions for Enums</summary>
+        </member>
+        <member name="M:H5.Lib.Utils.EnumUtils.ToStringCached``1(``0)">
+            <summary>
+            <inheritdoc cref="M:System.Enum.ToString"/>
+            Caches results to minimize usage of reflection
+            </summary>
+            <inheritdoc cref="M:System.Enum.ToString"/>
         </member>
         <member name="M:H5.Lib.Utils.StreamUtils.SameContent(System.IO.Stream,System.IO.Stream)">
             <summary>

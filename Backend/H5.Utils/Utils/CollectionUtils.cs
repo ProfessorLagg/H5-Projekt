@@ -1,7 +1,12 @@
 ﻿using System.Collections.Specialized;
 
 namespace H5.Lib.Utils;
+/// <summary>Utilities and extentions for collections</summary>
 public static class CollectionUtils {
+	/// <summary>
+	/// Creates a <see cref="StringDictionary"/> from an <c>IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;</c> according to the default comparer for the key type.
+	/// </summary>
+	/// <returns>A <see cref="StringDictionary"/> that contains keys and values from <paramref name="keyValuePairs"/> and uses default comparer for the key type.</returns>
 	public static StringDictionary ToStringDictionary(this IEnumerable<KeyValuePair<string, string>> keyValuePairs) {
 		StringDictionary result = new();
 		foreach (KeyValuePair<string, string> kvp in keyValuePairs) {
@@ -9,21 +14,4 @@ public static class CollectionUtils {
 		}
 		return result;
 	}
-
-#nullable enable
-	public static bool TryGetValue(this StringDictionary @this, string key, out string value) {
-		string? v = @this[key];
-		if (v is null) {
-			value = "";
-			return false;
-		}
-		value = v!;
-		return true;
-	}
-	public static IEnumerable<string> EnumerateKeys(this StringDictionary @this) {
-		foreach (string key in @this.Keys) {
-			yield return key;
-		}
-	}
-#nullable disable
 }

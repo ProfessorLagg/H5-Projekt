@@ -8,13 +8,13 @@ internal class ApiSettingsTest : IUnitTest {
 
 	public void Run() {
 		ApiSettings.LoadDefault();
-		IniFile defaultFile = ApiSettings.ToIniFile();
+		IniDocument defaultFile = ApiSettings.ToIniFile();
 		HTTPSettings defaultHTTP = HTTPSettings.Parse(defaultFile.GetSection(HTTPSettings.SectionName));
 		LoggingSettings defaultLogging = LoggingSettings.Parse(defaultFile.GetSection(LoggingSettings.SectionName));
 		ApiSettings.Save();
 
 		ApiSettings.Load();
-		IniFile loadedFile = ApiSettings.ToIniFile();
+		IniDocument loadedFile = ApiSettings.ToIniFile();
 		HTTPSettings loadedHTTP = HTTPSettings.Parse(loadedFile.GetSection(HTTPSettings.SectionName));
 		LoggingSettings loadedLogging = LoggingSettings.Parse(loadedFile.GetSection(LoggingSettings.SectionName));
 

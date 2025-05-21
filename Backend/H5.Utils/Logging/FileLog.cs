@@ -4,9 +4,13 @@ using System.Text;
 
 namespace H5.Lib.Logging;
 #nullable enable
+/// <summary>Writes <see cref="LogMessage"/>'s to timestamp named files in a directory</summary>
 public sealed class FileLog : ILogDestination {
+	/// <summary>Path to default directory. Used when no directory was passed to constructor</summary>
 	public static readonly string DefaultDirectoryPath = Path.Join(PathUtils.ExeDirectory.FullName, "Logs");
+	/// <summary><see cref="DirectoryInfo"/> of <see cref="FileLog.DefaultDirectoryPath"/>. Used when no directory was passed to constructor</summary>
 	public static readonly DirectoryInfo DefaultDirectory = new DirectoryInfo(DefaultDirectoryPath);
+	/// <summary>Default <see cref="Encoding"/> for log files. Used when no <see cref="Encoding"/> was passed constructor</summary>
 	public static readonly Encoding DefaultEncoding = Encoding.UTF8;
 
 	private static readonly int BufferSize = Environment.SystemPageSize;
@@ -20,14 +24,32 @@ public sealed class FileLog : ILogDestination {
 	#endregion
 
 	#region Constructors
+	/// <summary>Creates a new instance of the <see cref="FileLog"/> class</summary>
+	/// <param name="logDir"><see cref="DirectoryInfo"/> of directory to place logfiles in</param>
+	/// <param name="encoding"><see cref="Encoding"/> text encoding to write logfiles in</param>
 	public FileLog(DirectoryInfo logDir, Encoding encoding) {
 		LogDirectory = logDir;
 		Encoding = encoding;
 	}
+
+	/// <summary><inheritdoc cref="FileLog(DirectoryInfo, Encoding)"/> using <see cref="FileLog.DefaultEncoding"/></summary>
+	/// <param name="logDir"><see cref="DirectoryInfo"/> of directory to place logfiles in</param>
 	public FileLog(DirectoryInfo logDir) : this(logDir, DefaultEncoding) { }
+
+	/// <summary><inheritdoc cref="FileLog(DirectoryInfo, Encoding)"/> using <see cref="FileLog.DefaultDirectory"/> and <see cref="FileLog.DefaultEncoding"/></summary>
 	public FileLog() : this(DefaultDirectory, DefaultEncoding) { }
+
+	/// <summary><inheritdoc cref="FileLog(DirectoryInfo, Encoding)"/> using <see cref="FileLog.DefaultDirectory"/></summary>
+	/// <param name="encoding"><see cref="Encoding"/> text encoding to write logfiles in</param>
 	public FileLog(Encoding encoding) : this(DefaultDirectory, encoding) { }
+
+	/// <summary><inheritdoc cref="FileLog(string, Encoding)"/> using <see cref="FileLog.DefaultEncoding"/></summary>
+	/// <param name="logDirPath">Path of directory to place logfiles in</param>
 	public FileLog(string logDirPath) : this(new DirectoryInfo(logDirPath), DefaultEncoding) { }
+
+	/// <inheritdoc cref="FileLog(DirectoryInfo, Encoding)"/>
+	/// <param name="logDirPath">Path of directory to place logfiles in</param>
+	/// <param name="encoding"><inheritdoc/></param>
 	public FileLog(string logDirPath, Encoding encoding) : this(new DirectoryInfo(logDirPath), encoding) { }
 	#endregion
 
@@ -54,12 +76,14 @@ public sealed class FileLog : ILogDestination {
 	#endregion
 
 	#region Interface Implementation
+	/// <inheritdoc/>
 	public bool Equals(ILogDestination? other) {
 		if (other is null || other is not FileLog) { return false; }
 		FileLog otherFileLogger = (FileLog)other;
 		return this.LogDirectory.Equals(otherFileLogger.LogDirectory);
 	}
 
+	/// <inheritdoc/>
 	public void Write(LogMessage logMessage) {
 		lock (WriteLock) {
 			FileStream stream = this.EnsureLogFile();
@@ -77,5 +101,11 @@ public sealed class FileLog : ILogDestination {
 		}
 	}
 	#endregion
+	/// <summary>Destructor</summary>
+	~FileLog() {
+		if (this.LogFileStream is not null) {
+			this.LogFileStream.Close();
+		}
+	}
 }
 #nullable disable
