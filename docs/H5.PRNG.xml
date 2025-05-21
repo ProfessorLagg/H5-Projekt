@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>H5.PRNG</name>
+    </assembly>
+    <members>
+        <member name="M:H5.PRNG.SFC32.NextInt">
+            <returns>Random integer between 0 and 2^32</returns>
+        </member>
+        <member name="M:H5.PRNG.SFC32.NextFloat">
+            <returns>Random float between 0.0 and 1.0</returns>
+        </member>
+    </members>
+</doc>

@@ -11,6 +11,8 @@
 		<PublishTrimmed>True</PublishTrimmed>
 		<DebugType>pdbonly</DebugType>
 		<Authors>Søren P.K Thuesen</Authors>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>..\..\docs\API.xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>

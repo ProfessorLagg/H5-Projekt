@@ -11,8 +11,6 @@ internal class API_Program {
 		Console.Write($"Loaded settings:\n{ApiSettings.ToIniFile()}\n");
 		if (ApiSettings.Logging.LogToConsole) { Log.AddConsoleLog(); }
 		if (ApiSettings.Logging.LogToFile) { Log.AddFileLog(ApiSettings.Logging.LogDirPath); }
-
-
 		ApiController controller = new();
 		HandleTimeServer handleTimeServer = new();
 		HttpServer server = new(controller, null);

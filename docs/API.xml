@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>H5.API</name>
+    </assembly>
+    <members>
+        <member name="T:H5.API.ApiController">
+            <summary>Handles routing for the API</summary>
+        </member>
+        <member name="M:H5.API.ApiController.MatchRoute(System.Net.HttpListenerRequest)">
+            <summary>
+            Matches request
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="T:H5.API.ApiSettings">
+            <summary>Handles settings file for the API</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.EnableHttp">
+            <summary>Should the API server respond to http:// requests</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.PortHttp">
+            <summary>The port the API server listsens for http:// requests on</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.EnableHttps">
+            <summary>Should the API server respond to https:// requests</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.PortHttps">
+            <summary>The port the API server listsens for https:// requests on</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.HostNames">
+            <summary>Hostnames the API server listens for requests on ex. localhost, casa-blanca.com, *</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.MaxLogLevel">
+            <summary>Lowest level of logs that get printed to console and generic log file</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogToConsole">
+            <summary>Enables/Disables writing generic log to console</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogToFile">
+            <summary>Enables/Disables writing generic log to file</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogDirPath">
+            <summary>Directory logfiles are placed in when <see cref="F:H5.API.ApiSettings.LoggingSettings.LogToFile"/> is enabled</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogW3">
+            <summary>Enables/Disables writing W3 Extended Log File Format to file</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogW3DirPath">
+            <summary>Directory logfiles are placed in when <see cref="F:H5.API.ApiSettings.LoggingSettings.LogW3"/> is enabled</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.FileServerSettings.ContentRoot">
+            <summary>Directory path to static content.Defaults to {exe directory}\wwwroot if empty or missing</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.FileServerSettings.EnableCaching">
+            <summary>Toggles the file server in-memory cache. Defaults to true if not specified</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.FileServerSettings.MaxCacheFileSize">
+            <summary>Maximum size of cached files in bytes. Defaults to 4096 if not specified</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.FileServerSettings.CacheLifetimeSeconds">
+            <summary>Seconds a file can go untouched in the cache before it gets cleaned up. Defaults to 600 if not specified</summary>
+        </member>
+    </members>
+</doc>

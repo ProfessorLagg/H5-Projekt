@@ -7,6 +7,7 @@ using System.Collections;
 
 
 namespace H5.API;
+/// <summary>Handles settings file for the API</summary>
 public static class ApiSettings {
 	public class InvalidSettingException : Exception {
 		public InvalidSettingException(string? message) : base(message) { }

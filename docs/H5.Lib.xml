@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>H5.Lib</name>
+    </assembly>
+    <members>
+        <member name="M:H5.Lib.IniFile.SetSection(System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.String}})">
+            <summary>Adds or overrides the section with the specified name</summary>
+        </member>
+        <member name="M:H5.Lib.Logging.LogLevelExtentions.Name(H5.Lib.Logging.LogLevel)">
+            <summary>Faster version of <see cref="!:LogLevel.ToString()"/></summary>
+        </member>
+        <member name="M:H5.Lib.Utils.StreamUtils.SameContent(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            Check that 2 streams contain exactly the same bytes.
+            Does not reset positions
+            </summary>
+        </member>
+    </members>
+</doc>
