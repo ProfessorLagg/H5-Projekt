@@ -14,7 +14,10 @@ internal class API_Program {
 
 
 		ApiController controller = new();
+		HandleTimeServer handleTimeServer = new();
 		HttpServer server = new(controller, null);
+		server.AddIncomingMiddleWare(handleTimeServer.InHandler);
+		server.AddOutgoingMiddleWare(handleTimeServer.OutHandler);
 
 		foreach (string hostName in ApiSettings.HTTP.HostNames) {
 			if (ApiSettings.HTTP.EnableHttp) {

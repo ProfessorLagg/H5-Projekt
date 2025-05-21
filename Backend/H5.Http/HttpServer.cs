@@ -27,17 +27,17 @@ public sealed class HttpServer {
 
 	// TODO Summary
 	public void AddIncomingMiddleWare(IMiddleware middleware) {
-		if (this.ShouldRun) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
+		if (this.ShouldRun || this.Listener.IsListening) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
 		lock (DefitionLock) {
-			this.IncomingMiddleware.Append(middleware);
+			this.IncomingMiddleware.Add(middleware);
 		}
 	}
 
 	// TODO Summary
 	public void AddOutgoingMiddleWare(IMiddleware middleware) {
-		if (this.ShouldRun) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
+		if (this.ShouldRun || this.Listener.IsListening) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
 		lock (DefitionLock) {
-			this.OutgoingMiddleware.Append(middleware);
+			this.OutgoingMiddleware.Add(middleware);
 		}
 	}
 
@@ -99,8 +99,6 @@ public sealed class HttpServer {
 			Logger.Error("context was already disposed!");
 		}
 	}
-	const string HandleTimeHeaderName = @"X-HandleTime";
-	const string ReceivedHeaderName = @"X-Received";
 	private void HandleRequest(HttpListenerContext context) {
 		try {
 			LogRequest(context.Request);
@@ -131,9 +129,6 @@ public sealed class HttpServer {
 		}
 		finally {
 			if (context is not null) {
-				DateTime recieved = DateTime.Parse(context.Request.Headers[ReceivedHeaderName]!).ToUniversalTime();
-				TimeSpan handleTime = DateTime.UtcNow - recieved;
-				context.Response.Headers[HandleTimeHeaderName] = handleTime.ToLargestUnitString();
 				LogResponse(context.Response);
 				context.Response.OutputStream.Flush();
 				context.Response.Close();
@@ -143,7 +138,6 @@ public sealed class HttpServer {
 	private void ScheduleRequest(HttpListenerContext context) {
 		context.Response.SendChunked = false;
 		context.Response.Headers.Add(@"Server", @""); // This is the only way to remove the Server field
-		context.Request.Headers[ReceivedHeaderName] = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.ffffffzzz");
 		ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);
 	}
 	public void AddPrefix(string uriPrefix) {

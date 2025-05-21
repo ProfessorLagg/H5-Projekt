@@ -6,7 +6,7 @@ Der stilles derfor følgende krav til performance:
 - [x] Web-Responstid må ikke overstige `ping + 1000ms`, og skal i gennemsnit være under `ping + 20ms`
 
 ## Krav til gameplay
-- [ ] Det skal være muligt at starte et nyt spil, også selvom du har gang i et eksisterende
+- [x] Det skal være muligt at starte et nyt spil, også selvom du har gang i et eksisterende
 - [x] Brikkerne skal kunne trækkes ud på brættet, både på mobil og desktop
 - Før en brik placeres skal det tydeligt fremgå:
   - [x] Præcist hvilke celler som brikken kommer til at fylde
@@ -33,5 +33,8 @@ Der stilles derfor følgende krav til performance:
   - [ ] Tilfældigheds Seed
   - [ ] Tilfældigheds Algoritme
   - [ ] De træk som brugeren har taget, i den rækkefølge de tog dem
-- [ ] Spillet skal kunne spilles i følgende browsere: Chrome til Android, Chrome til Windows, Safari på iOS
+- Spillet skal kunne spilles i følgende browsere
+  - [ ] Chrome til Android
+  - [x] Chrome til Windows
+  - [ ] Safari på iOS
 
