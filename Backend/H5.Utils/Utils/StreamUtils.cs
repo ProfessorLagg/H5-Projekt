@@ -29,7 +29,8 @@ public static class StreamUtils {
 		if (streamA.CanSeek && streamB.CanSeek) {
 			streamA.Seek(0, SeekOrigin.Begin);
 			streamB.Seek(0, SeekOrigin.Begin);
-		} else if (streamA.Position != streamB.Position) {
+		}
+		else if (streamA.Position != streamB.Position) {
 			throw new ArgumentException("Streams must either be seekable or have the same starting position");
 		}
 

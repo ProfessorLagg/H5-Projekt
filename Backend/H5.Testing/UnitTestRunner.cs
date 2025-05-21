@@ -40,7 +40,8 @@ internal class UnitTestRunner {
 				test.Run();
 				passCount++;
 				PrintPass(test);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				failCount++;
 				PrintFail(test, e);
 			}

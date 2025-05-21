@@ -5,7 +5,6 @@ using H5.Lib.Utils;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Mail;
 using System.Runtime.InteropServices;
 
 namespace H5.Http;

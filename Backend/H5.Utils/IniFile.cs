@@ -111,7 +111,8 @@ public sealed class IniFile {
 	public void SetValue(string sectionName, string key, string value) {
 		if (this.Sections.ContainsKey(sectionName)) {
 			this.Sections[sectionName][key] = value;
-		} else {
+		}
+		else {
 			IEnumerable<KeyValuePair<string, string>> kvps = new KeyValuePair<string, string>[] {
 				new KeyValuePair<string, string>(key, value)
 			};
