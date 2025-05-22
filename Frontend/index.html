@@ -3,7 +3,7 @@
 
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <link rel="stylesheet" href="css/root.css">
         <link rel="stylesheet" href="css/backgrounds.css">
         <link rel="prefetch" href="/game/board.svg" />
@@ -11,7 +11,7 @@
         <title>Laggdoku</title>
     </head>
 
-    <body>
+    <body style="overscroll-behavior: none;">
         <script type="module">
             import * as gameNs from "/game/game.js"
             window.gameNs = gameNs;

@@ -200,7 +200,11 @@ function assertValidShapeId(shapeId, allow_empty = false) {
 }
 //#endregion
 
-
+function fixScrolling() {
+    document.querySelectorAll('*').forEach(e =>
+        e.classList.add('scrollfix')
+    )
+}
 
 // -- GameElement --
 const GameElementTagName = 'game-wrap';
@@ -889,14 +893,15 @@ class GameElement extends HTMLElement {
 
         const targetBounds = event.target.getBoundingClientRect();
         const targetTouch = event.targetTouches[0];
-        const grab_left = rangeMapNumber(targetTouch.clientX, targetBounds.left, targetBounds.right, 0.0, 1.0) * targetBounds.width;
-        const grab_top = rangeMapNumber(targetTouch.clientY, targetBounds.top, targetBounds.bottom, 0.0, 1.0) * targetBounds.height;
+        const grab_left = rangeMapNumber(targetTouch.clientX, targetBounds.left, targetBounds.right, 0.0, 1.0) * targetBounds.width * 9 / 5;
+        const grab_top = rangeMapNumber(targetTouch.clientY, targetBounds.top, targetBounds.bottom, 0.0, 1.0) * targetBounds.height * 9 / 5;
 
         this.selectPiece(event.target, grab_top, grab_left);
 
         this.gameSelectedPiece.addEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
         this.gameSelectedPiece.addEventListener("touchend", e => this.piece_touchend(e), { passive: true });
         this.gameSelectedPiece.addEventListener("touchcancel", e => this.piece_touchcancel(e), { passive: true });
+        document.addEventListener('gesturestart', function (e) { e.preventDefault(); }, { passive: false });
         await this.piece_touchmove(event);
     }
     /**
@@ -904,7 +909,6 @@ class GameElement extends HTMLElement {
      */
     async piece_touchmove(event) {
         if (this.gameSelectedPiece === undefined || event.target !== this.gameSelectedPiece) { return; }
-
         const gameBounds = this.getBoundingClientRect();
         const touchpos = event.touches[0];
         const mouseX = touchpos.clientX - gameBounds.x;
@@ -920,13 +924,7 @@ class GameElement extends HTMLElement {
         this.gameSelectedPiece.removeEventListener("touchmove", e => this.piece_touchmove(e), { passive: true });
         this.gameSelectedPiece.removeEventListener("touchend", e => this.piece_touchend(e), { passive: true });
         this.gameSelectedPiece.removeEventListener("touchcancel", e => this.piece_touchend(e), { passive: true });
-
-        // const gameBounds = this.getBoundingClientRect();
-        // const touchpos = event.touches[0];
-        // const mouseX = touchpos.clientX - gameBounds.x;
-        // const mouseY = touchpos.clientY - gameBounds.y;
-        // await this.updateSelectedPiecePosition(mouseY, mouseX);
-
+        document.removeEventListener('gesturestart', function (e) { e.preventDefault(); }, { passive: false });
         await this.placeSelectedPiece();
     }
     /**
@@ -945,8 +943,8 @@ class GameElement extends HTMLElement {
     async piece_pointerdown(event) {
         console.debug("piece_pointerdown", "\n\tthis:", this, "\n\event.target:", event.target);
         const targetBounds = event.target.getBoundingClientRect();
-        const grab_left = rangeMapNumber(event.clientX, targetBounds.left, targetBounds.right, 0.0, 1.0) * targetBounds.width;
-        const grab_top = rangeMapNumber(event.clientY, targetBounds.top, targetBounds.bottom, 0.0, 1.0) * targetBounds.height;
+        const grab_left = rangeMapNumber(event.clientX, targetBounds.left, targetBounds.right, 0.0, 1.0) * targetBounds.width * 9 / 5;
+        const grab_top = rangeMapNumber(event.clientY, targetBounds.top, targetBounds.bottom, 0.0, 1.0) * targetBounds.height * 9 / 5;
 
         this.selectPiece(event.target, grab_top, grab_left);
 
@@ -996,7 +994,7 @@ class GameElement extends HTMLElement {
         } else {
             for (let i = 0; i < pieces.length; i++) {
                 console.debug("init piece:", pieces[i]);
-                pieces[i].addEventListener("touchstart", e => this.piece_touchstart(e), { passive: true });
+                pieces[i].addEventListener("touchstart", e => this.piece_touchstart(e), { passive: false });
             }
         }
     }
@@ -1030,3 +1028,4 @@ class GameElement extends HTMLElement {
 }
 
 customElements.define(GameElementTagName, GameElement);
+fixScrolling();

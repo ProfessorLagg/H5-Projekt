@@ -3,6 +3,7 @@
     margin: 0;
     padding: 0;
     overflow: none;
+    overscroll-behavior: none;
     touch-action: none !important;
 }
 
