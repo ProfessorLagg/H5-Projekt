@@ -1,0 +1,1 @@
+pwsh -Command "$(ConvertFrom-Markdown 'Rapport.md').Html | Out-File 'Rapport.html'"
