@@ -451,7 +451,7 @@ class GameElement extends HTMLElement {
     get lastScore() { return parseInt(localStorage["last-score"] ?? "0"); }
     set lastScore(new_score) {
         TypeChecker.assertIsInteger(new_score);
-        localStorage["high-score"] = new_score;
+        localStorage["last-score"] = new_score;
         this.lastScoreElem.setAttribute("value", new_score);
         this.lastScoreElem.textContent = "LAST SCORE: " + new_score.toString();
     }
@@ -1007,7 +1007,6 @@ class GameElement extends HTMLElement {
         this.restartButton.addEventListener("click", e => this.startButton_click(e));
         this.resumeButton.setAttribute("canLoad", this.can_load());
         this.initPieces();
-        this.highscore = this.highscore;
         this.lastScore = this.lastScore;
         this.init_called = true;
     }
