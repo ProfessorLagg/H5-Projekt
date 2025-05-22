@@ -18,6 +18,9 @@
         <member name="M:H5.Http.DefaultErrorHandler.Handle(System.Net.HttpListenerContext,System.Net.HttpStatusCode)">
             <inheritdoc/>
         </member>
+        <member name="T:H5.Http.FileServer">
+            <summary><see cref="T:H5.Http.IRequestHandler"/> than returns static files from a specified directory and url path root.</summary>
+        </member>
         <member name="M:H5.Http.FileServer.#ctor(System.IO.DirectoryInfo,H5.Http.HttpRoute,H5.Http.FileServer.CacheSettings)">
             <summary>Creates a new FileServer request handler</summary>
             <param name="rootDirectory">The root directory where the file server looks for files</param>
