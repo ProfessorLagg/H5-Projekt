@@ -7,8 +7,6 @@
     --a4mu: calc(max(var(--a4wu), var(--a4hu)));
 }
 * {
-    margin: 0px;
-    padding: 0px;
     font-family: 'Arial';
     max-width: var(--a4w);
 }
@@ -58,30 +56,31 @@ h1, h2 {
 <section>
 
 # Indholdsfortegnelse <!-- omit from toc -->
-- [Forord](#forord)
-  - [Formål](#formål)
-  - [Hvem er jeg](#hvem-er-jeg)
-- [Læsevejledning](#læsevejledning)
+1. [Læsevejledning](#læsevejledning)
+2. [Forord](#forord)
+    1. [Formål](#formål)
+    2. [Hvem er jeg](#hvem-er-jeg)
+3. [Indledning](#indledning)
+    1. [Problemformulering](#problemformulering)
+4. [Bilag](#bilag)
 
 </section>
 
 <section>
 
 # Læsevejledning
-Denne rapport beskriver selve udviklingsforløbet og de teknologiske valg der er blev taget og
-begrundelse herfor.
-Kildekoden for frontend og backend er tilgængelig på GitHub. Links hertil findes i ”Bilag 7 –
-Kildekoden”. 
+Denne rapport beskriver selve udviklingsforløbet, de teknologiske valg der er blev taget, og .
+Kildekoden for frontend og backend er tilgængelig på GitHub. Links hertil findes i Bilag 1 – Kildekode
 </section>
 
 
 <section>
 
-# 1 Forord
+# Forord
 Formålet med denne rapport er at give læseren en dybere indsigt i Laggdoku's udvikling.
 Laggdoku er udviklet af Søren P.K Thuesen.
 Denne rapport indeholder beskrvelse af både produktet og udviklingsprocessen.
-### 1.1 Formål
+## Formål
 Laggdoku er en fusion imellem tetris og sodoku, hvor brikker placeres på et 9x9 gitter.
 Brikkerne er en samling af blokke, som hver især fylder et en celle i 9x9 gitteret, og tager formæssig udgangspunkt i tetris-brikkerne.
 Når en række, kollonne eller 3x3 under gitter er helt fyldt med blokke bliver den ryddet.
@@ -89,7 +88,8 @@ Spilleren optjener score når en blok placeres, og når den ryddes.
 Hver runde gives spilleren 3 brikker, som må placeres i vilkårlig rækkefølge.
 Splittet slutter hvis splilleren ikke kan placere en brik, dvs. når der ikke er plads i gitteret til en brik.
 Når et spil er slut vil spilleren blive givet en endelig score, og få muligheden for at uploade resultatet til et online leaderboard.
-### 1. 2Hvem er jeg 
+
+## Hvem er jeg 
 Mit navn er Søren P.K Thuesen
 Jeg har 4+ års erfaring som Teknisk Konsulent hos D4 ApS, hvor jeg har arbejdet hovedesageligt med 
 	- IIS hostede ASP Hjemmesider
@@ -101,22 +101,28 @@ Jeg har 4+ års erfaring som Teknisk Konsulent hos D4 ApS, hvor jeg har arbejdet
 Gennem min læreplads hos D4 ApS har jeg opnået praktisk erfaring inden for blandt andet Microsoft SQL Server, IIS, ASP (både .net framework, VBScript og JScript), PowerShell, Drift af Windows Server og C# udvikling
 Derudover går meget af min fritid på software udvikling, hvorigennem jeg har fået erfaring med bla. Zig, Go, x86 Assembly, Godot og meget mere
 Jeg har en forkærlighed for performance optimering, hvorigennem mange af mine fritidsprojekter har handlet udelukkende om performance opdatering
-### Indledning
-
 </section>
 
 <section>
 
-# Læsevejledning
-TODO
+# Indledning
+## Problemformulering
+I min familie har vi over de sidste par år haft en hygge-konkurence kørrende i hvem der kan få den højeste score i spillet
+Woodoku. Min mor desværre udelukket fra kunkorrencen da Woodoku ikke er cross-platform og kun virker på Android. Spillet
+er derudover fyldt med abrydelser og lange ventetider i form af reklame-bombadament, pop-ups, irriterende forsøg på
+"Engagement Farming" og et hav af Performance problemer, som tilsammen resultere i en unødvændigt frusterende
+spiloplevelse. Den interne hygge-konkurence er også forværret af at Woodoku, uden at informere brugeren, justere
+sværhedsgraden. Hvilket gør at high-scores ikke er sammenlignelige
+Mit projekt går derfor ud på at bygge et cross-platform alternativ, fri for de frustrationspunkter som findes i Woodoku:
+Kan det lade sig gøre, via. simple web-teknologier, at bygge et cross-platform alternativ til Woodoku?
+Kan jeg levere en bedre spiloplevelse, fri for abrydelser og lange ventetider?
+Er det muligt at levere en mere tilgængelig og sammenlignelig konkurrence?
 </section>
-
-
 
 <section>
 
 # Bilag
-### 1. Kildekode
+1. [Kildekode](https://github.com/ProfessorLagg/H5-Projekt)
 </section>
 
 
