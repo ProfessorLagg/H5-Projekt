@@ -2,7 +2,7 @@
 using System.Text;
 
 namespace H5.Lib.Utils;
-/// <summary>Utilities and extentions for strings</summary>
+/// <summary>Utilities and extentions for <see langword="string"/></summary>
 public static class StringUtils {
 	private readonly struct EscapeSequence {
 		public readonly string Find;

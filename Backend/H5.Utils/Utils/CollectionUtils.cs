@@ -1,7 +1,7 @@
 ﻿using System.Collections.Specialized;
 
 namespace H5.Lib.Utils;
-/// <summary>Utilities and extentions for collections</summary>
+/// <summary>Utilities and extentions for <see cref="System.Collections"/></summary>
 public static class CollectionUtils {
 	/// <summary>
 	/// Creates a <see cref="StringDictionary"/> from an <c>IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;</c> according to the default comparer for the key type.

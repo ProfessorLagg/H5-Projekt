@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 
 namespace H5.Lib.Utils;
-/// <summary>Utilities and extentions for Enums</summary>
+/// <summary>Utilities and extentions for <see cref="Enum"/></summary>
 public static class EnumUtils {
 	private static ConcurrentDictionary<Enum, string> ToStringCache = new();
 	private static string ToStringFactory(Enum e) { return e.ToString(); }
