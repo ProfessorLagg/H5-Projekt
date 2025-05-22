@@ -69,7 +69,7 @@
     display: grid;
     grid-auto-flow: row dense;
     grid-template-columns: 1fr;
-    grid-template-rows: 2fr 9fr 5fr;
+    grid-template-rows: auto 2fr 9fr 5fr;
     gap: var(--baseunit);
     justify-content: end;
 
