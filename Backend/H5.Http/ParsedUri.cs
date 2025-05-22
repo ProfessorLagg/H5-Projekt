@@ -18,22 +18,21 @@ public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string>
 
 	/// <summary>The scheme component of the URI. ex. 'http''</summary>
 	public string Scheme {
-		get { return _Scheme; }
-		set { _Scheme = value.ToLowerInvariant(); }
+		get => this._Scheme; set => this._Scheme = value.ToLowerInvariant();
 	}
 	/// <summary>The UserInfo </summary>
 	public string UserInfo {
-		get { return $"{_UserName}:{_UserPassword}"; }
+		get => $"{this._UserName}:{this._UserPassword}";
 		set {
 			string[] split = value.ToLowerInvariant().Split(':');
 			switch (split.Length) {
 				case 1:
-					_UserName = split[0];
-					_UserPassword = string.Empty;
+					this._UserName = split[0];
+					this._UserPassword = string.Empty;
 					break;
 				case 2:
-					_UserName = split[0];
-					_UserPassword = string.Empty;
+					this._UserName = split[0];
+					this._UserPassword = string.Empty;
 					break;
 				default:
 					throw new ArgumentException("Invalid UserInfo component string");
@@ -41,24 +40,19 @@ public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string>
 		}
 	}
 	public string Host {
-		get { return _Host; }
-		set { _Host = value.ToLowerInvariant(); }
+		get => this._Host; set => this._Host = value.ToLowerInvariant();
 	}
 	public string Port {
-		get { return _Port; }
-		set { _Port = value.ToLowerInvariant(); }
+		get => this._Port; set => this._Port = value.ToLowerInvariant();
 	}
 	public string Path {
-		get { return _Path; }
-		set { _Path = value.ToLowerInvariant(); }
+		get => this._Path; set => this._Path = value.ToLowerInvariant();
 	}
 	public string Query {
-		get { return _Query; }
-		set { _Query = value.ToLowerInvariant(); }
+		get => this._Query; set => this._Query = value.ToLowerInvariant();
 	}
 	public string Fragment {
-		get { return _Fragment; }
-		set { _Fragment = value.ToLowerInvariant(); }
+		get => this._Fragment; set => this._Fragment = value.ToLowerInvariant();
 	}
 
 	public ParsedUri() { }
@@ -70,7 +64,7 @@ public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string>
 			url = url.Substring(scheme_end + 1);
 		}
 
-		/// Authority component
+		// Authority component
 		if (url.StartsWith("//")) {
 			url = url.Substring(2);
 			int authority_end = url.IndexOf('/');
@@ -111,35 +105,35 @@ public sealed record class ParsedUri : IEquatable<ParsedUri>, IEquatable<string>
 		StringBuilder sb = new StringBuilder();
 		// Scheme
 		if (this.Scheme.Length > 0) {
-			sb.Append(this.Scheme);
-			sb.Append("://");
+			_ = sb.Append(this.Scheme);
+			_ = sb.Append("://");
 		}
 		// UserInfo
 		if (this.UserInfo.Length > 0) {
-			sb.Append(this.UserInfo);
-			sb.Append('@');
+			_ = sb.Append(this.UserInfo);
+			_ = sb.Append('@');
 		}
 		// Host
-		sb.Append(this.Host);
+		_ = sb.Append(this.Host);
 		// Port
 		if (this.Port.Length > 0) {
-			sb.Append(':');
-			sb.Append(this.Port);
+			_ = sb.Append(':');
+			_ = sb.Append(this.Port);
 		}
 		// Path
 		if (this.Path.Length > 0) {
-			sb.Append('/');
-			sb.Append(this.Path);
+			_ = sb.Append('/');
+			_ = sb.Append(this.Path);
 		}
 		// Query
 		if (this.Query.Length > 0) {
-			sb.Append("?");
-			sb.Append(this.Query);
+			_ = sb.Append("?");
+			_ = sb.Append(this.Query);
 		}
 		// Fragment
 		if (this.Fragment.Length > 0) {
-			sb.Append('#');
-			sb.Append(this.Fragment);
+			_ = sb.Append('#');
+			_ = sb.Append(this.Fragment);
 		}
 		return sb.ToString();
 	}

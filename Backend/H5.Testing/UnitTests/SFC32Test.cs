@@ -8,9 +8,8 @@ internal class SFC32Test : IUnitTest {
 	private void TestInt() {
 		PRNG.SFC32 rand = new();
 		uint r0 = rand.NextInt();
-		uint r1 = r0;
 		for (int i = 0; i < IterCount; i++) {
-			r1 = rand.NextInt();
+			uint r1 = rand.NextInt();
 			TestHelpers.ExpectNotEqual(r0, r1);
 			r0 = r1;
 		}
@@ -18,9 +17,8 @@ internal class SFC32Test : IUnitTest {
 	private void TestFloat() {
 		PRNG.SFC32 rand = new();
 		float r0 = rand.NextInt();
-		float r1 = r0;
 		for (int i = 0; i < IterCount; i++) {
-			r1 = rand.NextFloat();
+			float r1 = rand.NextFloat();
 			TestHelpers.ExpectNotEqual(r0, r1);
 			r0 = r1;
 		}

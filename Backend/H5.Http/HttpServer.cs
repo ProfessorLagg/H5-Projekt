@@ -27,7 +27,7 @@ public sealed class HttpServer {
 	// TODO Summary
 	public void AddIncomingMiddleWare(IMiddleware middleware) {
 		if (this.ShouldRun || this.Listener.IsListening) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
-		lock (DefitionLock) {
+		lock (this.DefitionLock) {
 			this.IncomingMiddleware.Add(middleware);
 		}
 	}
@@ -35,7 +35,7 @@ public sealed class HttpServer {
 	// TODO Summary
 	public void AddOutgoingMiddleWare(IMiddleware middleware) {
 		if (this.ShouldRun || this.Listener.IsListening) { throw new InvalidOperationException("Cannot edit middleware while server is running"); }
-		lock (DefitionLock) {
+		lock (this.DefitionLock) {
 			this.OutgoingMiddleware.Add(middleware);
 		}
 	}
@@ -53,13 +53,13 @@ public sealed class HttpServer {
 	private void LogRequest(HttpListenerRequest request) {
 		const string spacer = "  ";
 		StringBuilder msgbuilder = new();
-		msgbuilder.AppendLine("HTTP Request:");
-		msgbuilder.AppendLine($"{spacer}{request.HttpMethod} {request.RawUrl} {request.GetHTTPVersionString()}");
+		_ = msgbuilder.AppendLine("HTTP Request:");
+		_ = msgbuilder.AppendLine($"{spacer}{request.HttpMethod} {request.RawUrl} {request.GetHTTPVersionString()}");
 		for (int i = 0; i < request.Headers.Count; i++) {
-			msgbuilder.Append(spacer);
-			msgbuilder.Append(request.Headers.Keys[i] ?? "");
-			msgbuilder.Append(": ");
-			msgbuilder.AppendLine(request.Headers[i] ?? "");
+			_ = msgbuilder.Append(spacer);
+			_ = msgbuilder.Append(request.Headers.Keys[i] ?? "");
+			_ = msgbuilder.Append(": ");
+			_ = msgbuilder.AppendLine(request.Headers[i] ?? "");
 		}
 		Logger.Write(LogLevel.Info, msgbuilder.ToString());
 	}
@@ -70,14 +70,14 @@ public sealed class HttpServer {
 			level = LogLevel.Error;
 		}
 		StringBuilder msgbuilder = new();
-		msgbuilder.AppendLine("HTTP Response:");
-		msgbuilder.Append(spacer);
-		msgbuilder.AppendLine($"{response.GetHTTPVersionString()} {((int)response.StatusCode).ToString()} {response.StatusDescription}");
+		_ = msgbuilder.AppendLine("HTTP Response:");
+		_ = msgbuilder.Append(spacer);
+		_ = msgbuilder.AppendLine($"{response.GetHTTPVersionString()} {response.StatusCode.ToString()} {response.StatusDescription}");
 		for (int i = 0; i < response.Headers.Count; i++) {
-			msgbuilder.Append(spacer);
-			msgbuilder.Append(response.Headers.Keys[i] ?? "");
-			msgbuilder.Append(": ");
-			msgbuilder.AppendLine(response.Headers[i] ?? "");
+			_ = msgbuilder.Append(spacer);
+			_ = msgbuilder.Append(response.Headers.Keys[i] ?? "");
+			_ = msgbuilder.Append(": ");
+			_ = msgbuilder.AppendLine(response.Headers[i] ?? "");
 		}
 		Logger.Write(level, msgbuilder.ToString());
 	}
@@ -100,15 +100,17 @@ public sealed class HttpServer {
 	}
 	private void HandleRequest(HttpListenerContext context) {
 		try {
-			LogRequest(context.Request);
+			this.LogRequest(context.Request);
 			for (int i = 0; i < this.IncomingMiddleware.Count; i++) {
 				// Returning here still runs the finally block
-				if (!this.IncomingMiddleware[i].Handle(context)) return;
+				if (!this.IncomingMiddleware[i].Handle(context)) {
+					return;
+				}
 			}
 
 			IRequestHandler? mapResult = this.RouteMatcher.MatchRoute(context.Request);
 			if (mapResult is null) {
-				HandleException(context, new RouteNotFoundException(context));
+				this.HandleException(context, new RouteNotFoundException(context));
 				this.ErrorHandler.Handle(context, HttpStatusCode.NotFound);
 			}
 			else {
@@ -117,18 +119,18 @@ public sealed class HttpServer {
 
 			for (int i = 0; i < this.OutgoingMiddleware.Count; i++) {
 				// Returning here still runs the finally block
-				if (!this.OutgoingMiddleware[i].Handle(context)) return;
+				if (!this.OutgoingMiddleware[i].Handle(context)) { return; }
 			}
 		}
 		catch (Exception e) {
-			HandleException(context, e);
+			this.HandleException(context, e);
 #if DEBUG
 			throw;
 #endif
 		}
 		finally {
 			if (context is not null) {
-				LogResponse(context.Response);
+				this.LogResponse(context.Response);
 				context.Response.OutputStream.Flush();
 				context.Response.Close();
 			}
@@ -137,7 +139,7 @@ public sealed class HttpServer {
 	private void ScheduleRequest(HttpListenerContext context) {
 		context.Response.SendChunked = false;
 		context.Response.Headers.Add(@"Server", @""); // This is the only way to remove the Server field
-		ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);
+		_ = ThreadPool.QueueUserWorkItem<HttpListenerContext>(this.HandleRequest, context, false);
 	}
 	public void AddPrefix(string uriPrefix) {
 		this.Listener.Prefixes.Add(uriPrefix);
@@ -145,19 +147,19 @@ public sealed class HttpServer {
 
 	/// <summary>Blocks the calling thread to run the WebServer</summary>
 	public void Run() {
-		lock (DefitionLock) {
+		lock (this.DefitionLock) {
 			this.ShouldRun = true;
 			this.Listener.Start();
 			string listening_msg = "Listening on:";
-			foreach (var prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
+			foreach (string prefix in this.Listener.Prefixes) { listening_msg += "\n\t" + prefix; }
 			Logger.Info(listening_msg);
 
-			while (Listener.IsListening && this.ShouldRun) {
-				HttpListenerContext context = Listener.GetContext();
+			while (this.Listener.IsListening && this.ShouldRun) {
+				HttpListenerContext context = this.Listener.GetContext();
 				this.ScheduleRequest(context);
 			}
-			if (Listener.IsListening) { Listener.Stop(); }
-			Listener.Close();
+			if (this.Listener.IsListening) { this.Listener.Stop(); }
+			this.Listener.Close();
 		}
 	}
 

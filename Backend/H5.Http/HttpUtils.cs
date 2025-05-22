@@ -27,9 +27,9 @@ public static class HttpUtils {
 	/// <summary>Gets the raw bytes of a request</summary>
 	public static byte[] RawBytes(this HttpListenerRequest request) {
 		Stream rs = request.InputStream;
-		rs.Seek(0, SeekOrigin.Begin);
+		_ = rs.Seek(0, SeekOrigin.Begin);
 		byte[] bytes = new byte[rs.Length];
-		rs.Read(bytes, 0, bytes.Length);
+		_ = rs.Read(bytes, 0, bytes.Length);
 		return bytes;
 	}
 	/// <summary>Gets the raw bytes of a request as a string</summary>
@@ -47,7 +47,7 @@ public static class HttpUtils {
 		const string ResourceName = "H5.Http.BaseMimeTypes.csv";
 		const char SplitChar = ';';
 		Assembly asm = typeof(HttpUtils).Assembly;
-		string[] resourceNames = asm.GetManifestResourceNames();
+		_ = asm.GetManifestResourceNames();
 		using Stream resourceStream = asm.GetManifestResourceStream(ResourceName) ?? throw new Exception($"Could not find or open resource \"{ResourceName}\"");
 		using StreamReader sr = new(resourceStream, Encoding.UTF8, true);
 		foreach (string line in sr.ReadLines()) {
@@ -64,8 +64,14 @@ public static class HttpUtils {
 	}
 
 	public static ParsedUri ParseUri(this HttpListenerRequest request) {
-		if (request.Url is not null) return new ParsedUri(request.Url.ToString());
-		if (request.RawUrl is not null) return new ParsedUri(request.RawUrl);
+		if (request.Url is not null) {
+			return new ParsedUri(request.Url.ToString());
+		}
+
+		if (request.RawUrl is not null) {
+			return new ParsedUri(request.RawUrl);
+		}
+
 		return ParsedUri.Empty;
 	}
 

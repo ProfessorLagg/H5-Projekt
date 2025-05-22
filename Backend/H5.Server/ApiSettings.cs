@@ -117,7 +117,7 @@ public static class ApiSettings {
 		public void Validate() {
 			InvalidSettingException.ThrowIf(!(this.EnableHttp || this.EnableHttps), "Atleast one of HTTP.EnableHttp or HTTP.EnableHttps must be enabled");
 			InvalidSettingException.ThrowIf(this.HostNames.Length == 0, "You must define atleast 1 host name in HTTP.HostNames");
-			InvalidSettingException.ThrowIf(EnableHttp && EnableHttps && PortHttp == PortHttps, $"http:// and https:// cannot both use port {PortHttp}");
+			InvalidSettingException.ThrowIf(this.EnableHttp && this.EnableHttps && this.PortHttp == this.PortHttps, $"http:// and https:// cannot both use port {this.PortHttp}");
 		}
 	}
 
@@ -126,7 +126,7 @@ public static class ApiSettings {
 	public static HTTPSettings HTTP {
 		get {
 			if (!LoadCalled) { throw new Exception("Load has not been called"); }
-			if (_HTTP is null) { _HTTP = HTTPSettings.Parse(SettingsFile.GetSection(HTTPSettings.SectionName)); }
+			_HTTP ??= HTTPSettings.Parse(SettingsFile.GetSection(HTTPSettings.SectionName));
 			return _HTTP;
 		}
 	}
@@ -192,7 +192,7 @@ public static class ApiSettings {
 	public static LoggingSettings Logging {
 		get {
 			if (!LoadCalled) { throw new Exception("Load has not been called"); }
-			if (_Logging is null) { _Logging = LoggingSettings.Parse(SettingsFile.GetSection("Logging")); }
+			_Logging ??= LoggingSettings.Parse(SettingsFile.GetSection("Logging"));
 
 			return _Logging;
 		}
@@ -243,7 +243,7 @@ public static class ApiSettings {
 	public static FileServerSettings FileServer {
 		get {
 			if (!LoadCalled) { throw new Exception("Load has not been called"); }
-			if (_FileServer is null) { _FileServer = FileServerSettings.Parse(SettingsFile.GetSection(FileServerSettings.SectionName)); }
+			_FileServer ??= FileServerSettings.Parse(SettingsFile.GetSection(FileServerSettings.SectionName));
 			return _FileServer;
 		}
 	}

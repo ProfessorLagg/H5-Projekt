@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace H5.Lib.Utils;
+﻿namespace H5.Lib.Utils;
 /// <summary>Utilities and extentions for <see cref="System.IO.Stream"/></summary>
 public static class StreamUtils {
 #nullable enable
@@ -10,8 +8,9 @@ public static class StreamUtils {
 	public static IEnumerable<string> ReadLines(this StreamReader streamReader) {
 		while (!streamReader.EndOfStream) {
 			string? line = streamReader.ReadLine();
-			if (line is not null) yield return line!;
+			if (line is not null) {
+				yield return line!;
+			}
 		}
 	}
-#nullable disable
 }

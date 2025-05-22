@@ -27,8 +27,8 @@ public sealed class IniDocument {
 			if (sectionIndex > 0) { sw.Write('\n'); }
 			if (sectionName.Length > 0) { sw.Write($"[{sectionName}]\n"); }
 
-			foreach (string k in Sections[sectionName].Keys) {
-				string v = Sections[sectionName][k];
+			foreach (string k in this.Sections[sectionName].Keys) {
+				string v = this.Sections[sectionName][k];
 				sw.Write($"{k}={v.EscapeWhitespace()}\n");
 			}
 			sectionIndex += 1;
@@ -67,7 +67,9 @@ public sealed class IniDocument {
 		foreach (string l in sr.ReadLines()) {
 			lineIndex++;
 			string line = l.Trim();
-			if (string.IsNullOrWhiteSpace(line)) continue;
+			if (string.IsNullOrWhiteSpace(line)) {
+				continue;
+			}
 
 			ReadOnlySpan<char> span = line;
 			int lineCommentIdx = -1;

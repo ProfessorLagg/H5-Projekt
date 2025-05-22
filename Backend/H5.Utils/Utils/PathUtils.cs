@@ -36,7 +36,7 @@ public static class PathUtils {
 	/// Uses <see cref="PathUtils.ExeFile"/> to find the directory.
 	/// Does not check that the directory actually exists.
 	/// </remarks>
-	public static DirectoryInfo ExeDirectory { get { return ExeFile.Directory!; } }
+	public static DirectoryInfo ExeDirectory => ExeFile.Directory!;
 
 	/// <summary>Validates that a directory path does not contain invalid characters</summary>
 	/// <remarks>The list of invalid characters is sourced from <see cref="System.IO.Path.GetInvalidPathChars()"/></remarks>
@@ -45,7 +45,9 @@ public static class PathUtils {
 	public static bool ValidateDirectoryPath(ReadOnlySpan<char> path) {
 		foreach (char c in path) {
 			foreach (char invalidChar in InvalidPathChars) {
-				if (c == invalidChar) return false;
+				if (c == invalidChar) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -58,7 +60,9 @@ public static class PathUtils {
 	public static bool ValidateFileName(ReadOnlySpan<char> fileName) {
 		foreach (char c in fileName) {
 			foreach (char invalidChar in InvalidFileNameChars) {
-				if (c == invalidChar) return false;
+				if (c == invalidChar) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -104,7 +108,9 @@ public static class PathUtils {
 	/// <param name="directory">The <see cref="DirectoryInfo"/> to check</param>
 	/// <exception cref="DirectoryNotFoundException"></exception>
 	public static void AssertExists(this DirectoryInfo directory) {
-		if (!directory.Exists) throw new DirectoryNotFoundException($"directory at \"{directory.FullName}\" did not exist, is not accisible or is not a directory");
+		if (!directory.Exists) {
+			throw new DirectoryNotFoundException($"directory at \"{directory.FullName}\" did not exist, is not accisible or is not a directory");
+		}
 	}
 
 	/// <summary>

@@ -449,14 +449,6 @@
             <param name="streamReader">The <see cref="T:System.IO.StreamReader"/> to read lines from</param>
             <returns>Every non-null line returned from <see cref="M:System.IO.StreamReader.ReadLine"/></returns>
         </member>
-        <member name="M:H5.Lib.Utils.StreamUtils.EqualContent(System.IO.Stream,System.IO.Stream)">
-            <summary>Check that 2 streams contain exactly the same bytes</summary>
-            <remarks>Does not reset <see cref="P:System.IO.Stream.Position"/> for <paramref name="streamA"/> and <paramref name="streamB"/></remarks>
-            <param name="streamA"></param>
-            <param name="streamB"></param>
-            <returns><see langword="true"/> if <paramref name="streamA"/> and <paramref name="streamB"/> contain exactly the same bytes</returns>
-            <exception cref="T:System.ArgumentException"></exception>
-        </member>
         <member name="T:H5.Lib.Utils.StringUtils">
             <summary>Utilities and extentions for <see langword="string"/></summary>
         </member>

@@ -25,8 +25,8 @@ public sealed class FileServer : IRequestHandler {
 	/// <param name="rootRoute">The root route that the file server is handling</param>
 	/// <param name="cacheConfig">File content cache settings. If <see langword="null"/> uses <see cref="CacheSettings.Default"/></param>
 	public FileServer(DirectoryInfo rootDirectory, HttpRoute? rootRoute = null, CacheSettings? cacheConfig = null) {
-		if (!rootDirectory.ValidatePath()) throw new ArgumentException($"\"{rootDirectory.FullName}\" is not a valid directory path");
-		if (!rootDirectory.Exists) throw new ArgumentException($"Could not find or access directory at \"{rootDirectory.FullName}\"");
+		if (!rootDirectory.ValidatePath()) { throw new ArgumentException($"\"{rootDirectory.FullName}\" is not a valid directory path"); }
+		if (!rootDirectory.Exists) { throw new ArgumentException($"Could not find or access directory at \"{rootDirectory.FullName}\""); }
 		this.RootDirectory = rootDirectory;
 		this.Route = rootRoute ?? HttpRoute.Root;
 		this.CacheConfig = cacheConfig ?? CacheSettings.Default;
@@ -90,37 +90,37 @@ public sealed class FileServer : IRequestHandler {
 
 	/// <summary>Cleans the FileContentCache if enough time has passed since the previous clean</summary>
 	private void CleanCache() {
-		if (NextClean <= DateTime.Now) { return; }
-		NextClean = DateTime.Now + CacheConfig.CacheLifetime;
+		if (this.NextClean <= DateTime.Now) { return; }
+		this.NextClean = DateTime.Now + this.CacheConfig.CacheLifetime;
 		List<string> removeKeys = new();
-		foreach (KeyValuePair<string, DateTime> kvp in LastTouchedCache) {
+		foreach (KeyValuePair<string, DateTime> kvp in this.LastTouchedCache) {
 			if ((DateTime.Now - kvp.Value) > this.CacheConfig.CacheLifetime) {
 				removeKeys.Add(kvp.Key);
 			}
-			else if (kvp.Value < NextClean) {
-				NextClean = kvp.Value;
+			else if (kvp.Value < this.NextClean) {
+				this.NextClean = kvp.Value;
 			}
 		}
 		foreach (string k in CollectionsMarshal.AsSpan(removeKeys)) {
-			LastTouchedCache.Remove(k, out _);
-			FileContentCache.Remove(k, out _);
+			_ = this.LastTouchedCache.Remove(k, out _);
+			_ = this.FileContentCache.Remove(k, out _);
 			Logger.Debug($"Removed {k} from file cache");
 		}
 	}
 	private readonly Action CleanCacheAction = () => { };
 	private byte[]? ReadFileCached(FileInfo file) {
 		if (file.Length > this.CacheConfig.MaxFileSize) { return null; }
-		FileCacheValue? cacheValue = null;
-		if (FileContentCache.TryGetValue(file.FullName, out cacheValue) && cacheValue is not null) {
+		FileCacheValue? cacheValue;
+		if (this.FileContentCache.TryGetValue(file.FullName, out cacheValue) && cacheValue is not null) {
 			cacheValue.UpdateContentIfNeed(file);
 		}
 		else {
 			cacheValue = new FileCacheValue(file);
-			FileContentCache[file.FullName] = cacheValue;
+			this.FileContentCache[file.FullName] = cacheValue;
 		}
 		Debug.Assert(cacheValue is not null);
-		LastTouchedCache[file.FullName] = DateTime.Now;
-		CleanCacheAction.Invoke();
+		this.LastTouchedCache[file.FullName] = DateTime.Now;
+		this.CleanCacheAction.Invoke();
 		return cacheValue.Content;
 	}
 	#endregion

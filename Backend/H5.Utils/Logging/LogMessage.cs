@@ -18,10 +18,9 @@ public sealed record class LogMessage {
 	/// <param name="level">Level of the <see cref="LogMessage"/></param>
 	/// <param name="message">The message to write</param>
 	public LogMessage(LogScope scope, LogLevel level, string? message) {
-		Timestamp = DateTime.Now;
-		Scope = scope;
-		Level = level;
-		Message = message ?? string.Empty;
+		this.Timestamp = DateTime.Now;
+		this.Scope = scope;
+		this.Level = level;
+		this.Message = message ?? string.Empty;
 	}
-#nullable disable
 }

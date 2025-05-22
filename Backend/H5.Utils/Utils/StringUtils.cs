@@ -34,19 +34,22 @@ public static class StringUtils {
 	/// <summary><inheritdoc cref="StringUtils.EscapeWhitespace(string)"/></summary>
 	public static void EscapeWhitespace(this StringBuilder sb) {
 		foreach (EscapeSequence e in WhitespaceEscapes) {
-			sb.Replace(e.Find, e.Replace);
+			_ = sb.Replace(e.Find, e.Replace);
 		}
 	}
 	/// <summary><inheritdoc cref="StringUtils.ToLargestUnitString(TimeSpan, NumberFormatInfo)"/></summary>
 	/// <param name="timeSpan"><see cref="TimeSpan"/> to convert</param>
-	public static string ToLargestUnitString(this TimeSpan timeSpan) => timeSpan.ToLargestUnitString(CultureInfo.InvariantCulture.NumberFormat);
+	public static string ToLargestUnitString(this TimeSpan timeSpan) {
+		return timeSpan.ToLargestUnitString(CultureInfo.InvariantCulture.NumberFormat);
+	}
+
 	/// <summary>Converts <see cref="TimeSpan"/> to largest unit string</summary>
 	/// <param name="timeSpan"><see cref="TimeSpan"/> to convert</param>
 	/// <param name="format">Number format to use</param>
 	public static string ToLargestUnitString(this TimeSpan timeSpan, NumberFormatInfo format) {
-		double value = timeSpan.Ticks;
-		string unit_str = " ticks";
-
+		_ = timeSpan.Ticks;
+		string unit_str;
+		double value;
 		if (timeSpan.Ticks >= TimeSpan.TicksPerDay) {
 			value = timeSpan.TotalDays;
 			unit_str = " days";

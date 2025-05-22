@@ -69,7 +69,7 @@ public static class Log {
 	public static void Write(this LogScope scope, LogLevel level, string? message) {
 		LogMessage lm = new(scope, level, message);
 		foreach (ILogDestination dst in Destinations) {
-			ThreadPool.QueueUserWorkItem<LogMessage>(dst.Write, lm, false);
+			_ = ThreadPool.QueueUserWorkItem<LogMessage>(dst.Write, lm, false);
 		}
 	}
 
@@ -94,6 +94,5 @@ public static class Log {
 	/// <summary>Adds a new <see cref="ConsoleLog"/></summary>
 	public static void AddConsoleLog() { AddLogDestination(new ConsoleLog()); }
 }
-#nullable disable
 
 

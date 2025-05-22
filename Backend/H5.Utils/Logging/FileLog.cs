@@ -28,8 +28,8 @@ public sealed class FileLog : ILogDestination {
 	/// <param name="logDir"><see cref="DirectoryInfo"/> of directory to place logfiles in</param>
 	/// <param name="encoding"><see cref="Encoding"/> text encoding to write logfiles in</param>
 	public FileLog(DirectoryInfo logDir, Encoding encoding) {
-		LogDirectory = logDir;
-		Encoding = encoding;
+		this.LogDirectory = logDir;
+		this.Encoding = encoding;
 	}
 
 	/// <summary><inheritdoc cref="FileLog(DirectoryInfo, Encoding)"/> using <see cref="FileLog.DefaultEncoding"/></summary>
@@ -70,7 +70,7 @@ public sealed class FileLog : ILogDestination {
 		this.LogFileStream = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.Read, BufferSize, false);
 	}
 	private FileStream EnsureLogFile() {
-		if (this.LogFileDate != DateTime.Today) { NewLogFile(); }
+		if (this.LogFileDate != DateTime.Today) { this.NewLogFile(); }
 		return this.LogFileStream!;
 	}
 	#endregion
@@ -85,7 +85,7 @@ public sealed class FileLog : ILogDestination {
 
 	/// <inheritdoc/>
 	public void Write(LogMessage logMessage) {
-		lock (WriteLock) {
+		lock (this.WriteLock) {
 			FileStream stream = this.EnsureLogFile();
 			StreamWriter streamWriter = new(stream, this.Encoding, -1, true);
 			streamWriter.Write(logMessage.Timestamp.ToString("yyyy-MM-dd HH:mm:sszzz"));
@@ -108,4 +108,3 @@ public sealed class FileLog : ILogDestination {
 		}
 	}
 }
-#nullable disable

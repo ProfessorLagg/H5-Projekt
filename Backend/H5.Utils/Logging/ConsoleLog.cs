@@ -16,11 +16,11 @@ public sealed class ConsoleLog : ILogDestination {
 
 	/// <inheritdoc/>
 	public void Write(LogMessage logMessage) {
-		lock (WriteLock) {
+		lock (this.WriteLock) {
 			string msg = $"{Environment.NewLine}{logMessage.Scope.Name}:{logMessage.Level.Name()}{Environment.NewLine}{logMessage.Message}{Environment.NewLine}";
 			byte[] msgBytes = Console.OutputEncoding.GetBytes(msg);
-			StdOut.Write(msgBytes);
-			StdOut.Flush();
+			this.StdOut.Write(msgBytes);
+			this.StdOut.Flush();
 		}
 	}
 

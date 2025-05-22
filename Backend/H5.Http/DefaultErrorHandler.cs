@@ -15,8 +15,8 @@ public class DefaultErrorHandler : IRequestErrorHandler {
 	/// <inheritdoc/>
 	public void Handle(HttpListenerContext context, HttpStatusCode statusCode) {
 		switch (context.Request.ContentType) {
-			case "text/html": Html(context, statusCode); break;
-			default: Empty(context, statusCode); break;
+			case "text/html": this.Html(context, statusCode); break;
+			default: this.Empty(context, statusCode); break;
 		}
 	}
 }

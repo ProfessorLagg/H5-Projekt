@@ -18,14 +18,20 @@ internal class UnitTestRunner {
 		Console.ResetColor();
 	}
 	private void PrintPass(IUnitTest test) {
-		if (Console.CursorLeft != 0) Console.WriteLine("");
+		if (Console.CursorLeft != 0) {
+			Console.WriteLine("");
+		}
+
 		Console.ForegroundColor = ConsoleColor.Green;
 		Console.Write("PASS");
 		Console.ResetColor();
 		Console.WriteLine($"  {test.GetName()}");
 	}
 	private void PrintFail(IUnitTest test, Exception e) {
-		if (Console.CursorLeft != 0) Console.WriteLine("");
+		if (Console.CursorLeft != 0) {
+			Console.WriteLine("");
+		}
+
 		Console.ForegroundColor = ConsoleColor.Red;
 		Console.Write("FAIL");
 		Console.ResetColor();
@@ -39,11 +45,11 @@ internal class UnitTestRunner {
 			try {
 				test.Run();
 				passCount++;
-				PrintPass(test);
+				this.PrintPass(test);
 			}
 			catch (Exception e) {
 				failCount++;
-				PrintFail(test, e);
+				this.PrintFail(test, e);
 			}
 		}
 
