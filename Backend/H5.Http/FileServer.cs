@@ -8,6 +8,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 
 namespace H5.Http;
+/// <summary><see cref="IRequestHandler"/> than returns static files from a specified directory and url path root.</summary>
 public sealed class FileServer : IRequestHandler {
 	#region Static Data
 	private static LogScope Logger = new LogScope(typeof(FileServer).FullName);
