@@ -11,10 +11,11 @@ internal class API_Program {
 		Console.Write($"Loaded settings:\n{ApiSettings.ToIniFile()}\n");
 		if (ApiSettings.Logging.LogToConsole) { Log.AddConsoleLog(); }
 		if (ApiSettings.Logging.LogToFile) { Log.AddFileLog(ApiSettings.Logging.LogDirPath); }
-
-
 		ApiController controller = new();
+		HandleTimeServer handleTimeServer = new();
 		HttpServer server = new(controller, null);
+		server.AddIncomingMiddleWare(handleTimeServer.InHandler);
+		server.AddOutgoingMiddleWare(handleTimeServer.OutHandler);
 
 		foreach (string hostName in ApiSettings.HTTP.HostNames) {
 			if (ApiSettings.HTTP.EnableHttp) {
@@ -26,7 +27,6 @@ internal class API_Program {
 				server.AddPrefix(httpsPrefix);
 			}
 		}
-
 		server.Run();
 	}
 }

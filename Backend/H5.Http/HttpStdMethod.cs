@@ -41,15 +41,17 @@ public static class HttpStdMethodExt {
 	}
 
 	public static int Compare(this HttpStdMethod @this, HttpStdMethod other) {
-		int a = (int)((ushort)@this);
-		int b = (int)((ushort)other);
+		int a = (ushort)@this;
+		int b = (ushort)other;
 		return int.Sign(unchecked(a - b));
 	}
 
 	public static HttpStdMethod Parse(string str) {
 		str = str.ToUpperInvariant();
 		foreach (HttpStdMethod method in Enum.GetValues<HttpStdMethod>()) {
-			if (method.ToString().Equals(str)) return method;
+			if (method.ToString().Equals(str)) {
+				return method;
+			}
 		}
 		throw new Exception($"\"{str}\" could not be parsed as a standard HTTP method");
 	}

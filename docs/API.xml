@@ -1,0 +1,169 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>H5.API</name>
+    </assembly>
+    <members>
+        <member name="T:H5.API.ApiController">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.API.ApiController.MatchRoute(System.Net.HttpListenerRequest)">
+            <inheritdoc/>
+        </member>
+        <member name="T:H5.API.ApiSettings">
+            <summary>Handles settings for the API</summary>
+        </member>
+        <member name="T:H5.API.ApiSettings.InvalidSettingException">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.API.ApiSettings.InvalidSettingException.#ctor(System.String)">
+            <inheritdoc cref = "M:System.Exception.#ctor(System.String)" />
+        </member>
+        <member name="M:H5.API.ApiSettings.InvalidSettingException.ThrowIf(System.Boolean,System.String)">
+            <summary>Throws a new <see cref="T:H5.API.ApiSettings.InvalidSettingException"/> if true</summary>
+            <param name="v">Value indicating wether to throw or not</param>
+            <param name="message"><inheritdoc cref="M:H5.API.ApiSettings.InvalidSettingException.#ctor(System.String)"/></param>
+        </member>
+        <member name="M:H5.API.ApiSettings.Validate">
+            <summary>Validates the current state of <see cref="T:H5.API.ApiSettings"/>. Throws errors for invalid settings.</summary>
+        </member>
+        <member name="M:H5.API.ApiSettings.ToInstance">
+            <summary>Clones current <see cref="T:H5.API.ApiSettings"/> to dictionary</summary>
+            <returns>Clone of current <see cref="T:H5.API.ApiSettings"/> in the format &lt;section, &lt;key, value&gt;&gt;</returns>
+        </member>
+        <member name="M:H5.API.ApiSettings.LoadDefault">
+            <summary>Overwrites all values in <see cref="T:H5.API.ApiSettings"/> with defaults</summary>
+        </member>
+        <member name="M:H5.API.ApiSettings.Load">
+            <summary>Loads <see cref="T:H5.API.ApiSettings"/> from file <see cref="F:H5.API.ApiSettings.SettingsFileInfo"/></summary>
+        </member>
+        <member name="M:H5.API.ApiSettings.ToIniFile">
+            <summary>Clones current <see cref="T:H5.API.ApiSettings"/> to <see cref="T:H5.Lib.IniDocument"/></summary>
+        </member>
+        <member name="M:H5.API.ApiSettings.Save">
+            <summary>Saves current <see cref="T:H5.API.ApiSettings"/> to file <see cref="F:H5.API.ApiSettings.SettingsFileInfo"/></summary>
+        </member>
+        <member name="T:H5.API.ApiSettings.HTTPSettings">
+            <summary>HTTP settings section</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.SectionName">
+            <summary><see cref="T:H5.Lib.IniDocument"/> section header for <see cref="T:H5.API.ApiSettings.HTTPSettings"/></summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.EnableHttp">
+            <summary>Should the API server respond to http:// requests</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.PortHttp">
+            <summary>The port the API server listsens for http:// requests on</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.EnableHttps">
+            <summary>Should the API server respond to https:// requests</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.PortHttps">
+            <summary>The port the API server listsens for https:// requests on</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.HTTPSettings.HostNames">
+            <summary>Hostnames the API server listens for requests on ex. localhost, casa-blanca.com, *</summary>
+        </member>
+        <member name="M:H5.API.ApiSettings.HTTPSettings.Parse(System.Collections.Generic.IDictionary{System.String,System.String}@)">
+            <summary>
+            Parses the input key/value pairs to a new instance of <see cref="T:H5.API.ApiSettings.HTTPSettings"/>.
+            Only parses known keys, and does not check for unkown keys.
+            Missing keys will be set to default values
+            </summary>
+            <param name="kvps">key/value pairs to parse</param>
+        </member>
+        <member name="M:H5.API.ApiSettings.HTTPSettings.GetEnumerator">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.API.ApiSettings.HTTPSettings.System#Collections#IEnumerable#GetEnumerator">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.API.ApiSettings.HTTPSettings.Validate">
+            <summary>Validates the state of this <see cref="T:H5.API.ApiSettings.HTTPSettings"/>. Throws <see cref="T:H5.API.ApiSettings.InvalidSettingException"/> for invalid values.</summary>
+        </member>
+        <member name="P:H5.API.ApiSettings.HTTP">
+            <summary><inheritdoc cref="T:H5.API.ApiSettings.HTTPSettings"/></summary>
+        </member>
+        <member name="T:H5.API.ApiSettings.LoggingSettings">
+            <summary>Logging settings section</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.SectionName">
+            <summary><see cref="T:H5.Lib.IniDocument"/> section header for <see cref="T:H5.API.ApiSettings.LoggingSettings"/></summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.MaxLogLevel">
+            <summary>Lowest level of logs that get printed to console and generic log file</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogToConsole">
+            <summary>Enables/Disables writing generic log to console</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogToFile">
+            <summary>Enables/Disables writing generic log to file</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogDirPath">
+            <summary>Directory logfiles are placed in when <see cref="F:H5.API.ApiSettings.LoggingSettings.LogToFile"/> is enabled</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogW3">
+            <summary>Enables/Disables writing W3 Extended Log File Format to file</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.LoggingSettings.LogW3DirPath">
+            <summary>Directory logfiles are placed in when <see cref="F:H5.API.ApiSettings.LoggingSettings.LogW3"/> is enabled</summary>
+        </member>
+        <member name="M:H5.API.ApiSettings.LoggingSettings.Parse(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Parses the input key/value pairs to a new instance of <see cref="T:H5.API.ApiSettings.LoggingSettings"/>.
+            Only parses known keys, and does not check for unkown keys.
+            Missing keys will be set to default values
+            </summary>
+            <param name="kvps">key/value pairs to parse</param>
+        </member>
+        <member name="M:H5.API.ApiSettings.LoggingSettings.GetEnumerator">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.API.ApiSettings.LoggingSettings.System#Collections#IEnumerable#GetEnumerator">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.API.ApiSettings.LoggingSettings.Validate">
+            <summary>Validates the state of this <see cref="T:H5.API.ApiSettings.LoggingSettings"/>.
+            Throws <see cref="T:H5.API.ApiSettings.InvalidSettingException"/> for invalid values.</summary>
+        </member>
+        <member name="P:H5.API.ApiSettings.Logging">
+            <summary><inheritdoc cref="T:H5.API.ApiSettings.LoggingSettings"/></summary>
+        </member>
+        <member name="T:H5.API.ApiSettings.FileServerSettings">
+            <summary>FileServer settings section</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.FileServerSettings.SectionName">
+            <summary><see cref="T:H5.Lib.IniDocument"/> section header for <see cref="T:H5.API.ApiSettings.FileServerSettings"/></summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.FileServerSettings.ContentRoot">
+            <summary>Directory path to static content.Defaults to {exe directory}\wwwroot if empty or missing</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.FileServerSettings.EnableCaching">
+            <summary>Toggles the file server in-memory cache. Defaults to true if not specified</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.FileServerSettings.MaxCacheFileSize">
+            <summary>Maximum size of cached files in bytes. Defaults to 4096 if not specified</summary>
+        </member>
+        <member name="F:H5.API.ApiSettings.FileServerSettings.CacheLifetimeSeconds">
+            <summary>Seconds a file can go untouched in the cache before it gets cleaned up. Defaults to 600 if not specified</summary>
+        </member>
+        <member name="M:H5.API.ApiSettings.FileServerSettings.Parse(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Parses the input key/value pairs to a new instance of <see cref="T:H5.API.ApiSettings.FileServerSettings"/>.
+            Only parses known keys, and does not check for unkown keys.
+            Missing keys will be set to default values
+            </summary>
+            <param name="kvps">key/value pairs to parse</param>
+        </member>
+        <member name="M:H5.API.ApiSettings.FileServerSettings.Validate">
+            <summary>Validates the state of this <see cref="T:H5.API.ApiSettings.FileServerSettings"/>.
+            Throws <see cref="T:H5.API.ApiSettings.InvalidSettingException"/> for invalid values.</summary>
+        </member>
+        <member name="M:H5.API.ApiSettings.FileServerSettings.GetEnumerator">
+            <inheritdoc/>
+        </member>
+        <member name="P:H5.API.ApiSettings.FileServer">
+            <inheritdoc cref="T:H5.API.ApiSettings.FileServerSettings"/>
+        </member>
+    </members>
+</doc>

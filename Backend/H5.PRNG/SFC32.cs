@@ -17,12 +17,12 @@ public unsafe class SFC32 {
 	}
 	/// <returns>Random integer between 0 and 2^32</returns>
 	public uint NextInt() {
-		uint t = (State.u32[0] + State.u32[1]) + State.u32[3];
-		State.u32[3] = State.u32[3] + 1;
-		State.u32[0] = State.u32[1] ^ (State.u32[1] >>> 9);
-		State.u32[1] = State.u32[2] + (State.u32[2] << 3);
-		State.u32[2] = State.u32[2] << 21 | State.u32[2] >>> 11;
-		State.u32[2] = State.u32[2] + t;
+		uint t = (this.State.u32[0] + this.State.u32[1]) + this.State.u32[3];
+		this.State.u32[3] = this.State.u32[3] + 1;
+		this.State.u32[0] = this.State.u32[1] ^ (this.State.u32[1] >>> 9);
+		this.State.u32[1] = this.State.u32[2] + (this.State.u32[2] << 3);
+		this.State.u32[2] = this.State.u32[2] << 21 | this.State.u32[2] >>> 11;
+		this.State.u32[2] = this.State.u32[2] + t;
 		this.Count += 1;
 		return t;
 	}

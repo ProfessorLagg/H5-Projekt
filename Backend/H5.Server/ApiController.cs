@@ -2,16 +2,18 @@
 
 using System.Net;
 namespace H5.API;
+
+/// <inheritdoc/>
 public sealed class ApiController : IRouteMatcher {
-	public readonly FileServer FileHandler = new(ApiSettings.FileServer.ContentRoot, "/");
-	public readonly RedirectionHandler RedirectToIndexHandler = new RedirectionHandler("/index.html");
-	public readonly BenchmarkHandler BenchmarkHandler = new BenchmarkHandler();
+	private readonly FileServer FileHandler = new(ApiSettings.FileServer.ContentRoot, "/");
+	private readonly RedirectionHandler RedirectToIndexHandler = new RedirectionHandler("/index.html");
+	private readonly BenchmarkHandler BenchmarkHandler = new BenchmarkHandler();
 
-
+	/// <inheritdoc/>
 	public IRequestHandler? MatchRoute(HttpListenerRequest request) {
 		if (request.RawUrl is null) { return null; }
-		if (request.RawUrl == @"/") { return RedirectToIndexHandler; }
-		if (request.RawUrl.Equals(@"/benchmark", StringComparison.InvariantCultureIgnoreCase)) { return BenchmarkHandler; }
+		if (request.RawUrl == @"/") { return this.RedirectToIndexHandler; }
+		if (request.RawUrl.Equals(@"/benchmark", StringComparison.InvariantCultureIgnoreCase)) { return this.BenchmarkHandler; }
 
 		return this.FileHandler;
 	}

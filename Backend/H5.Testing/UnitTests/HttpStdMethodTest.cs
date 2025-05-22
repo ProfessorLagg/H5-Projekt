@@ -20,7 +20,7 @@ internal sealed class HttpStdMethodTest : IUnitTest {
 	}
 
 	public void Run() {
-		TestComponents();
+		this.TestComponents();
 
 	}
 }

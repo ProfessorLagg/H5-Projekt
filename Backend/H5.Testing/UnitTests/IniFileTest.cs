@@ -4,14 +4,14 @@ using System.Text;
 namespace H5.Testing.UnitTests;
 internal class IniFileTest : IUnitTest {
 
-	public string GetName() { return typeof(H5.Lib.IniFile).FullName; }
+	public string GetName() { return typeof(H5.Lib.IniDocument).FullName; }
 
 	public void Run() {
 		string srcFilePath = Path.Join(PathUtils.ExeDirectory.FullName, "TestData", "test.ini");
 		FileInfo srcFileInfo = new(srcFilePath);
 		string dstFilePath = Path.Join(srcFileInfo.DirectoryName, "_" + srcFileInfo.Name);
 		FileInfo dstFileInfo = new(dstFilePath);
-		Lib.IniFile iniFile = Lib.IniFile.Load(srcFileInfo);
+		Lib.IniDocument iniFile = Lib.IniDocument.Load(srcFileInfo);
 
 		TestHelpers.ExpectEqual(@" orchard rental service (with app)", iniFile.GetValue("project", "name"));
 		TestHelpers.ExpectEqual(" \"Bay Area\"", iniFile.GetValue("project", "target region"));

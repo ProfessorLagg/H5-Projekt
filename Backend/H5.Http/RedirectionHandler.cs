@@ -5,6 +5,6 @@ public sealed class RedirectionHandler : IRequestHandler {
 	public readonly string RedirectTo;
 	public RedirectionHandler(string redirectTo) { this.RedirectTo = redirectTo; }
 	public void Handle(HttpListenerContext context) {
-		context.Response.Redirect(RedirectTo);
+		context.Response.Redirect(this.RedirectTo);
 	}
 }

@@ -1,5 +1,5 @@
 export class sfc32 {
-    static getSeed() {
+    static generateSeed() {
         const buffer = new ArrayBuffer((32 / 8) * 4);
         const view = new Uint32Array(buffer);
         view[0] = (Math.random() * 2 ** 32) >>> 0;
@@ -30,15 +30,19 @@ export class sfc32 {
         return JSON.stringify(result);
     }
 
-    constructor(s) {
-        if (!(s instanceof Uint32Array)) { throw new TypeError("seed was not an instance of Uint32Array") }
-        if (s.length !== 4) { throw new TypeError(`Expected seed.length = 4, but found: ${s.length}`) }
+    /**
+     * Creates a new sfc32 prng using the specified seed
+     * @param {Uint32Array} seed 
+     */
+    constructor(seed) {
+        if (!(seed instanceof Uint32Array)) { throw new TypeError("seed was not an instance of Uint32Array") }
+        if (seed.length !== 4) { throw new TypeError(`Expected seed.length = 4, but found: ${seed.length}`) }
         this.count = 0;
         this.seed = new Uint32Array(4);
         this.state = new Uint32Array(4);
         for (let i = 0; i < 4; i++) {
-            this.seed[i] = s[i];
-            this.state[i] = s[i];
+            this.seed[i] = seed[i];
+            this.state[i] = seed[i];
         }
     }
 

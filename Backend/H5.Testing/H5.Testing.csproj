@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net9.0</TargetFramework>
@@ -8,10 +7,11 @@
 		<PublishAot>true</PublishAot>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<DebugType>pdbonly</DebugType>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>..\..\docs\$(MSBuildProjectName).xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\H5.DB\H5.DB.csproj" />
 		<ProjectReference Include="..\H5.Http\H5.Http.csproj" />
 		<ProjectReference Include="..\H5.PRNG\H5.PRNG.csproj" />
 		<ProjectReference Include="..\H5.Server\H5.API.csproj" />
@@ -22,5 +22,4 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
-
 </Project>

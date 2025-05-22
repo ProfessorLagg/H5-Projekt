@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Mime;
+﻿using System.Net;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace H5.Http;
+
+/// <summary><inheritdoc cref="BenchmarkHandler.Handle(HttpListenerContext)"/></summary>
+/// <inheritdoc cref="IRequestHandler"/>
 public sealed class BenchmarkHandler : IRequestHandler {
 	const int KB = 1024;
 	const int MB = 1024 * KB;
@@ -23,6 +19,8 @@ public sealed class BenchmarkHandler : IRequestHandler {
 		return result;
 	}
 
+	/// <summary>Responds with static sized random bytes intented for performance testing</summary>
+	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void Handle(HttpListenerContext context) {
 		context.WriteResponse(Payload);

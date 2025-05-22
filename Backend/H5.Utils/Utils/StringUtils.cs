@@ -2,6 +2,7 @@
 using System.Text;
 
 namespace H5.Lib.Utils;
+/// <summary>Utilities and extentions for <see langword="string"/></summary>
 public static class StringUtils {
 	private readonly struct EscapeSequence {
 		public readonly string Find;
@@ -19,21 +20,36 @@ public static class StringUtils {
 		new EscapeSequence("\v", @"\v"),
 	};
 
+	/// <summary>
+	/// Escapes whitespace characters.
+	/// See <see cref="StringUtils.WhitespaceEscapes"/> for which characters get escaped with what
+	/// </summary>
+	/// <param name="str">The string to escape whitespace in</param>
+	/// <returns>The input string with whitespace characters escaped</returns>
 	public static string EscapeWhitespace(this string str) {
 		StringBuilder sb = new(str);
 		sb.EscapeWhitespace();
 		return sb.ToString();
 	}
+	/// <summary><inheritdoc cref="StringUtils.EscapeWhitespace(string)"/></summary>
 	public static void EscapeWhitespace(this StringBuilder sb) {
 		foreach (EscapeSequence e in WhitespaceEscapes) {
-			sb.Replace(e.Find, e.Replace);
+			_ = sb.Replace(e.Find, e.Replace);
 		}
 	}
-	public static string ToLargestUnitString(this TimeSpan timeSpan) => timeSpan.ToLargestUnitString(CultureInfo.InvariantCulture);
-	public static string ToLargestUnitString(this TimeSpan timeSpan, IFormatProvider format) {
-		double value = timeSpan.Ticks;
-		string unit_str = " ticks";
+	/// <summary><inheritdoc cref="StringUtils.ToLargestUnitString(TimeSpan, NumberFormatInfo)"/></summary>
+	/// <param name="timeSpan"><see cref="TimeSpan"/> to convert</param>
+	public static string ToLargestUnitString(this TimeSpan timeSpan) {
+		return timeSpan.ToLargestUnitString(CultureInfo.InvariantCulture.NumberFormat);
+	}
 
+	/// <summary>Converts <see cref="TimeSpan"/> to largest unit string</summary>
+	/// <param name="timeSpan"><see cref="TimeSpan"/> to convert</param>
+	/// <param name="format">Number format to use</param>
+	public static string ToLargestUnitString(this TimeSpan timeSpan, NumberFormatInfo format) {
+		_ = timeSpan.Ticks;
+		string unit_str;
+		double value;
 		if (timeSpan.Ticks >= TimeSpan.TicksPerDay) {
 			value = timeSpan.TotalDays;
 			unit_str = " days";

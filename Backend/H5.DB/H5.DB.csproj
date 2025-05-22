@@ -5,6 +5,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>disable</Nullable>
 		<DebugType>pdbonly</DebugType>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>..\..\docs\$(MSBuildProjectName).xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>

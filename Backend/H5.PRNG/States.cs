@@ -15,66 +15,66 @@ public unsafe struct State128 {
 	public fixed ulong u64[SizeOfThis / sizeof(ulong)];
 
 	public State128() {
-		for (int i = 0; i < 16; i++) { u8[i] = 0; }
+		for (int i = 0; i < 16; i++) { this.u8[i] = 0; }
 	}
 	public State128(params byte[] values) : this() {
 		int L = int.Min(values.Length, SizeOfThis);
 		for (int i = 0; i < L; i++) {
-			u8[i] = values[i];
+			this.u8[i] = values[i];
 		}
 	}
 	public State128(params ushort[] values) : this() {
 		int L = int.Min(values.Length, SizeOfThis / sizeof(ushort));
 		for (int i = 0; i < L; i++) {
-			u16[i] = values[i];
+			this.u16[i] = values[i];
 		}
 	}
 	public State128(params uint[] values) : this() {
 		int L = int.Min(values.Length, SizeOfThis / sizeof(uint));
 		for (int i = 0; i < L; i++) {
-			u32[i] = values[i];
+			this.u32[i] = values[i];
 		}
 	}
 	public State128(params ulong[] values) : this() {
 		int L = int.Min(values.Length, SizeOfThis / sizeof(ulong));
 		for (int i = 0; i < L; i++) {
-			u64[i] = values[i];
+			this.u64[i] = values[i];
 		}
 	}
 
 	public string ToString8() {
 		StringBuilder sb = new();
 		for (int i = 0; i < SizeOfThis; i++) {
-			sb.Append("0x");
-			sb.Append(u8[i].ToString("X"));
-			sb.Append(", ");
+			_ = sb.Append("0x");
+			_ = sb.Append(this.u8[i].ToString("X"));
+			_ = sb.Append(", ");
 		}
 		return sb.ToString();
 	}
 	public string ToString16() {
 		StringBuilder sb = new();
 		for (int i = 0; i < SizeOfThis / sizeof(ushort); i++) {
-			sb.Append("0x");
-			sb.Append(u16[i].ToString("X"));
-			sb.Append(", ");
+			_ = sb.Append("0x");
+			_ = sb.Append(this.u16[i].ToString("X"));
+			_ = sb.Append(", ");
 		}
 		return sb.ToString();
 	}
 	public string ToString32() {
 		StringBuilder sb = new();
 		for (int i = 0; i < SizeOfThis / sizeof(uint); i++) {
-			sb.Append("0x");
-			sb.Append(u32[i].ToString("X"));
-			sb.Append(", ");
+			_ = sb.Append("0x");
+			_ = sb.Append(this.u32[i].ToString("X"));
+			_ = sb.Append(", ");
 		}
 		return sb.ToString();
 	}
 	public string ToString64() {
 		StringBuilder sb = new();
 		for (int i = 0; i < SizeOfThis / sizeof(ulong); i++) {
-			sb.Append("0x");
-			sb.Append(u64[i].ToString("X"));
-			sb.Append(", ");
+			_ = sb.Append("0x");
+			_ = sb.Append(this.u64[i].ToString("X"));
+			_ = sb.Append(", ");
 		}
 		return sb.ToString();
 	}
@@ -103,7 +103,7 @@ public unsafe struct State256 {
 	public fixed UInt64 Array64[SizeOfThis / 8];
 
 	public State256() {
-		for (int i = 0; i < 16; i++) { Array8[i] = 0; }
+		for (int i = 0; i < 16; i++) { this.Array8[i] = 0; }
 	}
 
 	public static State128 GetSeed() {

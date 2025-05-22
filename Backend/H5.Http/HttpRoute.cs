@@ -6,10 +6,12 @@ public sealed record class HttpRoute : IComparable<HttpRoute> {
 
 	public HttpStdMethod Method;
 	public string Path;
-	public ParsedUri Uri { get { return new ParsedUri(this.Path); } }
+	public ParsedUri Uri => new ParsedUri(this.Path);
 	private static string NormalizePath(string path) {
 		string r = path.ToLowerInvariant().Trim().TrimEnd('/');
-		if (r.Length == 0 || r[0] != '/') r = '/' + r;
+		if (r.Length == 0 || r[0] != '/') {
+			r = '/' + r;
+		}
 
 		return r;
 	}
@@ -20,7 +22,10 @@ public sealed record class HttpRoute : IComparable<HttpRoute> {
 	public HttpRoute(string url, HttpStdMethod method = HttpStdMethodExt.ANY) : this(new ParsedUri(url), method) { }
 
 	private static bool PathMatch(HttpRoute a, HttpRoute b) {
-		if (a.Path.Length != b.Path.Length) return false;
+		if (a.Path.Length != b.Path.Length) {
+			return false;
+		}
+
 		return a.Path.Equals(b.Path, StringComparison.InvariantCultureIgnoreCase);
 	}
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -36,9 +41,9 @@ public sealed record class HttpRoute : IComparable<HttpRoute> {
 	}
 
 	public int CompareTo(HttpRoute? other) {
-		if (other is null) return -1;
+		if (other is null) { return -1; }
 		unchecked {
-			int cmpMethod = Math.Sign(Method.Compare(other.Method));
+			int cmpMethod = Math.Sign(this.Method.Compare(other.Method));
 			int cmpPath = Math.Sign(StringComparer.InvariantCultureIgnoreCase.Compare(this.Path, other.Path)) * 10;
 			int cmp = cmpMethod + cmpPath;
 			return Math.Sign(cmp);

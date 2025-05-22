@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>H5.Http</name>
+    </assembly>
+    <members>
+        <member name="T:H5.Http.BenchmarkHandler">
+            <summary><inheritdoc cref="M:H5.Http.BenchmarkHandler.Handle(System.Net.HttpListenerContext)"/></summary>
+            <inheritdoc cref="T:H5.Http.IRequestHandler"/>
+        </member>
+        <member name="M:H5.Http.BenchmarkHandler.Handle(System.Net.HttpListenerContext)">
+            <summary>Responds with static sized random bytes intented for performance testing</summary>
+            <inheritdoc/>
+        </member>
+        <member name="T:H5.Http.DefaultErrorHandler">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.Http.DefaultErrorHandler.Handle(System.Net.HttpListenerContext,System.Net.HttpStatusCode)">
+            <inheritdoc/>
+        </member>
+        <member name="M:H5.Http.FileServer.#ctor(System.IO.DirectoryInfo,H5.Http.HttpRoute,H5.Http.FileServer.CacheSettings)">
+            <summary>Creates a new FileServer request handler</summary>
+            <param name="rootDirectory">The root directory where the file server looks for files</param>
+            <param name="rootRoute">The root route that the file server is handling</param>
+            <param name="cacheConfig">File content cache settings. If <see langword="null"/> uses <see cref="F:H5.Http.FileServer.CacheSettings.Default"/></param>
+        </member>
+        <member name="M:H5.Http.FileServer.#ctor(System.String)">
+            <summary>Creates a new FileServer request handler</summary>
+            <param name="rootDirectoryPath">The root directory where the file server looks for files</param>
+        </member>
+        <member name="M:H5.Http.FileServer.#ctor(System.String,System.String)">
+            <summary>Creates a new FileServer request handler</summary>
+            <param name="rootDirectoryPath">The root directory where the file server looks for files</param>
+            <param name="httpRoute">The root route that the file server is handling</param>
+        </member>
+        <member name="M:H5.Http.FileServer.#ctor(System.String,H5.Http.FileServer.CacheSettings)">
+            <summary>Creates a new FileServer request handler</summary>
+            <param name="rootDirectoryPath">The root directory where the file server looks for files</param>
+            <param name="cacheConfig">File content cache settings</param>
+        </member>
+        <member name="M:H5.Http.FileServer.#ctor(System.String,System.String,H5.Http.FileServer.CacheSettings)">
+            <summary>Creates a new FileServer request handler</summary>
+            <param name="rootDirectoryPath">The root directory where the file server looks for files</param>
+            <param name="httpRoute">The root route that the file server is handling</param>
+            <param name="cacheConfig">File content cache settings</param>
+        </member>
+        <member name="F:H5.Http.FileServer.CacheSettings.EnableCache">
+            <summary>If the file server should cache file content</summary>
+        </member>
+        <member name="F:H5.Http.FileServer.CacheSettings.MaxFileSize">
+            <summary>The maximum size of cached files in bytes</summary>
+        </member>
+        <member name="F:H5.Http.FileServer.CacheSettings.CacheLifetime">
+            <summary>The maximum time a file lives in the cache without being touched</summary>
+        </member>
+        <member name="M:H5.Http.FileServer.CleanCache">
+            <summary>Cleans the FileContentCache if enough time has passed since the previous clean</summary>
+        </member>
+        <member name="M:H5.Http.HttpRoute.GetSubPath(System.String)">
+            <summary>Removes this <see cref="F:H5.Http.HttpRoute.Path"/> from the input path</summary>
+        </member>
+        <member name="M:H5.Http.HttpServer.Run">
+            <summary>Blocks the calling thread to run the WebServer</summary>
+        </member>
+        <member name="T:H5.Http.HttpStdMethod">
+            <summary>
+            Standard HTTP Methods.
+            HTTP Actually allows you to write whatever you want in the method field
+            </summary>
+        </member>
+        <member name="M:H5.Http.HttpStdMethodExt.SharesFlag(H5.Http.HttpStdMethod,H5.Http.HttpStdMethod)">
+            <summary>Checks if 2 <see cref="T:H5.Http.HttpStdMethod"/> enums shares atleast 1 flag</summary>
+        </member>
+        <member name="M:H5.Http.HttpStdMethodExt.Components(H5.Http.HttpStdMethod)">
+            <summary>Returns the singluar <see cref="T:H5.Http.HttpStdMethod"/>s that make up this <see cref="T:H5.Http.HttpStdMethod"/></summary>
+        </member>
+        <member name="T:H5.Http.IMiddleware">
+            <summary>
+            HTTP Middleware.
+            <see cref="T:H5.Http.HttpServer"/> can run these either before the request is handled or after
+            </summary>
+        </member>
+        <member name="M:H5.Http.IMiddleware.Handle(System.Net.HttpListenerContext)">
+            <summary>
+            Runs this <see cref="T:H5.Http.IMiddleware"/> on a <see cref="T:System.Net.HttpListenerContext"/>
+            </summary>
+            <returns><see langword="true"/> if handling of the request should continue, otherwise <see langword="false"/></returns>
+        </member>
+        <member name="T:H5.Http.IRequestErrorHandler">
+            <summary>
+            Request handler for Errors
+            </summary>
+        </member>
+        <member name="M:H5.Http.IRequestErrorHandler.Handle(System.Net.HttpListenerContext,System.Net.HttpStatusCode)">
+            <summary>
+            Writes error response to the input <see cref="T:System.Net.HttpListenerContext"/>
+            </summary>
+            <param name="context"><see cref="T:System.Net.HttpListenerContext"/> to write error to</param>
+            <param name="statusCode"><see cref="T:System.Net.HttpStatusCode"/> to write</param>
+        </member>
+        <member name="T:H5.Http.IRequestHandler">
+            <summary>
+            <inheritdoc cref="M:H5.Http.IRequestHandler.Handle(System.Net.HttpListenerContext)"/>
+            </summary>
+        </member>
+        <member name="M:H5.Http.IRequestHandler.Handle(System.Net.HttpListenerContext)">
+            <summary>
+            Handles <see cref="T:System.Net.HttpListenerRequest"/>'s
+            </summary>
+            <param name="context"><see cref="T:System.Net.HttpListenerContext"/> to handle request for</param>
+        </member>
+        <member name="T:H5.Http.IRouteMatcher">
+            <summary>Matches requests to routes</summary>
+        </member>
+        <member name="M:H5.Http.IRouteMatcher.MatchRoute(System.Net.HttpListenerRequest)">
+            <summary>Matches <see cref="T:System.Net.HttpListenerRequest"/> to <see cref="T:H5.Http.IRequestHandler"/></summary>
+            <param name="request">The <see cref="T:System.Net.HttpListenerRequest"/> to match a handler for</param>
+            <returns>A <see cref="T:H5.Http.IRequestHandler"/> if one is found, otherwise null</returns>
+        </member>
+        <member name="T:H5.Http.ParsedUri">
+            <summary>Represents a uri in the standard format scheme ":" ["//" authority] path ["?" query] ["#" fragment]</summary>
+        </member>
+        <member name="P:H5.Http.ParsedUri.Scheme">
+            <summary>The scheme component of the URI. ex. 'http''</summary>
+        </member>
+        <member name="P:H5.Http.ParsedUri.UserInfo">
+            <summary>The UserInfo </summary>
+        </member>
+        <member name="T:H5.Http.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:H5.Http.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:H5.Http.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="M:H5.Lib.HttpUtils.HttpUtils.SetStatus(System.Net.HttpListenerResponse,System.Net.HttpStatusCode)">
+            <summary>Sets both the <see cref="P:System.Net.HttpListenerResponse.StatusCode"/> and <see cref="P:System.Net.HttpListenerResponse.StatusDescription"/> fields</summary>
+        </member>
+        <member name="M:H5.Lib.HttpUtils.HttpUtils.RawBytes(System.Net.HttpListenerRequest)">
+            <summary>Gets the raw bytes of a request</summary>
+        </member>
+        <member name="M:H5.Lib.HttpUtils.HttpUtils.RawString(System.Net.HttpListenerRequest,System.Text.Encoding)">
+            <summary>Gets the raw bytes of a request as a string</summary>
+        </member>
+        <member name="M:H5.Lib.HttpUtils.HttpUtils.RawString(System.Net.HttpListenerRequest)">
+            <summary>Gets the raw bytes of a request as a string. Assumes UTF8 encoding</summary>
+        </member>
+        <member name="M:H5.Lib.HttpUtils.HttpUtils.WriteFile(System.Net.HttpListenerContext,System.IO.FileInfo,System.Net.HttpStatusCode)">
+            <summary>Responds with the content of a file</summary>
+        </member>
+        <member name="M:H5.Lib.HttpUtils.HttpUtils.WriteHtml(System.Net.HttpListenerContext,System.String,System.Net.HttpStatusCode)">
+            <summary>Writes an HTML response</summary>
+        </member>
+        <member name="M:H5.Lib.HttpUtils.HttpUtils.WriteResponse(System.Net.HttpListenerContext,System.IO.Stream,System.String,System.Net.HttpStatusCode)">
+            <summary>Writes bytes to the response. All content writing must go through this</summary>
+        </member>
+        <member name="M:H5.Lib.HttpUtils.HttpUtils.WriteResponse(System.Net.HttpListenerContext,System.Byte[],System.String,System.Net.HttpStatusCode)">
+            <summary>Writes bytes to the response</summary>
+        </member>
+    </members>
+</doc>

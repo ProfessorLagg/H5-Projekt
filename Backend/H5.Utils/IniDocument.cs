@@ -3,17 +3,23 @@
 using System.Text;
 
 namespace H5.Lib;
-public sealed class IniFile {
+/// <summary>Represents a .ini document</summary>
+public sealed class IniDocument {
 	private const string DefaultSectionName = "";
 	private static readonly Encoding DefaultEncoding = Encoding.UTF8;
 
+	/// <summary><see cref="StringComparer"/> used to sort sections and keys</summary>
 	public StringComparer KeyComparer = StringComparer.InvariantCultureIgnoreCase;
 	private readonly SortedDictionary<string, SortedDictionary<string, string>> Sections;
 
-	public IniFile() {
+	/// <summary>Creates a new <see cref="IniDocument"/> with no data</summary>
+	public IniDocument() {
 		this.Sections = new(this.KeyComparer);
 	}
 
+	/// <summary>Writes this <see cref="IniDocument"/> as a string to a <see cref="System.IO.Stream"/></summary>
+	/// <param name="stream"><see cref="Stream"/> to write to</param>
+	/// <param name="encoding"><see cref="Encoding"/> to encode string as</param>
 	public void Save(Stream stream, Encoding encoding) {
 		using StreamWriter sw = new(stream, encoding);
 		int sectionIndex = 0;
@@ -21,24 +27,38 @@ public sealed class IniFile {
 			if (sectionIndex > 0) { sw.Write('\n'); }
 			if (sectionName.Length > 0) { sw.Write($"[{sectionName}]\n"); }
 
-			foreach (string k in Sections[sectionName].Keys) {
-				string v = Sections[sectionName][k];
+			foreach (string k in this.Sections[sectionName].Keys) {
+				string v = this.Sections[sectionName][k];
 				sw.Write($"{k}={v.EscapeWhitespace()}\n");
 			}
 			sectionIndex += 1;
 		}
 	}
+	/// <inheritdoc cref="Save(Stream, Encoding)"/>
 	public void Save(Stream stream) { this.Save(stream, DefaultEncoding); }
+	/// <summary>Writes this <see cref="IniDocument"/> as a string to a file. Overwrites the file!</summary>
+	/// <param name="file"><see cref="FileInfo"/> of file to overwrite</param>
+	/// <param name="encoding"><inheritdoc cref="Save(Stream, Encoding)"/></param>
 	public void Save(FileInfo file, Encoding encoding) {
 		using FileStream stream = file.Open(FileMode.Create, FileAccess.Write, FileShare.Read);
 		this.Save(stream, encoding);
 	}
+	/// <inheritdoc cref="Save(FileInfo, Encoding)"/>
 	public void Save(FileInfo file) { this.Save(file, DefaultEncoding); }
+	/// <summary><inheritdoc cref="Save(FileInfo, Encoding)"/></summary>
+	/// <param name="filePath">Path of file to overwrite</param>
+	/// <param name="encoding"><inheritdoc cref="Save(Stream, Encoding)"/></param>
 	public void Save(string filePath, Encoding encoding) { this.Save(new FileInfo(filePath), encoding); }
+	/// <inheritdoc cref="Save(string, Encoding)"/>
 	public void Save(string filePath) { this.Save(filePath, DefaultEncoding); }
 
-	public static IniFile Load(Stream stream, Encoding encoding) {
-		IniFile result = new();
+	/// <summary>Parses text content from a <see cref="Stream"/> as an <see cref="IniDocument"/> </summary>
+	/// <param name="stream">The <see cref="Stream"/> to load from</param>
+	/// <param name="encoding"><see cref="Encoding"/> of the input text</param>
+	/// <returns>A new <see cref="IniDocument"/>The parsed <see cref="IniDocument"/></returns>
+	/// <exception cref="FormatException"></exception>
+	public static IniDocument Load(Stream stream, Encoding encoding) {
+		IniDocument result = new();
 
 		using StreamReader sr = new(stream, encoding);
 		string currentSection = DefaultSectionName;
@@ -47,7 +67,9 @@ public sealed class IniFile {
 		foreach (string l in sr.ReadLines()) {
 			lineIndex++;
 			string line = l.Trim();
-			if (string.IsNullOrWhiteSpace(line)) continue;
+			if (string.IsNullOrWhiteSpace(line)) {
+				continue;
+			}
 
 			ReadOnlySpan<char> span = line;
 			int lineCommentIdx = -1;
@@ -92,32 +114,62 @@ public sealed class IniFile {
 
 		return result;
 	}
-	public static IniFile Load(Stream stream) { return Load(stream, DefaultEncoding); }
-	public static IniFile Load(FileInfo file, Encoding encoding) {
+	/// <inheritdoc cref="Load(Stream, Encoding)"/>
+	public static IniDocument Load(Stream stream) { return Load(stream, DefaultEncoding); }
+	/// <summary>Parses text content from a file as an <see cref="IniDocument"/> </summary>
+	/// <param name="file"><see cref="FileInfo"/> of the file to read</param>
+	/// <param name="encoding"><see cref="Encoding"/><inheritdoc cref="Load(Stream, Encoding)"/></param>
+	/// <returns>A new <see cref="IniDocument"/><inheritdoc cref="Load(Stream, Encoding)"/></returns>
+	/// <exception cref="FormatException"><inheritdoc cref="Load(Stream, Encoding)"/></exception>
+	public static IniDocument Load(FileInfo file, Encoding encoding) {
 		using Stream stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
 		return Load(stream, encoding);
 	}
-	public static IniFile Load(FileInfo file) { return Load(file, DefaultEncoding); }
-	public static IniFile Load(string filePath, Encoding encoding) { return Load(new FileInfo(filePath), encoding); }
-	public static IniFile Load(string filePath) { return Load(new FileInfo(filePath), DefaultEncoding); }
+	/// <inheritdoc cref="Load(FileInfo, Encoding)"/>
+	public static IniDocument Load(FileInfo file) { return Load(file, DefaultEncoding); }
+	/// <summary><inheritdoc cref="Load(FileInfo, Encoding)"/></summary>
+	/// <param name="filePath">Path of the file to read</param>
+	/// <param name="encoding"><see cref="Encoding"/><inheritdoc cref="Load(Stream, Encoding)"/></param>
+	/// <returns>A new <see cref="IniDocument"/><inheritdoc cref="Load(Stream, Encoding)"/></returns>
+	/// <exception cref="FormatException"><inheritdoc cref="Load(Stream, Encoding)"/></exception>
+	public static IniDocument Load(string filePath, Encoding encoding) { return Load(new FileInfo(filePath), encoding); }
+	/// <inheritdoc cref="Load(FileInfo, Encoding)"/>
+	public static IniDocument Load(string filePath) { return Load(new FileInfo(filePath), DefaultEncoding); }
 
+	/// <summary>
+	/// Get's a value from this <see cref="IniDocument"/>
+	/// </summary>
+	/// <param name="sectionName">Section the value is stored in</param>
+	/// <param name="key"></param>
+	/// <returns></returns>
+	/// <exception cref="ArgumentOutOfRangeException">Thrown if key not found in section</exception>
 	public string GetValue(string sectionName, string key) {
 		IDictionary<string, string> section = this.GetSection(sectionName);
 		if (section[key] is null) { throw new ArgumentOutOfRangeException($"Section [{sectionName}] does not contain key \"{key}\""); }
 		return section[key];
 	}
+	/// <inheritdoc cref="GetValue(string, string)"/>
 	public string GetValue(string key) { return this.GetValue(DefaultSectionName, key); }
 
+	/// <summary>
+	/// Adds or overwrites a value in this <see cref="IniDocument"/>.
+	/// If the section does not exists, it is created
+	/// </summary>
+	/// <param name="sectionName">Section to add or overwrite value in</param>
+	/// <param name="key">Key of the value to add or overwrite</param>
+	/// <param name="value">New value</param>
 	public void SetValue(string sectionName, string key, string value) {
 		if (this.Sections.ContainsKey(sectionName)) {
 			this.Sections[sectionName][key] = value;
-		} else {
+		}
+		else {
 			IEnumerable<KeyValuePair<string, string>> kvps = new KeyValuePair<string, string>[] {
 				new KeyValuePair<string, string>(key, value)
 			};
 			this.SetSection(sectionName, kvps);
 		}
 	}
+	/// <inheritdoc cref="SetValue(string, string, string)"/>
 	public void SetValue(string key, string value) { this.SetValue(DefaultSectionName, key, value); }
 
 	/// <summary>Adds or overrides the section with the specified name</summary>
@@ -128,6 +180,12 @@ public sealed class IniFile {
 		}
 		this.Sections[sectionName] = section;
 	}
+	/// <summary>
+	/// Get's a section from this <see cref="IniDocument"/>
+	/// </summary>
+	/// <param name="sectionName">Name of the section to get</param>
+	/// <returns>Section as a <see cref="IDictionary{String, String}"/></returns>
+	/// <exception cref="ArgumentOutOfRangeException"></exception>
 	public IDictionary<string, string> GetSection(string sectionName) {
 		if (!this.Sections.TryGetValue(sectionName, out var section)) {
 			throw new ArgumentOutOfRangeException($"Could not find section [{sectionName}]");
@@ -135,6 +193,10 @@ public sealed class IniFile {
 		return section;
 	}
 
+	/// <summary>
+	/// Returns this <see cref="IniDocument"/> as a string
+	/// </summary>
+	/// <returns>this <see cref="IniDocument"/> as a string</returns>
 	public override string ToString() {
 		MemoryStream stream = new();
 		this.Save(stream, Encoding.Unicode);
