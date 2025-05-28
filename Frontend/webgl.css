@@ -1,0 +1,62 @@
+:root {
+    --color-text: white;
+}
+
+@media (min-aspect-ratio: 1/2) {
+    :root {
+        --rw: 50vh;
+        --rh: 100vh;
+    }
+}
+
+@media (aspect-ratio: 1/2) {
+    :root {
+        --rw: 100vw;
+        --rh: 200vw;
+    }
+}
+
+* {
+    font-family: "Open Sans", sans-serif;
+    box-sizing: border-box;
+    color: var(--color-text);
+    padding: 0;
+    margin: 0;
+    overscroll-behavior: none;
+    overflow: none;
+}
+
+body {
+    background-color: black;
+    z-index: -9999;
+    height: 100vh !important;
+    width: 100vw !important;
+
+    display: flex;
+    justify-content: center;
+}
+
+.webgl-wrap {
+    aspect-ratio: 1/2;
+    width: var(--rw);
+    height: var(--rh);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Debug */
+    /* outline: 1px solid rgba(255, 255, 255, 25%); */
+    background-color: rgba(255, 255, 255, 10%);
+
+}
+
+.webgl-board {
+    width: var(--rw);
+    height: var(--rw);
+    aspect-ratio: 1/1;
+    position: absolute;
+    /* Debug */
+    /* outline: 1px solid magenta; */
+    /* background-color: rgba(255, 0, 255, 10%); */
+}

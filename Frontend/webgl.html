@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <link rel="stylesheet" href="css/root.css">
+        <link rel="stylesheet" href="css/backgrounds.css">
+        <link rel="stylesheet" href="webgl.css">
+        <title>WebGL Test</title>
+    </head>
+
+    <body style="overscroll-behavior: none;">
+        <div class="background-pattern2"></div>
+        <div id="game-wrap" class="webgl-wrap">
+            <img src="block.svg" alt="block" id="block-img" style="display: none;">
+
+
+            <canvas id="layer0" class="webgl-board"></canvas>
+            <canvas id="layer1" class="webgl-board"></canvas>
+            <canvas id="layer2" class="webgl-board"></canvas>
+        </div>
+        <script src="webgl.js"></script>
+        <script>init()</script>
+    </body>
+
+</html>

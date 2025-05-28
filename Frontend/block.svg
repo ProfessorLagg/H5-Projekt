@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+    <g>
+        <rect width="80" height="80" fill="HSL(30, 100%, 33%)" />
+        <g fill="HSL(0, 0%, 7%)">
+            
+            <path opacity=".5" d="M 0 0 h 80 v 80 H 0 V 0 z m 20 20 v 40 h 40 V 20 H 20 z z" />
+            <rect opacity=".5" width="40" height="40" x="20" y="20"/>
+            <path d="M 15 15 h 50 l -5 5 H 20 v 40 l -5 5 V 15 z m 0 50 h 50 V 15 L 80 0 v 80 H 0 l 15 -15 z z z" />
+        </g>
+    </g>
+</svg>
