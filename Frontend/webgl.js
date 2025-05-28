@@ -6,7 +6,7 @@ const block_img = document.getElementById('block-img');
 
 
 const cell_size = 100;
-const border_size = 10;
+const border_size = 5;
 const canvas_size = (cell_size * 9) + (border_size * 11);
 const group_size = canvas_size / 3;
 
