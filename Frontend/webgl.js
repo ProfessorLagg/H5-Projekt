@@ -6,7 +6,7 @@ const block_img = document.getElementById('block-img');
 
 
 const cell_size = 100;
-const border_size = 5;
+const border_size = 10;
 const canvas_size = (cell_size * 9) + (border_size * 11);
 const group_size = canvas_size / 3;
 
@@ -60,13 +60,35 @@ function draw_layer0() {
 function draw_layer1() {
     const ctx = layer1.getContext("2d");
     ctx.clearRect(0, 0, canvas_size, canvas_size);
-    ctx.fillStyle = "rgba(255,0,255,50%";
-    const cells = getCellDrawBounds();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = border_size;
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(0, 0, canvas_size, canvas_size); // Draw outer border
+    const innerCanvas = {
+        left: border_size / 2,
+        top: border_size / 2,
+        right: canvas_size - (border_size / 2),
+        bot: canvas_size - (border_size / 2),
+        width: (canvas_size - (border_size / 2)) - (border_size / 2),
+        height: (canvas_size - (border_size / 2)) - (border_size / 2),
+    }
+    const cells = getCellOuterBounds();
     for (let i = 0; i < cells.length; i++) {
-        const cell = cells[i];
-        if (cellFilled(i)) {
-            ctx.drawImage(block_img, cell.x, cell.y, cell.w, cell.h);
-        }
+        if(!cellFilled(i)){continue}
+        const C = cells[i];
+        const left = rangeMapNumber(C.x, 0, canvas_size, innerCanvas.left, innerCanvas.right);
+        const top = rangeMapNumber(C.y, 0, canvas_size, innerCanvas.top, innerCanvas.bot);
+        const right = rangeMapNumber(C.x + C.w, 0, canvas_size, innerCanvas.left, innerCanvas.right);
+        const bot = rangeMapNumber(C.y + C.h, 0, canvas_size, innerCanvas.top, innerCanvas.bot);
+        const width = right - left;
+        const height = bot - top;
+        ctx.drawImage(
+            block_img,
+            left + border_size,
+            top + border_size,
+            width - border_size * 2,
+            height - border_size * 2
+        );
     }
 }
 
@@ -88,12 +110,10 @@ function draw_layer2() {
     );
 
     const ctx = layer2.getContext("2d");
-
     ctx.strokeStyle = "white";
     ctx.lineWidth = border_size;
     ctx.strokeStyle = "white";
     ctx.strokeRect(0, 0, canvas_size, canvas_size); // Draw outer border
-
     const innerCanvas = {
         left: border_size / 2,
         top: border_size / 2,
@@ -102,7 +122,7 @@ function draw_layer2() {
         width: (canvas_size - (border_size / 2)) - (border_size / 2),
         height: (canvas_size - (border_size / 2)) - (border_size / 2),
     }
-    const cells = getCellDrawBounds();
+    const cells = getCellOuterBounds();
     for (let i = 0; i < cells.length; i++) {
         const C = cells[i];
         const left = rangeMapNumber(C.x, 0, canvas_size, innerCanvas.left, innerCanvas.right);
@@ -113,10 +133,9 @@ function draw_layer2() {
         const height = bot - top;
         ctx.drawImage(cell_border_img, left, top, width, height);
     }
-
 }
 
-function getCellDrawBounds() {
+function getCellOuterBounds() {
     let result = [];
     result.length = 81;
 
@@ -137,7 +156,36 @@ function getCellDrawBounds() {
     return result;
 }
 
+function getCellInnerBounds() {
+    const innerCanvas = {
+        left: border_size / 2,
+        top: border_size / 2,
+        right: canvas_size - (border_size / 2),
+        bot: canvas_size - (border_size / 2),
+        width: (canvas_size - (border_size / 2)) - (border_size / 2),
+        height: (canvas_size - (border_size / 2)) - (border_size / 2),
+    }
+    const cells = getCellOuterBounds();
+    let result = []
+    result.length = 81;
+    for (let i = 0; i < cells.length; i++) {
+        const C = cells[i];
+        let B = {
+            left: rangeMapNumber(C.x, 0, canvas_size, innerCanvas.left, innerCanvas.right),
+            top: rangeMapNumber(C.y, 0, canvas_size, innerCanvas.top, innerCanvas.bot),
+            right: rangeMapNumber(C.x + C.w, 0, canvas_size, innerCanvas.left, innerCanvas.right),
+            bottom: rangeMapNumber(C.y + C.h, 0, canvas_size, innerCanvas.top, innerCanvas.bot),
+            width: -1,
+            height: -1,
+        }
+        B.width = B.right - B.left;
+        B.height = B.bot - B.top;
+        result[i] = B;
+    }
+    return result;
+}
+
 function cellFilled(cellId) {
     // TODO make this not a debug version
-    return Math.random() >= 0.33;
+    return Math.random() >= cellId / 81;
 }
