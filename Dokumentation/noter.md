@@ -38,3 +38,9 @@ Der stilles derfor følgende krav til performance:
   - [x] Chrome til Windows
   - [ ] Safari på iOS
 
+
+# WebGL
+## Links
+https://www.khronos.org/files/webgl20-reference-guide.pdf
+https://www.khronos.org/opengles/sdk/tools/Reference-Compiler/
+

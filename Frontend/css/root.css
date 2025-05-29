@@ -95,7 +95,7 @@ body {
     align-items: center;
 
     /* Debug */
-    outline: 1px solid white;
+    border: 1px solid white;
     /* border: 1px solid magenta; */
     /* background-color: rgba(255, 0, 0, 33%) */
     /* visibility: hidden; */

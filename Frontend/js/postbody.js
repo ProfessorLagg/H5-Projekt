@@ -7,14 +7,15 @@ const board_bounds = new DOMRect(); // TODO update this on resize
 
 const block_img = document.getElementById('blck-img');
 const cell_img = document.getElementById('cell-img');
+const highlight_img = document.getElementById('highlight-img');
 
 const cell_size = 100;
 const border_size = 5;
 const board_canvas_size = (cell_size * 9) + (border_size * 11);
 const group_size = board_canvas_size / 3;
-const outerCellBounds = new Array(81);
+const cellBounds = new Array(81);
 
-//#region utils
+// utils
 /**
  * Maps x from the range [srcMin - srcMax] to the range [dstMin - dstMax]
  * @param {Number} x 
@@ -78,9 +79,16 @@ function indexToGroup(row, col) {
     const gc = Math.floor(c / 3);
     return gr + gc;
 }
-//#endregion
+function isIntersecting(x, y, boundsX, boundsY, boundsW, boundsH) {
+    const xI = x >= boundsX && x <= (boundsX + boundsW);
+    const yI = y >= boundsY && y <= (boundsY + boundsH);
+    const result = xI && yI
+    // console.debug(arguments.callee.name, "\n\tx:", x, "\n\ty:", y, "\n\tboundsX:", boundsX, "\n\tboundsY:", boundsY, "\n\tboundsW:", boundsW, "\n\tboundsH:", boundsH, "\n\tresult:", result)
+    return result;
+}
 
-//#region draw functions
+
+// draw functions
 function draw_board_background() {
     const ctx = board_background.getContext("2d");
     ctx.fillStyle = "rgba(100,45,0,100%)";
@@ -105,8 +113,8 @@ function draw_board_background() {
 function draw_board_cells() {
     const ctx = board_cells.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
-    for (let i = 0; i < outerCellBounds.length; i++) {
-        const cell = outerCellBounds[i];
+    for (let i = 0; i < cellBounds.length; i++) {
+        const cell = cellBounds[i];
         ctx.drawImage(
             cell_img,
             Math.floor(cell.x),
@@ -117,19 +125,51 @@ function draw_board_cells() {
     }
 }
 function draw_board_highlight() {
-
-
-
     const ctx = board_highlight.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
+    if (pointermove_data.buttons <= 0) { return }
+    const pointer_intersects_board = isIntersecting(
+        pointermove_data.clientX,
+        pointermove_data.clientY,
+        board_bounds.left,
+        board_bounds.top,
+        board_bounds.width,
+        board_bounds.height
+    );
+    if (!pointer_intersects_board) { return }
+    const uvX = (pointermove_data.clientX - board_bounds.left) / board_bounds.width;
+    const uvY = (pointermove_data.clientY - board_bounds.top) / board_bounds.height;
+
+    // TODO Do this for every offset in the currently selected shape
+    const col = Math.floor(rangeMapNumber(uvX, 0, 1, 0, 9));
+    const row = Math.floor(rangeMapNumber(uvY, 0, 1, 0, 9));
+    if (col < 0 || col > 8) {
+        console.error(arguments.callee.name, "Invalid col: " + col);
+        return;
+    }
+    if (row < 0 || row > 8) {
+        console.error(arguments.callee.name, "Invalid row: " + row);
+        return;
+    }
+    const idx = indexTo1D(row, col);
+
+    ctx.fillStyle = "rgba(255,255,0,.5)"
+    ctx.drawImage(
+        highlight_img,
+        cellBounds[idx].x,
+        cellBounds[idx].y,
+        cellBounds[idx].w,
+        cellBounds[idx].h
+    );
+
 }
 function draw_board_borders() {
     const ctx = board_borders.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
-    for (let i = 0; i < outerCellBounds.length; i++) {
-        if(!cellFilled(i)){continue}
+    for (let i = 0; i < cellBounds.length; i++) {
+        if (!cellFilled(i)) { continue }
 
-        const cell = outerCellBounds[i];
+        const cell = cellBounds[i];
         ctx.drawImage(
             block_img,
             Math.floor(cell.x),
@@ -143,8 +183,6 @@ function draw_board_borders() {
 function update(deltaTime) {
     draw_board_highlight();
 }
-//#endregion
-
 
 const boardState = new Uint8Array(81);
 function cellFilled(cellId) {
@@ -160,7 +198,7 @@ function updateBoardRect() {
     board_bounds.height = curr_bounds.height;
 }
 
-//#region init
+// init
 async function init() {
     console.log(arguments.callee.name);
     await loadShapes();
@@ -188,7 +226,7 @@ function initCellBounds() {
     let i = 0;
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
-            outerCellBounds[i] = {
+            cellBounds[i] = {
                 x: c * s,
                 y: r * s,
                 w: s,
@@ -207,14 +245,15 @@ function initPointerEvents() {
 function initResizeEvent() {
     window.addEventListener("resize", resizeHandler)
 }
-//#endregion
 
-//#region resize event
+
+// resize event
 async function resizeHandler(event) {
     updateBoardRect();
 }
 
-//#region pointer events
+// pointer events
+
 const pointermove_data = {
     /**time (in milliseconds) at which the event was created. */
     timeStamp: -1,
@@ -426,4 +465,3 @@ async function pointerupHandler(event) {
         console.debug("pointerup");
     }
 }
-//#endregion
