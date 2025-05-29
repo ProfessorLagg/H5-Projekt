@@ -1,40 +1,14 @@
 class sfc32 {
     static generateSeed() {
-        const buffer = new ArrayBuffer((32 / 8) * 4);
-        const view = new Uint32Array(buffer);
-        view[0] = (Math.random() * 2 ** 32) >>> 0;
-        view[1] = (Math.random() * 2 ** 32) >>> 0;
-        view[2] = (Math.random() * 2 ** 32) >>> 0;
-        view[3] = (Math.random() * 2 ** 32) >>> 0;
-        return view;
+        const seed = new Uint32Array(4);
+        seed[0] = (Math.random() * 2 ** 32) >>> 0;
+        seed[1] = (Math.random() * 2 ** 32) >>> 0;
+        seed[2] = (Math.random() * 2 ** 32) >>> 0;
+        seed[3] = (Math.random() * 2 ** 32) >>> 0;
+        return seed;
     }
 
-    static test() {
-        let seed = new Uint32Array(4);
-        seed[0] = 9 - 0;
-        seed[1] = 9 - 1;
-        seed[2] = 9 - 2;
-        seed[3] = 9 - 3;
-        let result = {
-            seed: Array.from(seed),
-            integers: [],
-        };
-        let rand = new sfc32(seed);
-        const iterCount = 8;
-
-        for (let i = 0; i < iterCount; i++) {
-            const v = rand.nextInt();
-            result.integers.push(v);
-        }
-
-        return JSON.stringify(result);
-    }
-
-    /**
-     * Creates a new sfc32 prng using the specified seed
-     * @param {Uint32Array} seed 
-     */
-    constructor(seed) {
+    reset(seed) {
         if (!(seed instanceof Uint32Array)) { throw new TypeError("seed was not an instance of Uint32Array") }
         if (seed.length !== 4) { throw new TypeError(`Expected seed.length = 4, but found: ${seed.length}`) }
         this.count = 0;
@@ -44,6 +18,14 @@ class sfc32 {
             this.seed[i] = seed[i];
             this.state[i] = seed[i];
         }
+    }
+
+    /**
+     * Creates a new sfc32 prng using the specified seed
+     * @param {Uint32Array} seed 
+     */
+    constructor(seed) {
+        this.reset(seed);
     }
 
     /**

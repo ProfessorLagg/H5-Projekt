@@ -117,12 +117,3 @@ body {
     font-size: calc(3 * var(--rh));
     font-weight: bold;
 }
-
-#fps-display {
-    position: absolute;
-    left: 0;
-    top: 0;
-    color: rgb(0, 255, 0);
-    font-family: monospace;
-    font-size: 3vh;
-}

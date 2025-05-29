@@ -1,20 +1,26 @@
 const game_wrap = document.getElementById('game-wrap');
+
+const game_score = document.getElementById('game-score');
+
 const board_background = document.getElementById('board-background');
 const board_cells = document.getElementById('board-cells');
 const board_highlight = document.getElementById('board-highlight');
 const board_borders = document.getElementById('board-borders');
 const board_bounds = new DOMRect();
 
+
+
 const block_img = document.getElementById('blck-img');
 const cell_img = document.getElementById('cell-img');
 const highlight_img = document.getElementById('highlight-img');
 
-const cell_size = 100;
-const border_size = 5;
-const board_canvas_size = (cell_size * 9) + (border_size * 11);
+
+const board_canvas_size = 990;
 const group_size = board_canvas_size / 3;
+const cell_size = board_canvas_size / 9;
 const cellBounds = new Array(81);
 
+const piece_canvas_size = (board_canvas_size / 9) * 5;
 const piece1 = document.getElementById('piece1');
 const piece2 = document.getElementById('piece2');
 const piece3 = document.getElementById('piece3');
@@ -152,11 +158,11 @@ function draw_board_highlight() {
     );
 
 }
-function draw_board_borders() {
+function draw_board_state() {
     const ctx = board_borders.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
     for (let i = 0; i < cellBounds.length; i++) {
-        if (!cellFilled(i)) { continue }
+        if (!game_state.getCellState(i)) { continue }
 
         const cell = cellBounds[i];
         ctx.drawImage(
@@ -168,14 +174,98 @@ function draw_board_borders() {
         );
     }
 }
-function update() {
-    draw_board_highlight();
+function draw_piecebuffer() {
+    console.debug(arguments.callee.name);
+
+    const ctx1 = piece1.getContext("2d");
+    ctx1.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
+    const img1 = renderShape(game_state.pieces[0], cell_size, block_img);
+    ctx1.drawImage(img1, 0, 0, piece_canvas_size, piece_canvas_size);
+
+    const ctx2 = piece2.getContext("2d");
+    ctx2.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
+    const img2 = renderShape(game_state.pieces[1], cell_size, block_img);
+    ctx2.drawImage(img2, 0, 0, piece_canvas_size, piece_canvas_size);
+
+    const ctx3 = piece3.getContext("2d");
+    ctx3.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
+    const img3 = renderShape(game_state.pieces[2], cell_size, block_img);
+    ctx3.drawImage(img3, 0, 0, piece_canvas_size, piece_canvas_size);
 }
 
-function cellFilled(cellId) {
-    // TODO make this not a debug version
-    return Math.random() <= .33;
+
+// Game
+let game_state = new GameState();
+function gameUpdate(timestamp = -1) {
+    draw_board_highlight();
+    game_score.innerText = game_state.score;
 }
+
+
+// init
+async function init() {
+    console.log(arguments.callee.name);
+    await loadShapes();
+    await initCellBounds();
+    await initBoardCanvas();
+    await initPieceCanvas();
+    await initGameState(); // MUST BE RUN AFTER initPieceCanvas()
+    await initPointerEvents();
+    await initResizeEvent();
+}
+async function initBoardCanvas() {
+    console.log(arguments.callee.name);
+    Array.from(document.querySelectorAll(".board-canvas")).forEach(board_canvas => {
+        board_canvas.width = board_canvas_size;
+        board_canvas.height = board_canvas_size;
+    });
+    draw_board_background();
+    draw_board_cells();
+    draw_board_highlight();
+    draw_board_state();
+}
+async function initPieceCanvas() {
+    piece1.width = piece_canvas_size;
+    piece1.height = piece_canvas_size;
+    piece2.width = piece_canvas_size;
+    piece2.height = piece_canvas_size;
+    piece3.width = piece_canvas_size;
+    piece3.height = piece_canvas_size;
+}
+async function initCellBounds() {
+    console.log(arguments.callee.name);
+    const s = board_canvas_size / 9;
+    let i = 0;
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+            cellBounds[i] = {
+                x: c * s,
+                y: r * s,
+                w: s,
+                h: s
+            };
+            i++;
+        }
+    }
+}
+async function initPointerEvents() {
+    console.log(arguments.callee.name);
+    window.addEventListener("pointermove", pointermoveHandler);
+    window.addEventListener("pointerdown", pointerdownHandler);
+    window.addEventListener("pointerup", pointerupHandler);
+}
+async function initResizeEvent() {
+    resizeHandler();
+    window.addEventListener("resize", resizeHandler)
+}
+async function initGameState() {
+    game_state.pieceBufferChangedCallback = draw_piecebuffer;
+    game_state.boardStateChangedCallback = draw_board_state;
+    game_state.restart();
+    gameUpdate();
+}
+
+// resize event
 function updateBoardRect() {
     console.debug(arguments.callee.name)
     const curr_bounds = board_background.getBoundingClientRect();
@@ -203,55 +293,6 @@ function updatePieceRects() {
     piece3_bounds.width = bounds3.width;
     piece3_bounds.height = bounds3.height;
 }
-
-// init
-async function init() {
-    console.log(arguments.callee.name);
-    await loadShapes();
-    initCellBounds();
-    initBoardCanvas();
-    initPointerEvents();
-    initResizeEvent();
-}
-function initBoardCanvas() {
-    console.log(arguments.callee.name);
-    Array.from(document.querySelectorAll(".board-canvas")).forEach(board_canvas => {
-        board_canvas.width = board_canvas_size;
-        board_canvas.height = board_canvas_size;
-    });
-    draw_board_background();
-    draw_board_cells();
-    draw_board_highlight();
-    draw_board_borders();
-}
-function initCellBounds() {
-    console.log(arguments.callee.name);
-    const s = board_canvas_size / 9;
-    let i = 0;
-    for (let r = 0; r < 9; r++) {
-        for (let c = 0; c < 9; c++) {
-            cellBounds[i] = {
-                x: c * s,
-                y: r * s,
-                w: s,
-                h: s
-            };
-            i++;
-        }
-    }
-}
-function initPointerEvents() {
-    console.log(arguments.callee.name);
-    window.addEventListener("pointermove", pointermoveHandler);
-    window.addEventListener("pointerdown", pointerdownHandler);
-    window.addEventListener("pointerup", pointerupHandler);
-}
-function initResizeEvent() {
-    resizeHandler();
-    window.addEventListener("resize", resizeHandler)
-}
-
-// resize event
 async function resizeHandler() {
     updateBoardRect();
     updatePieceRects();
@@ -264,22 +305,20 @@ const pointerup_data = new PointerData();
 async function pointermoveHandler(event) {
     if (pointermove_data.update(event)) {
         // requestAnimationFrame(update);
-        update();
+        gameUpdate();
     }
 }
 async function pointerdownHandler(event) {
     if (pointerdown_data.update(event)) {
         console.debug("pointerdown");
-        requestAnimationFrame(update);
+        requestAnimationFrame(gameUpdate);
     }
 }
 async function pointerupHandler(event) {
     if (pointerup_data.update(event)) {
         console.debug("pointerup");
-        requestAnimationFrame(update);
+        requestAnimationFrame(gameUpdate);
     }
 }
 
-// Game State
-const boardState = new Uint8Array(81);
-const pieceBufferState = new Uint16Array(3);
+

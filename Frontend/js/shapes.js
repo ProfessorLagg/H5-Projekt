@@ -37,19 +37,19 @@ function isValidShapeId(shapeId) {
 
     return true;
 }
+/**Used to save on GC while rendering shapes */
+const temp_canvas = document.createElement("canvas");
 function renderShape(shapeId, cellSize, blockimg) {
-    const cell_size = Number(cellSize);
-    if (cell_size < 1) { throw console.error("cellSize must be greater than 1, but was: " + cellSize); }
-    if (!isValidShapeId(shapeId)) { return; }
+    TypeChecker.assertIsInteger(cellSize);
+    if (!isValidShapeId(shapeId)) { throw Error(shapeId + " is not a valid shapeId"); }
 
     // TODO validate that blockimg is an Image
     const shape = shapes[shapeId];
-    const result = document.createElement("canvas");
-    result.width = cell_size * 5;
-    result.height = cell_size * 5;
-    const ctx = result.getContext("2d");
+    temp_canvas.width = cellSize * 5;
+    temp_canvas.height = cellSize * 5;
+    const ctx = temp_canvas.getContext("2d");
     for (let i = 0; i < shape.length; i++) {
-        ctx.drawImage(blockimg, shape[i].x * cellSize, shape[i].y * cellSize, cellSize, cellSize)
+        ctx.drawImage(blockimg, shape[i].c * cellSize, shape[i].r * cellSize, cellSize, cellSize)
     }
-    return result;
+    return temp_canvas;
 }
