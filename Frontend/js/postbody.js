@@ -3,7 +3,7 @@ const board_background = document.getElementById('board-background');
 const board_cells = document.getElementById('board-cells');
 const board_highlight = document.getElementById('board-highlight');
 const board_borders = document.getElementById('board-borders');
-const board_bounds = new DOMRect(); // TODO update this on resize
+const board_bounds = new DOMRect();
 
 const block_img = document.getElementById('blck-img');
 const cell_img = document.getElementById('cell-img');
@@ -14,6 +14,13 @@ const border_size = 5;
 const board_canvas_size = (cell_size * 9) + (border_size * 11);
 const group_size = board_canvas_size / 3;
 const cellBounds = new Array(81);
+
+const piece1 = document.getElementById('piece1');
+const piece2 = document.getElementById('piece2');
+const piece3 = document.getElementById('piece3');
+const piece1_bounds = new DOMRect();
+const piece2_bounds = new DOMRect();
+const piece3_bounds = new DOMRect();
 
 // utils
 /**
@@ -79,6 +86,10 @@ function indexToGroup(row, col) {
     const gc = Math.floor(c / 3);
     return gr + gc;
 }
+function roundDecimals(value, decimals) {
+    const mul = Math.pow(10, Math.max(0, decimals));
+    return Math.round(value * mul) / mul;
+}
 
 // draw functions
 function draw_board_background() {
@@ -101,7 +112,6 @@ function draw_board_background() {
     ctx.fillRect(group_size * 2, group_size, group_size, group_size);
     ctx.fillRect(group_size, group_size * 2, group_size, group_size);
 }
-
 function draw_board_cells() {
     const ctx = board_cells.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
@@ -130,14 +140,6 @@ function draw_board_highlight() {
     // TODO Do this for every offset in the currently selected shape
     const col = Math.floor(rangeMapNumber(uvX, 0, 1, 0, 9));
     const row = Math.floor(rangeMapNumber(uvY, 0, 1, 0, 9));
-    if (col < 0 || col > 8) {
-        console.error(arguments.callee.name, "Invalid col: " + col);
-        return;
-    }
-    if (row < 0 || row > 8) {
-        console.error(arguments.callee.name, "Invalid row: " + row);
-        return;
-    }
     const idx = indexTo1D(row, col);
 
     ctx.fillStyle = "rgba(255,255,0,.5)"
@@ -166,11 +168,10 @@ function draw_board_borders() {
         );
     }
 }
-function update(deltaTime = null) {
+function update() {
     draw_board_highlight();
 }
 
-const boardState = new Uint8Array(81);
 function cellFilled(cellId) {
     // TODO make this not a debug version
     return Math.random() <= .33;
@@ -182,6 +183,25 @@ function updateBoardRect() {
     board_bounds.y = curr_bounds.y;
     board_bounds.width = curr_bounds.width;
     board_bounds.height = curr_bounds.height;
+}
+function updatePieceRects() {
+    const bounds1 = piece1.getBoundingClientRect();
+    piece1_bounds.x = bounds1.x;
+    piece1_bounds.y = bounds1.y;
+    piece1_bounds.width = bounds1.width;
+    piece1_bounds.height = bounds1.height;
+
+    const bounds2 = piece2.getBoundingClientRect();
+    piece2_bounds.x = bounds2.x;
+    piece2_bounds.y = bounds2.y;
+    piece2_bounds.width = bounds2.width;
+    piece2_bounds.height = bounds2.height;
+
+    const bounds3 = piece3.getBoundingClientRect();
+    piece3_bounds.x = bounds3.x;
+    piece3_bounds.y = bounds3.y;
+    piece3_bounds.width = bounds3.width;
+    piece3_bounds.height = bounds3.height;
 }
 
 // init
@@ -201,10 +221,8 @@ function initBoardCanvas() {
     });
     draw_board_background();
     draw_board_cells();
-    // draw_board_highlight();
+    draw_board_highlight();
     draw_board_borders();
-
-    updateBoardRect();
 }
 function initCellBounds() {
     console.log(arguments.callee.name);
@@ -229,34 +247,39 @@ function initPointerEvents() {
     window.addEventListener("pointerup", pointerupHandler);
 }
 function initResizeEvent() {
+    resizeHandler();
     window.addEventListener("resize", resizeHandler)
 }
 
-
 // resize event
-async function resizeHandler(event) {
+async function resizeHandler() {
     updateBoardRect();
+    updatePieceRects();
 }
 
 // pointer events
 const pointermove_data = new PointerData();
 const pointerdown_data = new PointerData();
 const pointerup_data = new PointerData();
-function pointermoveHandler(event) {
+async function pointermoveHandler(event) {
     if (pointermove_data.update(event)) {
         // requestAnimationFrame(update);
         update();
     }
 }
-function pointerdownHandler(event) {
+async function pointerdownHandler(event) {
     if (pointerdown_data.update(event)) {
         console.debug("pointerdown");
         requestAnimationFrame(update);
     }
 }
-function pointerupHandler(event) {
+async function pointerupHandler(event) {
     if (pointerup_data.update(event)) {
         console.debug("pointerup");
         requestAnimationFrame(update);
     }
 }
+
+// Game State
+const boardState = new Uint8Array(81);
+const pieceBufferState = new Uint16Array(3);

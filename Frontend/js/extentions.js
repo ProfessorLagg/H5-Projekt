@@ -11,12 +11,5 @@ DOMRect.prototype.intersects = function (other) {
     const testL = this.left >= other.left && this.left <= other.right;
 
     const result = testT && testL;
-    console.debug(arguments.callee.name, 
-        "\n\tthis:", this,
-        "\n\tother:", other,
-        "\n\ttestT:", testT,
-        "\n\ttestL:", testL,
-        "\n\tresult:", result,
-    )
     return result;
 }
