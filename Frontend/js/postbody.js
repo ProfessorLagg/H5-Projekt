@@ -79,14 +79,6 @@ function indexToGroup(row, col) {
     const gc = Math.floor(c / 3);
     return gr + gc;
 }
-function isIntersecting(x, y, boundsX, boundsY, boundsW, boundsH) {
-    const xI = x >= boundsX && x <= (boundsX + boundsW);
-    const yI = y >= boundsY && y <= (boundsY + boundsH);
-    const result = xI && yI
-    // console.debug(arguments.callee.name, "\n\tx:", x, "\n\ty:", y, "\n\tboundsX:", boundsX, "\n\tboundsY:", boundsY, "\n\tboundsW:", boundsW, "\n\tboundsH:", boundsH, "\n\tresult:", result)
-    return result;
-}
-
 
 // draw functions
 function draw_board_background() {
@@ -128,14 +120,9 @@ function draw_board_highlight() {
     const ctx = board_highlight.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
     if (pointermove_data.buttons <= 0) { return }
-    const pointer_intersects_board = isIntersecting(
-        pointermove_data.clientX,
-        pointermove_data.clientY,
-        board_bounds.left,
-        board_bounds.top,
-        board_bounds.width,
-        board_bounds.height
-    );
+
+
+    const pointer_intersects_board = pointermove_data.bounds.intersects(board_bounds);
     if (!pointer_intersects_board) { return }
     const uvX = (pointermove_data.clientX - board_bounds.left) / board_bounds.width;
     const uvY = (pointermove_data.clientY - board_bounds.top) / board_bounds.height;
@@ -179,8 +166,7 @@ function draw_board_borders() {
         );
     }
 }
-
-function update(deltaTime) {
+function update(deltaTime = null) {
     draw_board_highlight();
 }
 
@@ -253,22 +239,24 @@ async function resizeHandler(event) {
 }
 
 // pointer events
-
 const pointermove_data = new PointerData();
 const pointerdown_data = new PointerData();
 const pointerup_data = new PointerData();
-async function pointermoveHandler(event) {
+function pointermoveHandler(event) {
     if (pointermove_data.update(event)) {
+        // requestAnimationFrame(update);
+        update();
+    }
+}
+function pointerdownHandler(event) {
+    if (pointerdown_data.update(event)) {
+        console.debug("pointerdown");
         requestAnimationFrame(update);
     }
 }
-async function pointerdownHandler(event) {
-    if (pointerdown_data.update(event)) {
-        console.debug("pointerdown");
-    }
-}
-async function pointerupHandler(event) {
+function pointerupHandler(event) {
     if (pointerup_data.update(event)) {
         console.debug("pointerup");
+        requestAnimationFrame(update);
     }
 }

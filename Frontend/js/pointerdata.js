@@ -52,7 +52,7 @@ class PointerData {
     /**Indicates if the pointer represents the primary pointer of this pointer type. */
     isPrimary = false;
 
-    get bounds() { new DOMRect(this.clientX, this.clientY, this.width, this.height); }
+    bounds = new DOMRect();
     /**
      * Updates this PointerData with never data.
      * @param {*} event 
@@ -87,8 +87,13 @@ class PointerData {
         this.width = event.width;
         this.pointerType = event.pointerType;
         this.type = event.type;
+
+        this.bounds.y = event.clientY;
+        this.bounds.x = event.clientX;
+        this.bounds.width = event.width;
+        this.bounds.height = event.height;
         return true;
     }
     constructor() { }
-
 }
+
