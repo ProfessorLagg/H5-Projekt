@@ -3,8 +3,10 @@ const board_background = document.getElementById('board-background');
 const board_cells = document.getElementById('board-cells');
 const board_highlight = document.getElementById('board-highlight');
 const board_borders = document.getElementById('board-borders');
-const block_img = document.getElementById('block-img');
 const board_bounds = new DOMRect(); // TODO update this on resize
+
+const block_img = document.getElementById('blck-img');
+const cell_img = document.getElementById('cell-img');
 
 const cell_size = 100;
 const border_size = 5;
@@ -142,46 +144,19 @@ function draw_board_highlight() {
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
 }
 function draw_board_borders() {
-    let cell_border_img = document.createElement("canvas");
-    cell_border_img.width = board_canvas_size / 9;
-    cell_border_img.height = board_canvas_size / 9;
-    const cell_border_ctx = cell_border_img.getContext("2d");
-
-    cell_border_ctx.strokeStyle = "white";
-    cell_border_ctx.lineWidth = border_size;
-    cell_border_ctx.shadowBlur = cell_size / 5;
-    cell_border_ctx.shadowColor = "black";
-    cell_border_ctx.strokeRect(
-        0,
-        0,
-        board_canvas_size / 9,
-        board_canvas_size / 9
-    );
-
     const ctx = board_borders.getContext("2d");
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = border_size;
-    ctx.strokeStyle = "white";
-    ctx.strokeRect(0, 0, board_canvas_size, board_canvas_size); // Draw outer border
-    const innerCanvas = {
-        left: border_size / 2,
-        top: border_size / 2,
-        right: board_canvas_size - (border_size / 2),
-        bot: board_canvas_size - (border_size / 2),
-        width: (board_canvas_size - (border_size / 2)) - (border_size / 2),
-        height: (board_canvas_size - (border_size / 2)) - (border_size / 2),
-    }
     for (let i = 0; i < outerCellBounds.length; i++) {
-        const C = outerCellBounds[i];
-        const left = rangeMapNumber(C.x, 0, board_canvas_size, innerCanvas.left, innerCanvas.right);
-        const top = rangeMapNumber(C.y, 0, board_canvas_size, innerCanvas.top, innerCanvas.bot);
-        const right = rangeMapNumber(C.x + C.w, 0, board_canvas_size, innerCanvas.left, innerCanvas.right);
-        const bot = rangeMapNumber(C.y + C.h, 0, board_canvas_size, innerCanvas.top, innerCanvas.bot);
-        const width = right - left;
-        const height = bot - top;
-        ctx.drawImage(cell_border_img, left, top, width, height);
+        const cell = outerCellBounds[i];
+        ctx.drawImage(
+            cell_img,
+            Math.floor(cell.x),
+            Math.floor(cell.y),
+            Math.floor(cell.w),
+            Math.floor(cell.h)
+        );
     }
 }
+
 function update(deltaTime) {
     draw_board_highlight();
 }
@@ -218,8 +193,8 @@ function initBoardCanvas() {
         board_canvas.height = board_canvas_size;
     });
     draw_board_background();
-    draw_board_cells();
-    draw_board_highlight();
+    // draw_board_cells();
+    // draw_board_highlight();
     draw_board_borders();
 
     updateBoardRect();
