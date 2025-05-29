@@ -12,13 +12,22 @@
 
     <body style="overscroll-behavior: none;">
         <div class="background-pattern2"></div>
-        <div id="game-wrap" class="webgl-wrap">
-            <img src="block.svg" alt="block" id="block-img" style="display: none;">
-
-
-            <canvas id="layer0" class="webgl-board"></canvas>
-            <canvas id="layer1" class="webgl-board"></canvas>
-            <canvas id="layer2" class="webgl-board"></canvas>
+        <img src="block.svg" alt="block" id="block-img" style="display: none;" loading="eager">
+        <div id="game-wrap" class="game-wrap">
+            <div id="game-score-wrap">
+                <span id="game-score" class="score-display" value="0">0</span>
+            </div>
+            <div id="game-board-wrap" class="board-canvas-wrap">
+                <canvas id="board-background" class="board-canvas"></canvas>
+                <canvas id="board-cells" class="board-canvas"></canvas>
+                <canvas id="board-highlight" class="board-canvas"></canvas>
+                <canvas id="board-borders" class="board-canvas"></canvas>
+            </div>
+            <div id="piece-buffer" class="piece-buffer">
+                <canvas id="piece-1" class="piece-canvas"></canvas>
+                <canvas id="piece-2" class="piece-canvas"></canvas>
+                <canvas id="piece-3" class="piece-canvas"></canvas>
+            </div>
         </div>
         <script src="webgl.js"></script>
         <script>init()</script>

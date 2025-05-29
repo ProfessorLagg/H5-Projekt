@@ -1,18 +1,20 @@
 :root {
     --color-text: white;
+    --rw: calc(var(--rootWidth) / 100);
+    --rh: calc(var(--rootHeight) / 100);
 }
 
 @media (min-aspect-ratio: 1/2) {
     :root {
-        --rw: 50vh;
-        --rh: 100vh;
+        --rootWidth: 50vh;
+        --rootHeight: 100vh;
     }
 }
 
-@media (aspect-ratio: 1/2) {
+@media (max-aspect-ratio: 1/2) {
     :root {
-        --rw: 100vw;
-        --rh: 200vw;
+        --rootWidth: 100vw;
+        --rootHeight: 200vw;
     }
 }
 
@@ -24,6 +26,7 @@
     margin: 0;
     overscroll-behavior: none;
     overflow: none;
+    touch-action: none;
 }
 
 body {
@@ -33,30 +36,82 @@ body {
     width: 100vw !important;
 
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
 }
 
-.webgl-wrap {
+.game-wrap {
     aspect-ratio: 1/2;
-    width: var(--rw);
-    height: var(--rh);
+    width: var(--rootWidth);
+    height: var(--rootHeight);
 
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: end;
     align-items: center;
-
+    gap: calc(1 * var(--rh));
     /* Debug */
     /* outline: 1px solid rgba(255, 255, 255, 25%); */
     background-color: rgba(255, 255, 255, 10%);
 
 }
 
-.webgl-board {
-    width: var(--rw);
-    height: var(--rw);
+.board-canvas-wrap {
+    width: var(--rootWidth);
+    height: var(--rootWidth);
+
+    /* Debug */
+    /* outline: 1px solid rgba(255, 255, 255, 25%); */
+    /* border: 1px solid magenta; */
+    /* background-color: rgba(255, 255, 255, 10%); */
+}
+
+.board-canvas {
+    width: var(--rootWidth);
+    height: var(--rootWidth);
     aspect-ratio: 1/1;
     position: absolute;
+
     /* Debug */
-    /* outline: 1px solid magenta; */
-    /* background-color: rgba(255, 0, 255, 10%); */
+    /* outline: 1px solid rgba(255, 255, 255, 25%); */
+    /* border: 1px solid magenta; */
+    /* background-color: rgba(255, 255, 255, 10%);*/
+    /* visibility: hidden; */
+}
+
+.piece-buffer {
+    width: 100%;
+    min-height: fit-content;
+    min-height: calc((var(--rootWidth) / 9) * 5);
+    min-height: calc((var(--rootWidth) / 9) * 5);
+
+
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    align-items: center;
+
+    /* Debug */
+    outline: 1px solid white;
+    /* border: 1px solid magenta; */
+    /* background-color: rgba(255, 0, 0, 33%) */
+        /* visibility: hidden; */
+}
+
+.piece-canvas {
+    width: calc(var(--rootWidth) / 3 - 2 * var(--rw));
+    height: calc(var(--rootWidth) / 3 - 2 * var(--rw));
+    aspect-ratio: 1/1;
+    margin: var(--rw);
+    /* Debug */
+    /* outline: 1px solid rgba(255, 255, 255, 25%); */
+    /* border: 1px solid magenta; */
+    background-color: rgba(255, 0, 0, 33%)
+    /* visibility: hidden; */
+}
+
+.score-display {
+    font-size: calc(3 * var(--rh));
+    font-weight: bold;
 }
