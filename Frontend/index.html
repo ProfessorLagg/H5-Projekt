@@ -6,18 +6,31 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <link rel="stylesheet" href="css/root.css">
         <link rel="stylesheet" href="css/backgrounds.css">
-        <link rel="prefetch" href="/game/board.svg" />
-        <link rel="prefetch" href="/game/block.svg" />
-        <title>Laggdoku</title>
+        <script src="js/shapes.js"></script>
+        <title>WebGL Test</title>
     </head>
 
     <body style="overscroll-behavior: none;">
-        <script type="module">
-            import * as gameNs from "/game/game.js"
-            window.gameNs = gameNs;
-        </script>
         <div class="background-pattern2"></div>
-        <game-wrap id="game"></game-wrap>
+        <img src="img/block.svg" alt="block" id="block-img" style="display: none;" loading="eager">
+        <div id="game-wrap" class="game-wrap">
+            <div id="game-score-wrap">
+                <span id="game-score" class="score-display" value="0">0</span>
+            </div>
+            <div id="game-board-wrap" class="board-canvas-wrap">
+                <canvas id="board-background" class="board-canvas"></canvas>
+                <canvas id="board-cells" class="board-canvas"></canvas>
+                <canvas id="board-highlight" class="board-canvas"></canvas>
+                <canvas id="board-borders" class="board-canvas"></canvas>
+            </div>
+            <div id="piece-buffer" class="piece-buffer">
+                <canvas id="piece-1" class="piece-canvas"></canvas>
+                <canvas id="piece-2" class="piece-canvas"></canvas>
+                <canvas id="piece-3" class="piece-canvas"></canvas>
+            </div>
+        </div>
+        <script src="js/postbody.js"></script>
+        <script>init()</script>
     </body>
 
 </html>

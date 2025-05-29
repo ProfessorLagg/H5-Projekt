@@ -187,6 +187,7 @@ function update(deltaTime) {
 }
 //#endregion
 
+
 const boardState = new Uint8Array(81);
 function cellFilled(cellId) {
     // TODO make this not a debug version
@@ -204,6 +205,7 @@ function updateBoardRect() {
 //#region init
 async function init() {
     console.log(arguments.callee.name);
+    await loadShapes();
     initCellBounds();
     initBoardCanvas();
     initPointerEvents();
