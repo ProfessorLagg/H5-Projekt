@@ -1,3 +1,5 @@
+@import url(fonts/fonts.css);
+
 :root {
     --color-text: white;
     --rw: calc(var(--rootWidth) / 100);
@@ -19,7 +21,7 @@
 }
 
 * {
-    font-family: "Open Sans", sans-serif;
+    font-family: "Open Sans", "Arial", sans-serif;
     box-sizing: border-box;
     color: var(--color-text);
     padding: 0;
@@ -96,7 +98,7 @@ body {
     outline: 1px solid white;
     /* border: 1px solid magenta; */
     /* background-color: rgba(255, 0, 0, 33%) */
-        /* visibility: hidden; */
+    /* visibility: hidden; */
 }
 
 .piece-canvas {
@@ -108,7 +110,7 @@ body {
     /* outline: 1px solid rgba(255, 255, 255, 25%); */
     /* border: 1px solid magenta; */
     background-color: rgba(255, 0, 0, 33%)
-    /* visibility: hidden; */
+        /* visibility: hidden; */
 }
 
 .score-display {
