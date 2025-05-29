@@ -105,34 +105,14 @@ function draw_board_background() {
 function draw_board_cells() {
     const ctx = board_cells.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = border_size;
-    ctx.strokeStyle = "white";
-    ctx.strokeRect(0, 0, board_canvas_size, board_canvas_size); // Draw outer border
-    const innerCanvas = {
-        left: border_size / 2,
-        top: border_size / 2,
-        right: board_canvas_size - (border_size / 2),
-        bot: board_canvas_size - (border_size / 2),
-        width: (board_canvas_size - (border_size / 2)) - (border_size / 2),
-        height: (board_canvas_size - (border_size / 2)) - (border_size / 2),
-    }
-    const cells = outerCellBounds;
-    for (let i = 0; i < cells.length; i++) {
-        if (!cellFilled(i)) { continue }
-        const C = cells[i];
-        const left = rangeMapNumber(C.x, 0, board_canvas_size, innerCanvas.left, innerCanvas.right);
-        const top = rangeMapNumber(C.y, 0, board_canvas_size, innerCanvas.top, innerCanvas.bot);
-        const right = rangeMapNumber(C.x + C.w, 0, board_canvas_size, innerCanvas.left, innerCanvas.right);
-        const bot = rangeMapNumber(C.y + C.h, 0, board_canvas_size, innerCanvas.top, innerCanvas.bot);
-        const width = right - left;
-        const height = bot - top;
+    for (let i = 0; i < outerCellBounds.length; i++) {
+        const cell = outerCellBounds[i];
         ctx.drawImage(
-            block_img,
-            left + border_size,
-            top + border_size,
-            width - border_size * 2,
-            height - border_size * 2
+            cell_img,
+            Math.floor(cell.x),
+            Math.floor(cell.y),
+            Math.floor(cell.w),
+            Math.floor(cell.h)
         );
     }
 }
@@ -145,10 +125,13 @@ function draw_board_highlight() {
 }
 function draw_board_borders() {
     const ctx = board_borders.getContext("2d");
+    ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
     for (let i = 0; i < outerCellBounds.length; i++) {
+        if(!cellFilled(i)){continue}
+
         const cell = outerCellBounds[i];
         ctx.drawImage(
-            cell_img,
+            block_img,
             Math.floor(cell.x),
             Math.floor(cell.y),
             Math.floor(cell.w),
@@ -193,7 +176,7 @@ function initBoardCanvas() {
         board_canvas.height = board_canvas_size;
     });
     draw_board_background();
-    // draw_board_cells();
+    draw_board_cells();
     // draw_board_highlight();
     draw_board_borders();
 
