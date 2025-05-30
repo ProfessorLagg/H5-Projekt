@@ -86,13 +86,18 @@ class GameState {
             this.boardState[cellIndexes[i]] = 1;
             this.score += 1;
         }
+        this.pieces[this.selectedPieceId] = -1;
+        this.clearSelectedPiece();
+
 
         // TODO clear rows/cols/grps
 
         // TODO regen piece buffer if needed
+        if (this.pieces[0] === -1 && this.pieces[1] === -1 && this.pieces[2] === -1) {
+            this.generatePieces();
+        }
 
-        this.pieces[this.selectedPieceId] = -1;
-        this.clearSelectedPiece();
+
         this.boardStateChangedCallback();
         return true;
     }

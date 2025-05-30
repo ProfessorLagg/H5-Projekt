@@ -378,8 +378,7 @@ function pointerupHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerup");
     pointer_cell_index = getPointerCellIndex();
-    const place_cell_index = getPointerCellIndex();
-    if (game_state.tryPlaceSelectedPiece(place_cell_index, true, true)) {
+    if (game_state.tryPlaceSelectedPiece(pointer_cell_index)) {
 
     } else {
         game_state.clearSelectedPiece();
@@ -387,20 +386,17 @@ function pointerupHandler(event) {
 
     requestAnimationFrame(gameUpdate)
 }
+
 function getPointerCellIndex() {
     if (!pointerdata.bounds.intersects(board_bounds)) { return null }
 
     const pCenter = pointerdata.bounds.center();
-    const P = new DOMRect(
-        (pCenter.x - board_bounds.left) / board_bounds.width,
-        (pCenter.y - board_bounds.top) / board_bounds.height,
-        cell_size,
-        cell_size
-    );
+    const uvX = (pCenter.x - board_bounds.left) / board_bounds.width;
+    const uvY = (pCenter.y - board_bounds.top) / board_bounds.height
 
-    const row = Math.round(rangeMapNumber(P.y, 0, 1, 0, 8) - 1);
+    const row = Math.round(rangeMapNumber(uvY, 0, 1, 0, 8) - 1);
     if (row < 0 || row > 8) { return null }
-    const col = Math.round(rangeMapNumber(P.x, 0, 1, 0, 8) - 1);
+    const col = Math.round(rangeMapNumber(uvX, 0, 1, 0, 8) - 1);
     if (col < 0 || col > 8) { return null }
     return indexTo1D(row, col, true);
 }
