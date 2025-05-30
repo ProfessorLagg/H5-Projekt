@@ -32,6 +32,13 @@ function assertIsValidShapeId(shapeId) {
         throw Error("no shape has the shapeId " + shapeId);
     }
 }
+const centerOffsetLookup = [
+    2, // 1
+    1, // 2
+    1, // 3
+    0, // 4
+    0, // 5
+]
 /**
  * Finds the min/max col/row of a shape
  * @param {Number} shapeId 
@@ -55,8 +62,14 @@ function getShapeOffsetBounds(shapeId) {
             shapeOffsetBounds[shapeId].max_col = Math.max(shapeOffsetBounds[shapeId].max_col, shape[i].c);
             shapeOffsetBounds[shapeId].max_row = Math.max(shapeOffsetBounds[shapeId].max_row, shape[i].r);
         }
-        shapeOffsetBounds[shapeId].col_center_offset = Math.floor((5 - shapeOffsetBounds[shapeId].max_col) / 2)
-        shapeOffsetBounds[shapeId].row_center_offset = Math.floor((5 - shapeOffsetBounds[shapeId].max_row) / 2)
+        // shapeOffsetBounds[shapeId].col_center_offset = Math.floor((5 - shapeOffsetBounds[shapeId].max_col) / 2)
+        // shapeOffsetBounds[shapeId].row_center_offset = Math.floor((5 - shapeOffsetBounds[shapeId].max_row) / 2)
+        const w = shapeOffsetBounds[shapeId].max_col - shapeOffsetBounds[shapeId].min_col;
+        const h = shapeOffsetBounds[shapeId].max_row - shapeOffsetBounds[shapeId].min_row;
+
+        shapeOffsetBounds[shapeId].col_center_offset = centerOffsetLookup[w] ?? 0;
+        shapeOffsetBounds[shapeId].row_center_offset = centerOffsetLookup[h] ?? 0;
+
     }
     return shapeOffsetBounds[shapeId];
 }
@@ -66,14 +79,15 @@ function getShape(shapeId, centerX = false, centerY = false) {
     TypeChecker.assertIsBoolean(centerX);
     TypeChecker.assertIsBoolean(centerY);
 
-    const shape = structuredClone(shapes[shapeId]);
-    if (centerX || centerY) {
-        const add_col = shapeOffsetBounds[shapeId].col_center_offset * Number(centerX);
-        const add_row = shapeOffsetBounds[shapeId].row_center_offset * Number(centerY);
-        for (let i = 0; i < shape.length; i++) {
-            shape[i].c += add_col;
-            shape[i].r += add_row;
-        }
+    const add_col = shapeOffsetBounds[shapeId].col_center_offset * Number(centerX);
+    const add_row = shapeOffsetBounds[shapeId].row_center_offset * Number(centerY);
+    const shape = [];
+    shape.length = shapes[shapeId].length;
+    for (let i = 0; i < shape.length; i++) {
+        shape[i] = {
+            c: shapes[shapeId][i].c + add_col,
+            r: shapes[shapeId][i].r + add_row,
+        };
     }
     return shape;
 }

@@ -30,83 +30,6 @@ const piecedrag_canvas = document.getElementById('piecedrag');
 const piecedrag_bounds = new DOMRect();
 
 
-// utils
-/**
- * Maps x from the range [srcMin - srcMax] to the range [dstMin - dstMax]
- * @param {Number} x 
- * @param {Number} srcMin 
- * @param {Number} srcMax 
- * @param {Number} dstMin 
- * @param {Number} dstMax 
- * @returns Number
- */
-function rangeMapNumber(x, srcMin, srcMax, dstMin, dstMax) {
-    return (x - srcMin) / (srcMax - srcMin) * (dstMax - dstMin) + dstMin;
-}
-/**
- * Converts 2D board index to 1D board index
- * @param {Number} row 
- * @param {Number} col
- * @param {Boolean} [skip_range_check] Flag to allow out out range input
- * @returns The result 1D index in the range [0-80]
- */
-function indexTo1D(row, col, skip_range_check = false) {
-    TypeChecker.assertIsInteger(row);
-    TypeChecker.assertIsInteger(col);
-    if (!skip_range_check && (row < 0 || row > 8)) { throw Error("row must be in the range [0 - 8], but was: " + row) }
-    if (!skip_range_check && (col < 0 || col > 8)) { throw Error("col must be in the range [0 - 8], but was: " + col) }
-
-    const r = Math.max(0, Math.min(9, row));
-    const c = Math.max(0, Math.min(9, col));
-    return r * 9 + c;
-}
-/**
- * Converts 1D board index to 2D board index
- * @param {Number} index 
- * @param {Boolean} [skip_range_check] Flag to allow out out range input
- * @returns The resulting 2D index row and col
- */
-function indexTo2D(index, skip_range_check = false) {
-    TypeChecker.assertIsInteger(index);
-    if (!skip_range_check && (index < 0 || index > 80)) { throw Error("index must be in the range [0 - 80], but was: " + index) }
-    const idx = Math.max(0, Math.min(80, index));
-    const col = idx % 9;
-    const row = (idx - col) / 9
-    return {
-        row: row,
-        col: col,
-    }
-}
-/**
- * Calculates board group from 2D board index
- * @param {Number} row 
- * @param {Number} col 
- * @returns The resulting board group index
- */
-function indexToGroup(row, col) {
-    TypeChecker.assertIsInteger(row);
-    TypeChecker.assertIsInteger(col);
-    if (row < 0 || row > 8) { throw Error("row must be in the range [0 - 8], but was: " + row) }
-    if (col < 0 || col > 8) { throw Error("col must be in the range [0 - 8], but was: " + col) }
-    const r = Math.max(0, Math.min(9, row));
-    const c = Math.max(0, Math.min(9, col));
-    const gr = Math.floor(r / 3) * 3;
-    const gc = Math.floor(c / 3);
-    return gr + gc;
-}
-function roundDecimals(value, decimals) {
-    const mul = Math.pow(10, Math.max(0, decimals));
-    return Math.round(value * mul) / mul;
-}
-function distanceSquared2D(x0, y0, x1, y1) {
-    const dx = x0 - x1;
-    const dy = y0 - y1;
-    return dx * dx + dy + dy;
-}
-function distance2D(x0, y0, x1, y1) {
-    return Math.sqrt(distanceSquared2D(x0, y0, x1, y1));
-}
-
 // draw functions
 function draw_board_background() {
     const ctx = board_background.getContext("2d");
@@ -158,49 +81,6 @@ function draw_board_highlight() {
             )
         }
     }
-    return;
-    if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
-    if (!pointerdata.bounds.intersects(board_bounds)) { return }
-
-    // convert pointer position from viewport coordinates to drag canvas coordinates
-    const pointer_uv_bounds = new DOMRect(
-        (pointerdata.bounds.x - board_bounds.left) / board_bounds.width,
-        (pointerdata.bounds.y - board_bounds.top) / board_bounds.height,
-        pointerdata.width / board_bounds.width,
-        pointerdata.height / board_bounds.height
-    );
-
-    const pixel_bounds = new DOMRect();
-    pixel_bounds.width = cell_size * 5;
-    pixel_bounds.height = cell_size * 5;
-    pixel_bounds.x = (board_canvas_size * pointer_uv_bounds.x) - pixel_bounds.width / 2;
-    pixel_bounds.y = (board_canvas_size * pointer_uv_bounds.y) - pixel_bounds.height / 2;
-    pixel_bounds.x = Math.round(rangeMapNumber(pixel_bounds.x, 0, board_canvas_size, 0, 8)) * cell_size;
-    pixel_bounds.y = Math.round(rangeMapNumber(pixel_bounds.y, 0, board_canvas_size, 0, 8)) * cell_size;
-
-    const shapeId = game_state.selectedShapeId;
-    const shapeImg = renderShape(
-        shapeId, // shapeId
-        cell_size, // cellSize
-        highlight_img, // blockimg
-        true, // centerX
-        true // centerY
-    );
-    ctx.drawImage(
-        shapeImg,
-        pixel_bounds.x,
-        pixel_bounds.y,
-        pixel_bounds.width,
-        pixel_bounds.height
-    );
-
-    ctx.fillStyle = "rgba(255,0,255,.1)"
-    ctx.fillRect(
-        pixel_bounds.x,
-        pixel_bounds.y,
-        pixel_bounds.width,
-        pixel_bounds.height
-    );
 }
 function draw_board_state() {
     const ctx = board_borders.getContext("2d");
@@ -256,7 +136,6 @@ function draw_piecedrag() {
     );
 
     const pixel_bounds = new DOMRect();
-
     pixel_bounds.width = cell_size * 5;
     pixel_bounds.height = cell_size * 5;
     pixel_bounds.x = (piecedrag_canvas.width * pointer_uv_bounds.x) - pixel_bounds.width / 2;
@@ -279,19 +158,18 @@ function draw_piecedrag() {
         pixel_bounds.height
     );
 
-    ctx.fillStyle = "rgba(255,0,0,.1)"
-    ctx.fillRect(
-        pixel_bounds.x,
-        pixel_bounds.y,
-        pixel_bounds.width,
-        pixel_bounds.height
-    );
-
-
+    // ctx.fillStyle = "rgba(255,0,0,.1)"
+    // ctx.fillRect(
+    //     pixel_bounds.x,
+    //     pixel_bounds.y,
+    //     pixel_bounds.width,
+    //     pixel_bounds.height
+    // );
 }
 function draw_score() {
     game_score.innerText = game_state.score;
 }
+
 
 // Game
 let game_state = new GameState();
@@ -320,18 +198,22 @@ function update_hovering_cells() {
 
     const cell_index2D = indexTo2D(cell_index1D, true);
     // TODO cache this somehow
+    const shapeId = game_state.selectedShapeId;
+    const shapeOffsetBounds = getShapeOffsetBounds(shapeId);
     const shape = getShape(
-        game_state.selectedShapeId,
-        true,
-        true
+        shapeId,
+        false,
+        false
     );
 
+    // console.debug("update_hovering_cells:", "\n\tcell_index1D:", cell_index1D, "\n\tcell_index2D:", cell_index2D, "\n\tshape:", shape)
     for (let i = 0; i < shape.length; i++) {
-        const row = shape[i].r + cell_index2D.row - 2;
+        const row = cell_index2D.row + shape[i].r - shapeOffsetBounds.row_center_offset;
         if (row < 0 || row > 8) { continue }
-        const col = shape[i].c + cell_index2D.col - 2;
+        const col = cell_index2D.col + shape[i].c - shapeOffsetBounds.row_center_offset;
         if (col < 0 || col > 8) { continue }
         const idx = indexTo1D(row, col, true);
+
         hovering_cells[idx] = 1;
     }
     // console.debug(arguments.callee.name,
@@ -482,7 +364,7 @@ async function resizeHandler() {
     update_piecedrag_size();
 }
 
-// pointer events
+// pointer
 const pointerdata = new PointerData();
 async function pointermoveHandler(event) {
     if (!pointerdata.update(event)) { return }
@@ -507,20 +389,52 @@ function pointerdownHandler(event) {
 function pointerupHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerup");
-    // TODO Check if i can place the currently selected piece
+    // TODO TRY PLACE CURRENT PIECE
+    const place_cell_index = getPointerCellIndex();
+    if (game_state.tryPlaceSelectedPiece(place_cell_index, true, true)) {
 
-    game_state.clearSelectedPiece();
+    } else {
+        game_state.clearSelectedPiece();
+    }
+
     requestAnimationFrame(gameUpdate)
 }
 function getPointerCellIndex() {
     if (!pointerdata.bounds.intersects(board_bounds)) { return null }
 
-    // TODO this could be much much faster
     const pCenter = pointerdata.bounds.center();
-    for (let i = 0; i < cellViewPortBounds.length; i++) {
-        if (pCenter.intersects(cellViewPortBounds[i])) {
-            return i;
+    const P = new DOMRect(
+        (pCenter.x - board_bounds.left) / board_bounds.width,
+        (pCenter.y - board_bounds.top) / board_bounds.height,
+        cell_size,
+        cell_size
+    );
+
+    const row = Math.round(rangeMapNumber(P.y, 0, 1, 0, 8));
+    if (row < 0 || row > 8) { return null }
+    const col = Math.round(rangeMapNumber(P.x, 0, 1, 0, 8));
+    if (col < 0 || col > 8) { return null }
+    return indexTo1D(row, col, true);
+}
+
+
+// DEBUGGING
+function enableCheats() {
+    let cheatsShapeIndex = 0;
+    document.body.onkeyup = function (e) {
+        const magicNumber = 0
+            + Number(e.key == "ArrowRight")
+            + (-1 * Number(e.key == "ArrowLeft"));
+        if (magicNumber !== 0) {
+            cheatsShapeIndex = cheatsShapeIndex + magicNumber;
+            if (cheatsShapeIndex > 0) { cheatsShapeIndex = cheatsShapeIndex % shapeIds.length }
+            else if (cheatsShapeIndex < 0) { cheatsShapeIndex = shapeIds.length + cheatsShapeIndex }
+            game_state.pieces[0] = shapeIds[cheatsShapeIndex];
+            game_state.pieceBufferChangedCallback();
+            requestAnimationFrame(gameUpdate);
         }
     }
-    return null;
+    game_state.pieces[0] = shapeIds[cheatsShapeIndex];
+    game_state.pieceBufferChangedCallback();
+    requestAnimationFrame(gameUpdate);
 }

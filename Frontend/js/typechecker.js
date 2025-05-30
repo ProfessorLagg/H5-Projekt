@@ -75,12 +75,12 @@ class TypeChecker {
      * @param {Number} min
      * @param {Number} max
      */
-    static assertIsInRange(v, min, max) { if (!TypeChecker.isInRange(v, min, max)) { throw Error(`Expected number in range ${min} <= ${v} <= ${max}, but found ${v}`) } }
+    static assertIsInRange(v, min, max) { if (!TypeChecker.isInRange(v, min, max)) { throw Error(`Expected number in range ${min} <= v <= ${max}, but found ${v}`) } }
     /**
      * Throws if v is not an integer in the range min <= v <= max
      * @param {Number} v
      * @param {Number} min
      * @param {Number} max
      */
-    static assertIsIntegerInRange(v, min, max) { if (!TypeChecker.isIntegerInRange(v, min, max)) { throw Error(`Expected integer in range ${min} <= ${v} <= ${max}, but found ${v}`) } }
+    static assertIsIntegerInRange(v, min, max) { if (!TypeChecker.isIntegerInRange(v, min, max)) { throw Error(`Expected integer in range ${min} <= v <= ${max}, but found ${v}`) } }
 }

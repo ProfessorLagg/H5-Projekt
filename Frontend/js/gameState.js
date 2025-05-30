@@ -64,8 +64,22 @@ class GameState {
         console.debug("Selected piece " + this.selectedPieceId);
         this.selectionChangedCallback();
     }
-    placeSelectedPiece(cellIndex) {
-        throw Error("Not yet implemented");
+    tryPlaceSelectedPiece(cellIndex, centerX = false, centerY = false) {
+        console.debug("GameState.tryPlaceSelectedPiece", "cellIndex:", cellIndex);
+        if (!TypeChecker.isIntegerInRange(cellIndex, 0, 80)) { return false }
+        const shape = getShape(this.selectedShapeId, centerX, centerY);
+        const index2D = indexTo2D(cellIndex);
+        for (let i = 0; i < shape.length; i++) {
+            const row = shape[i].r + index2D.row;
+            const col = shape[i].c + index2D.col;
+            console.debug(`shape.r:${shape[i].r} + index2D.row:${index2D.row} = row:${row} | shape.c:${shape[i].c} + index2D.col:${index2D.col} = col:${col}`)
+
+            if (row < 0 || row > 8) { return false }
+            if (col < 0 || col > 8) { return false }
+
+            const idx = indexTo1D(row, col, false);
+            if (this.getCellState(idx)) { return false }
+        }
 
         this.pieceBufferChangedCallback();
     }
@@ -83,9 +97,5 @@ class GameState {
         this.boardStateChangedCallback();
     }
     constructor() {
-        // this.boardState = new Uint8Array(this.buffer.slice(0, 81));
-        // this.pieces = new Int16Array(this.buffer.slice(81, 87));
-        // this.scoreState = new Uint32Array(this.buffer.slice(87));
-        // this.restart();
     }
 }
