@@ -53,6 +53,8 @@ class PointerData {
     isPrimary = false;
 
     bounds = new DOMRect();
+
+    uv_bounds = new DOMRect();
     /**
      * Updates this PointerData with never data.
      * @param {*} event 

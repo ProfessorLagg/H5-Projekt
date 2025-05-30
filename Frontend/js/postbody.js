@@ -25,7 +25,9 @@ const piece0_bounds = new DOMRect();
 const piece1_bounds = new DOMRect();
 const piece2_bounds = new DOMRect();
 
-const piece_drag_canvas = document.getElementById('piece-drag-canvas');
+const piecedrag_canvas = document.getElementById('piecedrag');
+const piecedrag_bounds = new DOMRect();
+
 
 // utils
 /**
@@ -135,8 +137,6 @@ function draw_board_highlight() {
     const ctx = board_highlight.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
     if (pointermove_data.buttons <= 0) { return }
-
-
     const pointer_intersects_board = pointermove_data.bounds.intersects(board_bounds);
     if (!pointer_intersects_board) { return }
     const uvX = (pointermove_data.clientX - board_bounds.left) / board_bounds.width;
@@ -196,11 +196,26 @@ function draw_piecebuffer() {
     }
 }
 function draw_piecedrag() {
+    const ctx = piecedrag_canvas.getContext("2d");
+    ctx.clearRect(0, 0, piecedrag_canvas.width, piecedrag_canvas.height);
     if (game_state.selectedPiece < 0 || game_state.selectedPiece > 2) { return }
-    const ctx = piece_drag_canvas.getContext("2d");
-    ctx.clearRect(0, 0, piece_drag_canvas.width, piece_drag_canvas.height);
-    // TODO convert pointer position from viewport coordinates to drag canvas coordinates
 
+    // TODO convert pointer position from viewport coordinates to drag canvas coordinates
+    const pointer_uv_bounds = pointermove_data.bounds.uv();
+    const pixel_bounds = new DOMRect();
+    pixel_bounds.x = piecedrag_canvas.width * pointer_uv_bounds.x;
+    pixel_bounds.y = piecedrag_canvas.height * pointer_uv_bounds.y;
+    pixel_bounds.width = cell_size * 5;
+    pixel_bounds.height = cell_size * 5;
+
+    const shapeImg = renderShape(game_state.pieces[game_state.selectedPiece], cell_size, block_img);
+    ctx.drawImage(
+        shapeImg,
+        pixel_bounds.x,
+        pixel_bounds.y,
+        pixel_bounds.width,
+        pixel_bounds.height
+    );
 }
 function draw_score() {
     game_score.innerText = game_state.score;
@@ -229,6 +244,7 @@ function update_score(timestamp = -1) {
 function gameUpdate(timestamp = -1) {
     update_board(timestamp);
     update_piecebuffer(timestamp);
+    update_piecedrag(timestamp);
     update_score(timestamp);
 }
 
@@ -323,14 +339,19 @@ function updateBoundsData() {
     piece2_bounds.y = c_piece2_bounds.y;
     piece2_bounds.width = c_piece2_bounds.width;
     piece2_bounds.height = c_piece2_bounds.height;
+
+    const c_piecedrag_bounds = piecedrag_canvas.getBoundingClientRect();
+    piecedrag_bounds.x = c_piecedrag_bounds.x;
+    piecedrag_bounds.y = c_piecedrag_bounds.y;
+    piecedrag_bounds.width = c_piecedrag_bounds.width;
+    piecedrag_bounds.height = c_piecedrag_bounds.height;
 }
 function update_piecedrag_size() {
     console.debug(arguments.callee.name)
-    const piece_drag_bounds = piece_drag_canvas.getBoundingClientRect();
-    const scaleW = piece_drag_bounds.width / board_bounds.width;
-    const scaleH = piece_drag_bounds.height / board_bounds.height;
-    piece_drag_canvas.width = board_canvas_size * scaleW;
-    piece_drag_canvas.height = board_canvas_size * scaleH;
+    const scaleW = piecedrag_bounds.width / board_bounds.width;
+    const scaleH = piecedrag_bounds.height / board_bounds.height;
+    piecedrag_canvas.width = board_canvas_size * scaleW;
+    piecedrag_canvas.height = board_canvas_size * scaleH;
 }
 async function resizeHandler() {
     updateBoundsData();

@@ -118,7 +118,7 @@ body {
     font-weight: bold;
 }
 
-#piece-drag-canvas {
+.piecedrag-canvas {
     position: absolute;
     left: 0;
     top: 0;
