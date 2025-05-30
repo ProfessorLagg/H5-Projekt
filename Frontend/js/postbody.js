@@ -195,7 +195,7 @@ function update_hovering_cells() {
     hovering_cells.fill(0);
     if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
 
-    const cell_index1D = getPointerCellIndex();
+    const cell_index1D = pointer_cell_index;
     if (cell_index1D === null) { return }
 
     const cell_index2D = indexTo2D(cell_index1D, true);
@@ -390,13 +390,13 @@ function pointerdownHandler(event) {
 function pointerupHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerup");
-    pointer_cell_index = getPointerCellIndex();
-    if (game_state.tryPlaceSelectedPiece(pointer_cell_index)) {
-
-    } else {
+    if (!game_state.hasSelectedPiece()) {
+        game_state.clearSelectedPiece();
+    } else if (!pointerdata.bounds.intersects(board_bounds)) {
+        game_state.clearSelectedPiece();
+    } else if (!game_state.tryPlaceSelectedPiece(pointer_cell_index)) {
         game_state.clearSelectedPiece();
     }
-
     requestAnimationFrame(gameUpdate)
 }
 

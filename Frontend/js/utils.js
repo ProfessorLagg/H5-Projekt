@@ -75,3 +75,51 @@ function distanceSquared2D(x0, y0, x1, y1) {
 function distance2D(x0, y0, x1, y1) {
     return Math.sqrt(distanceSquared2D(x0, y0, x1, y1));
 }
+
+const cell_index_info = [];
+{
+    cell_index_info.length = 0;
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+            const i = indexTo1D(r, c, false);
+            const g = indexToGroup(r, c);
+            cell_index_info.push({
+                idx: i,
+                grp: g,
+                row: r,
+                col: c,
+            })
+        }
+    }
+}
+
+function getGroupCellIndexes(group) {
+    TypeChecker.assertIsIntegerInRange(group, 0, 8);
+    const result = [];
+    for (let i = 0; i < cell_index_info.length; i++) {
+        if (cell_index_info[i].grp === group) {
+            result.push(cell_index_info[i]);
+        }
+    }
+    return result;
+}
+function getRowCellIndexes(row) {
+    TypeChecker.assertIsIntegerInRange(row, 0, 8);
+    const result = [];
+    for (let i = 0; i < cell_index_info.length; i++) {
+        if (cell_index_info[i].row === row) {
+            result.push(cell_index_info[i]);
+        }
+    }
+    return result;
+}
+function getColumnCellIndexes(column) {
+    TypeChecker.assertIsIntegerInRange(column, 0, 8);
+    const result = [];
+    for (let i = 0; i < cell_index_info.length; i++) {
+        if (cell_index_info[i].col === column) {
+            result.push(cell_index_info[i]);
+        }
+    }
+    return result;
+}
