@@ -10,7 +10,16 @@ class GameState {
     boardState = new Uint8Array(this.buffer.slice(0, 81));
 
     pieces = new Int16Array(this.buffer.slice(81, 87));
-    selectedPiece = -1;
+    selectedPieceId = -1;
+    get selectedShapeId() {
+        if (this.selectedPieceId < 0 || this.selectedPieceId > 2) { 
+            console.error("No shape selected")
+            return null;
+         }
+        const shapeId = this.pieces[this.selectedPieceId];
+        assertIsValidShapeId(shapeId);
+        return shapeId;
+    }
 
     scoreState = new Uint32Array(this.buffer.slice(87));
 
@@ -45,16 +54,17 @@ class GameState {
     selectPiece(pieceId) {
         TypeChecker.assertIsIntegerInRange(pieceId, 0, 2);
         assertIsValidShapeId(this.pieces[pieceId]);
-        this.selectedPiece = pieceId;
-        console.debug("Selected piece " + pieceId);
+        this.selectedPieceId = pieceId;
+        console.debug("Selected piece " + this.selectedPieceId);
     }
-    placeSelectedPiece(cellIndex){
+    placeSelectedPiece(cellIndex) {
         throw Error("Not yet implemented");
 
         this.pieceBufferChangedCallback();
     }
-    clearSelectedPiece(){
-        this.selectedPiece = -1;
+    clearSelectedPiece() { 
+        this.selectedPieceId = -1;
+        console.debug("Selected piece " + this.selectedPieceId);
     }
 
     restart() {

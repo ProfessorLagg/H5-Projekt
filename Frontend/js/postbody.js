@@ -135,27 +135,46 @@ function draw_board_cells() {
 }
 function draw_board_highlight() {
     const ctx = board_highlight.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
-    if (pointermove_data.buttons <= 0) { return }
-    const pointer_intersects_board = pointermove_data.bounds.intersects(board_bounds);
-    if (!pointer_intersects_board) { return }
-    const uvX = (pointermove_data.clientX - board_bounds.left) / board_bounds.width;
-    const uvY = (pointermove_data.clientY - board_bounds.top) / board_bounds.height;
 
-    // TODO Do this for every offset in the currently selected shape
-    const col = Math.floor(rangeMapNumber(uvX, 0, 1, 0, 9));
-    const row = Math.floor(rangeMapNumber(uvY, 0, 1, 0, 9));
-    const idx = indexTo1D(row, col);
+    if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
+    if (!pointer_data.bounds.intersects(board_bounds)) { return }
 
-    ctx.fillStyle = "rgba(255,255,0,.5)"
-    ctx.drawImage(
-        highlight_img,
-        cellBounds[idx].x,
-        cellBounds[idx].y,
-        cellBounds[idx].w,
-        cellBounds[idx].h
+    // convert pointer position from viewport coordinates to drag canvas coordinates
+    const pointer_uv_bounds = new DOMRect(
+        (pointer_data.bounds.x - board_bounds.left) / board_bounds.width,
+        (pointer_data.bounds.y - board_bounds.top) / board_bounds.height,
+        pointer_data.width / board_bounds.width,
+        pointer_data.height / board_bounds.height
     );
 
+    const pixel_bounds = new DOMRect();
+    pixel_bounds.width = cell_size * 5;
+    pixel_bounds.height = cell_size * 5;
+    pixel_bounds.x = (board_canvas_size * pointer_uv_bounds.x) - pixel_bounds.width / 2;
+    pixel_bounds.y = (board_canvas_size * pointer_uv_bounds.y) - pixel_bounds.height / 2;
+
+    const col = Math.round(rangeMapNumber(pixel_bounds.x, 0, board_canvas_size, 0, 8));
+    const row = Math.round(rangeMapNumber(pixel_bounds.y, 0, board_canvas_size, 0, 8));
+    pixel_bounds.x = col * cell_size;
+    pixel_bounds.y = row * cell_size;
+    
+    const shapeId = game_state.selectedShapeId;
+    const shapeImg = renderShape(
+        shapeId, // shapeId
+        cell_size, // cellSize
+        highlight_img, // blockimg
+        true, // centerX
+        true // centerY
+    );
+    ctx.drawImage(
+        shapeImg,
+        pixel_bounds.x,
+        pixel_bounds.y,
+        pixel_bounds.width,
+        pixel_bounds.height
+    );
 }
 function draw_board_state() {
     const ctx = board_borders.getContext("2d");
@@ -176,39 +195,56 @@ function draw_board_state() {
 function draw_piecebuffer() {
     const ctx1 = piece0.getContext("2d");
     ctx1.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
-    if (game_state.pieces[0] >= 0 && game_state.selectedPiece != 0) {
-        const img1 = renderShape(game_state.pieces[0], cell_size, block_img);
+    if (game_state.pieces[0] >= 0 && game_state.selectedPieceId != 0) {
+        const img1 = renderShape(game_state.pieces[0], cell_size, block_img, true);
         ctx1.drawImage(img1, 0, 0, piece_canvas_size, piece_canvas_size);
     }
 
     const ctx2 = piece1.getContext("2d");
     ctx2.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
-    if (game_state.pieces[1] >= 0 && game_state.selectedPiece != 1) {
-        const img2 = renderShape(game_state.pieces[1], cell_size, block_img);
+    if (game_state.pieces[1] >= 0 && game_state.selectedPieceId != 1) {
+        const img2 = renderShape(game_state.pieces[1], cell_size, block_img, true);
         ctx2.drawImage(img2, 0, 0, piece_canvas_size, piece_canvas_size);
     }
 
     const ctx3 = piece2.getContext("2d");
     ctx3.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
-    if (game_state.pieces[2] >= 0 && game_state.selectedPiece != 2) {
-        const img3 = renderShape(game_state.pieces[2], cell_size, block_img);
+    if (game_state.pieces[2] >= 0 && game_state.selectedPieceId != 2) {
+        const img3 = renderShape(game_state.pieces[2], cell_size, block_img, true);
         ctx3.drawImage(img3, 0, 0, piece_canvas_size, piece_canvas_size);
     }
 }
 function draw_piecedrag() {
     const ctx = piecedrag_canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, piecedrag_canvas.width, piecedrag_canvas.height);
-    if (game_state.selectedPiece < 0 || game_state.selectedPiece > 2) { return }
 
-    // TODO convert pointer position from viewport coordinates to drag canvas coordinates
-    const pointer_uv_bounds = pointermove_data.bounds.uv();
+    if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
+
+    // convert pointer position from viewport coordinates to drag canvas coordinates
+    const pointer_uv_bounds = new DOMRect(
+        (pointer_data.bounds.x - piecedrag_bounds.left) / piecedrag_bounds.width,
+        (pointer_data.bounds.y - piecedrag_bounds.top) / piecedrag_bounds.height,
+        pointer_data.width / piecedrag_bounds.width,
+        pointer_data.height / piecedrag_bounds.height
+    );
+
     const pixel_bounds = new DOMRect();
-    pixel_bounds.x = piecedrag_canvas.width * pointer_uv_bounds.x;
-    pixel_bounds.y = piecedrag_canvas.height * pointer_uv_bounds.y;
+
     pixel_bounds.width = cell_size * 5;
     pixel_bounds.height = cell_size * 5;
+    pixel_bounds.x = (piecedrag_canvas.width * pointer_uv_bounds.x) - pixel_bounds.width / 2;
+    pixel_bounds.y = (piecedrag_canvas.height * pointer_uv_bounds.y) - pixel_bounds.height / 2;
 
-    const shapeImg = renderShape(game_state.pieces[game_state.selectedPiece], cell_size, block_img);
+    const shapeId = game_state.selectedShapeId;
+    const shapeImg = renderShape(
+        shapeId, // shapeId
+        cell_size, // cellSize
+        block_img, // blockimg
+        true, // centerX
+        true // centerY
+    );
+
     ctx.drawImage(
         shapeImg,
         pixel_bounds.x,
@@ -216,6 +252,16 @@ function draw_piecedrag() {
         pixel_bounds.width,
         pixel_bounds.height
     );
+
+    // ctx.fillStyle = "rgba(255,0,0,.1)"
+    // ctx.fillRect(
+    //     pixel_bounds.x,
+    //     pixel_bounds.y,
+    //     pixel_bounds.width,
+    //     pixel_bounds.height
+    // );
+
+
 }
 function draw_score() {
     game_score.innerText = game_state.score;
@@ -234,6 +280,7 @@ function update_piecebuffer(timestamp = -1) {
 }
 /**Updates and redraws the piece drag canvas. Intended to be run via. requestAnimationFrame */
 function update_piecedrag(timestamp = -1) {
+    draw_board_highlight();
     draw_piecedrag();
 }
 /**Updates and redraws the score. Intended to be run via. requestAnimationFrame */
@@ -359,37 +406,34 @@ async function resizeHandler() {
 }
 
 // pointer events
-const pointermove_data = new PointerData();
-const pointerdown_data = new PointerData();
-const pointerup_data = new PointerData();
+const pointer_data = new PointerData();
 async function pointermoveHandler(event) {
-    if (!pointermove_data.update(event)) { return }
-    if (game_state.selectedPiece < 0 || game_state.selectedPiece > 2) { return }
-    requestAnimationFrame(() => {
-        update_piecedrag();
-        update_board();
-    });
+    if (!pointer_data.update(event)) { return }
+    if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
+    requestAnimationFrame(update_piecedrag);
 }
-async function pointerdownHandler(event) {
-    if (!pointerdown_data.update(event)) { return }
+function pointerdownHandler(event) {
+    if (!pointer_data.update(event)) { return }
     console.debug("pointerdown");
-    if (game_state.pieces[0] >= 0 && pointerdown_data.bounds.intersects(piece0_bounds)) {
+    if (game_state.pieces[0] >= 0 && pointer_data.bounds.intersects(piece0_bounds)) {
         game_state.selectPiece(0);
-    } else if (game_state.pieces[1] >= 0 && pointerdown_data.bounds.intersects(piece1_bounds)) {
+        console.log("game_state.selectedPieceId:", game_state.selectedPieceId)
+        gameUpdate();
+    } else if (game_state.pieces[1] >= 0 && pointer_data.bounds.intersects(piece1_bounds)) {
         game_state.selectPiece(1);
-    } else if (game_state.pieces[2] >= 0 && pointerdown_data.bounds.intersects(piece2_bounds)) {
+        requestAnimationFrame(gameUpdate);
+    } else if (game_state.pieces[2] >= 0 && pointer_data.bounds.intersects(piece2_bounds)) {
         game_state.selectPiece(2);
+        requestAnimationFrame(gameUpdate);
     }
-    requestAnimationFrame(gameUpdate);
 }
-async function pointerupHandler(event) {
-    if (!pointerup_data.update(event)) { return }
-    _ = pointermove_data.update(event);
+function pointerupHandler(event) {
+    if (!pointer_data.update(event)) { return }
     console.debug("pointerup");
     // TODO Check if i can place the currently selected piece
 
     game_state.clearSelectedPiece();
-    requestAnimationFrame(gameUpdate);
+    gameUpdate();
 }
 
 
