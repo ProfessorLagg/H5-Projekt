@@ -199,30 +199,15 @@ function update_hovering_cells() {
     const cell_index2D = indexTo2D(cell_index1D, true);
     // TODO cache this somehow
     const shapeId = game_state.selectedShapeId;
-    const shapeOffsetBounds = getShapeOffsetBounds(shapeId);
-    const shape = getShape(
-        shapeId,
-        false,
-        false
-    );
-
-    // console.debug("update_hovering_cells:", "\n\tcell_index1D:", cell_index1D, "\n\tcell_index2D:", cell_index2D, "\n\tshape:", shape)
+    const shape = getShape(shapeId, false, false);
     for (let i = 0; i < shape.length; i++) {
-        const row = cell_index2D.row + shape[i].r - shapeOffsetBounds.row_center_offset;
+        const row = cell_index2D.row + shape[i].r;
         if (row < 0 || row > 8) { continue }
-        const col = cell_index2D.col + shape[i].c - shapeOffsetBounds.row_center_offset;
+        const col = cell_index2D.col + shape[i].c;
         if (col < 0 || col > 8) { continue }
         const idx = indexTo1D(row, col, true);
-
         hovering_cells[idx] = 1;
     }
-    // console.debug(arguments.callee.name,
-    //     "\n\tcell_index1D:", cell_index1D,
-    //     "\n\tcell_index2D:", cell_index2D,
-    //     "\n\tshape:", shape,
-    //     "\n\thovering_cells:", hovering_cells
-    // )
-
 }
 /**Updates and redraws the piece drag canvas and board highlight canvas. Intended to be run via. requestAnimationFrame */
 function update_piecedrag(timestamp = -1) {
@@ -366,14 +351,17 @@ async function resizeHandler() {
 
 // pointer
 const pointerdata = new PointerData();
+let pointer_cell_index = -1;
 async function pointermoveHandler(event) {
     if (!pointerdata.update(event)) { return }
     if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
+    pointer_cell_index = getPointerCellIndex();
     requestAnimationFrame(update_piecedrag);
 }
 function pointerdownHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerdown");
+    pointer_cell_index = getPointerCellIndex();
     if (game_state.pieces[0] >= 0 && pointerdata.bounds.intersects(piece0_bounds)) {
         game_state.selectPiece(0);
         console.log("game_state.selectedPieceId:", game_state.selectedPieceId)
@@ -389,7 +377,7 @@ function pointerdownHandler(event) {
 function pointerupHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerup");
-    // TODO TRY PLACE CURRENT PIECE
+    pointer_cell_index = getPointerCellIndex();
     const place_cell_index = getPointerCellIndex();
     if (game_state.tryPlaceSelectedPiece(place_cell_index, true, true)) {
 
@@ -410,9 +398,9 @@ function getPointerCellIndex() {
         cell_size
     );
 
-    const row = Math.round(rangeMapNumber(P.y, 0, 1, 0, 8));
+    const row = Math.round(rangeMapNumber(P.y, 0, 1, 0, 8) - 1);
     if (row < 0 || row > 8) { return null }
-    const col = Math.round(rangeMapNumber(P.x, 0, 1, 0, 8));
+    const col = Math.round(rangeMapNumber(P.x, 0, 1, 0, 8) - 1);
     if (col < 0 || col > 8) { return null }
     return indexTo1D(row, col, true);
 }
