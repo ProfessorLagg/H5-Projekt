@@ -12,10 +12,10 @@ class GameState {
     pieces = new Int16Array(this.buffer.slice(81, 87));
     selectedPieceId = -1;
     get selectedShapeId() {
-        if (this.selectedPieceId < 0 || this.selectedPieceId > 2) { 
+        if (this.selectedPieceId < 0 || this.selectedPieceId > 2) {
             console.error("No shape selected")
             return null;
-         }
+        }
         const shapeId = this.pieces[this.selectedPieceId];
         assertIsValidShapeId(shapeId);
         return shapeId;
@@ -33,6 +33,7 @@ class GameState {
     boardStateChangedCallback = () => { }
     pieceBufferChangedCallback = () => { }
     scoreChangedCallback = () => { }
+    selectionChangedCallback = () => { }
 
     /**
      * Gets the filled state of a board cell by it's index
@@ -56,15 +57,17 @@ class GameState {
         assertIsValidShapeId(this.pieces[pieceId]);
         this.selectedPieceId = pieceId;
         console.debug("Selected piece " + this.selectedPieceId);
+        this.selectionChangedCallback();
+    }
+    clearSelectedPiece() {
+        this.selectedPieceId = -1;
+        console.debug("Selected piece " + this.selectedPieceId);
+        this.selectionChangedCallback();
     }
     placeSelectedPiece(cellIndex) {
         throw Error("Not yet implemented");
 
         this.pieceBufferChangedCallback();
-    }
-    clearSelectedPiece() { 
-        this.selectedPieceId = -1;
-        console.debug("Selected piece " + this.selectedPieceId);
     }
 
     restart() {
