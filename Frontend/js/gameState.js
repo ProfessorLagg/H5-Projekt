@@ -73,12 +73,11 @@ class GameState {
         const shape = getShape(shapeId);
         const cellIndexes = new Uint8Array(shape.length);
         for (let i = 0; i < shape.length; i++) {
-            const row = cell_index2D.row + shape[i].r;
+            const row = shape[i].r + cell_index2D.row - Math.round(shapeOffsetBounds[shapeId].height / 2);
             if (row < 0 || row > 8) { return false }
-            const col = cell_index2D.col + shape[i].c;
+            const col = shape[i].c + cell_index2D.col - Math.round(shapeOffsetBounds[shapeId].width / 2);
             if (col < 0 || col > 8) { return false }
             const idx = indexTo1D(row, col, true);
-            if (this.boardState[idx] === 1) { return false }
             cellIndexes[i] = idx;
         }
 

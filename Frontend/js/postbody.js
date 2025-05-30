@@ -140,6 +140,8 @@ function draw_piecedrag() {
     pixel_bounds.height = cell_size * 5;
     pixel_bounds.x = (piecedrag_canvas.width * pointer_uv_bounds.x) - pixel_bounds.width / 2;
     pixel_bounds.y = (piecedrag_canvas.height * pointer_uv_bounds.y) - pixel_bounds.height / 2;
+    // pixel_bounds.x = (piecedrag_canvas.width * pointer_uv_bounds.x) - cell_size / 2;
+    // pixel_bounds.y = (piecedrag_canvas.height * pointer_uv_bounds.y) - cell_size / 2;
 
     const shapeId = game_state.selectedShapeId;
     const shapeImg = renderShape(
@@ -197,15 +199,26 @@ function update_hovering_cells() {
     if (cell_index1D === null) { return }
 
     const cell_index2D = indexTo2D(cell_index1D, true);
+
     // TODO cache this somehow
     const shapeId = game_state.selectedShapeId;
-    const shape = getShape(shapeId, false, false);
+    const shape = getShape(shapeId);
     for (let i = 0; i < shape.length; i++) {
-        const row = cell_index2D.row + shape[i].r;
-        if (row < 0 || row > 8) { continue }
-        const col = cell_index2D.col + shape[i].c;
-        if (col < 0 || col > 8) { continue }
+        const row = shape[i].r + cell_index2D.row - Math.round(shapeOffsetBounds[shapeId].height / 2);
+        if (row < 0 || row > 8) {
+            hovering_cells.fill(0);
+            return;
+        }
+        const col = shape[i].c + cell_index2D.col - Math.round(shapeOffsetBounds[shapeId].width / 2);
+        if (col < 0 || col > 8) {
+            hovering_cells.fill(0);
+            return;
+        }
         const idx = indexTo1D(row, col, true);
+        if (game_state.boardState[idx] > 0) {
+            hovering_cells.fill(0);
+            return;
+        }
         hovering_cells[idx] = 1;
     }
 }
@@ -394,9 +407,9 @@ function getPointerCellIndex() {
     const uvX = (pCenter.x - board_bounds.left) / board_bounds.width;
     const uvY = (pCenter.y - board_bounds.top) / board_bounds.height
 
-    const row = Math.round(rangeMapNumber(uvY, 0, 1, 0, 8) - 1);
+    const row = Math.round(rangeMapNumber(uvY, 0, 1, 0, 8));
     if (row < 0 || row > 8) { return null }
-    const col = Math.round(rangeMapNumber(uvX, 0, 1, 0, 8) - 1);
+    const col = Math.round(rangeMapNumber(uvX, 0, 1, 0, 8));
     if (col < 0 || col > 8) { return null }
     return indexTo1D(row, col, true);
 }

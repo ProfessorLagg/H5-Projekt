@@ -53,6 +53,8 @@ function getShapeOffsetBounds(shapeId) {
             min_row: Number.MAX_SAFE_INTEGER,
             max_col: Number.MIN_SAFE_INTEGER,
             max_row: Number.MIN_SAFE_INTEGER,
+            width: 0,
+            height: 0,
             col_center_offset: 0,
             row_center_offset: 0,
         }
@@ -64,11 +66,11 @@ function getShapeOffsetBounds(shapeId) {
         }
         // shapeOffsetBounds[shapeId].col_center_offset = Math.floor((5 - shapeOffsetBounds[shapeId].max_col) / 2)
         // shapeOffsetBounds[shapeId].row_center_offset = Math.floor((5 - shapeOffsetBounds[shapeId].max_row) / 2)
-        const w = shapeOffsetBounds[shapeId].max_col - shapeOffsetBounds[shapeId].min_col;
-        const h = shapeOffsetBounds[shapeId].max_row - shapeOffsetBounds[shapeId].min_row;
+        shapeOffsetBounds[shapeId].width = shapeOffsetBounds[shapeId].max_col - shapeOffsetBounds[shapeId].min_col;
+        shapeOffsetBounds[shapeId].height = shapeOffsetBounds[shapeId].max_row - shapeOffsetBounds[shapeId].min_row;
 
-        shapeOffsetBounds[shapeId].col_center_offset = centerOffsetLookup[w] ?? 0;
-        shapeOffsetBounds[shapeId].row_center_offset = centerOffsetLookup[h] ?? 0;
+        shapeOffsetBounds[shapeId].col_center_offset = centerOffsetLookup[shapeOffsetBounds[shapeId].width] ?? 0;
+        shapeOffsetBounds[shapeId].row_center_offset = centerOffsetLookup[shapeOffsetBounds[shapeId].height] ?? 0;
 
     }
     return shapeOffsetBounds[shapeId];
