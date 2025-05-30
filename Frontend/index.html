@@ -40,7 +40,16 @@
         </div>
         <script src="js/postbody.js"></script>
         <script>init()</script>
-        <script>toggleFPS()</script>
+        <script>
+            toggleFPS()
+            function temp() {
+                const fps_display = document.getElementById("fps-display");
+                fps_display.style.top = pointerdata.clientY + "px";
+                fps_display.style.left = pointerdata.clientX + "px";
+                console.log("pointerdata:", pointerdata)
+                console.log("fps_display", fps_display)
+            }
+        </script>
     </body>
 
 </html>

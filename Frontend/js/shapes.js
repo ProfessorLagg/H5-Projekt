@@ -61,6 +61,23 @@ function getShapeOffsetBounds(shapeId) {
     return shapeOffsetBounds[shapeId];
 }
 
+function getShape(shapeId, centerX = false, centerY = false) {
+    assertIsValidShapeId(shapeId);
+    TypeChecker.assertIsBoolean(centerX);
+    TypeChecker.assertIsBoolean(centerY);
+
+    const shape = structuredClone(shapes[shapeId]);
+    if (centerX || centerY) {
+        const add_col = shapeOffsetBounds[shapeId].col_center_offset * Number(centerX);
+        const add_row = shapeOffsetBounds[shapeId].row_center_offset * Number(centerY);
+        for (let i = 0; i < shape.length; i++) {
+            shape[i].c += add_col;
+            shape[i].r += add_row;
+        }
+    }
+    return shape;
+}
+
 /**Used to save on GC while rendering shapes */
 const temp_canvas = document.createElement("canvas");
 function renderShape(shapeId, cellSize, blockimg, centerX = false, centerY = false) {
@@ -69,21 +86,17 @@ function renderShape(shapeId, cellSize, blockimg, centerX = false, centerY = fal
 
     // TODO allow offsetting to center of mass for x/y individually
 
-    const shape = shapes[shapeId];
+    const shape = getShape(shapeId, centerX, centerY);
     const bounds = getShapeOffsetBounds(shapeId);
-
-    // Calculate centering offsets
-    const add_col = bounds.col_center_offset * Number(centerX);
-    const add_row = bounds.row_center_offset * Number(centerY);
-
     temp_canvas.width = cellSize * 5;
     temp_canvas.height = cellSize * 5;
     const ctx = temp_canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
     for (let i = 0; i < shape.length; i++) {
         ctx.drawImage(
             blockimg,
-            (shape[i].c + add_col) * cellSize,
-            (shape[i].r + add_row) * cellSize,
+            shape[i].c * cellSize,
+            shape[i].r * cellSize,
             cellSize,
             cellSize
         );

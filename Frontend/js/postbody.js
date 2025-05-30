@@ -15,7 +15,8 @@ const highlight_img = document.getElementById('highlight-img');
 const board_canvas_size = 990;
 const group_size = board_canvas_size / 3;
 const cell_size = board_canvas_size / 9;
-const cellBounds = new Array(81);
+const cellPixelBounds = new Array(81);
+const cellViewPortBounds = new Array(0);
 
 const piece_canvas_size = (board_canvas_size / 9) * 5;
 const piece0 = document.getElementById('piece0');
@@ -97,6 +98,14 @@ function roundDecimals(value, decimals) {
     const mul = Math.pow(10, Math.max(0, decimals));
     return Math.round(value * mul) / mul;
 }
+function distanceSquared2D(x0, y0, x1, y1) {
+    const dx = x0 - x1;
+    const dy = y0 - y1;
+    return dx * dx + dy + dy;
+}
+function distance2D(x0, y0, x1, y1) {
+    return Math.sqrt(distanceSquared2D(x0, y0, x1, y1));
+}
 
 // draw functions
 function draw_board_background() {
@@ -122,8 +131,8 @@ function draw_board_background() {
 function draw_board_cells() {
     const ctx = board_cells.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
-    for (let i = 0; i < cellBounds.length; i++) {
-        const cell = cellBounds[i];
+    for (let i = 0; i < cellPixelBounds.length; i++) {
+        const cell = cellPixelBounds[i];
         ctx.drawImage(
             cell_img,
             Math.floor(cell.x),
@@ -137,16 +146,28 @@ function draw_board_highlight() {
     const ctx = board_highlight.getContext("2d");
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
-
+    if (TypeChecker.isNullOrUndefined(hovering_cells)) { return }
+    for (let i = 0; i < hovering_cells.length; i++) {
+        if (hovering_cells[i] > 0) {
+            ctx.drawImage(
+                highlight_img,
+                cellPixelBounds[i].x,
+                cellPixelBounds[i].y,
+                cellPixelBounds[i].w,
+                cellPixelBounds[i].h,
+            )
+        }
+    }
+    return;
     if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
-    if (!pointer_data.bounds.intersects(board_bounds)) { return }
+    if (!pointerdata.bounds.intersects(board_bounds)) { return }
 
     // convert pointer position from viewport coordinates to drag canvas coordinates
     const pointer_uv_bounds = new DOMRect(
-        (pointer_data.bounds.x - board_bounds.left) / board_bounds.width,
-        (pointer_data.bounds.y - board_bounds.top) / board_bounds.height,
-        pointer_data.width / board_bounds.width,
-        pointer_data.height / board_bounds.height
+        (pointerdata.bounds.x - board_bounds.left) / board_bounds.width,
+        (pointerdata.bounds.y - board_bounds.top) / board_bounds.height,
+        pointerdata.width / board_bounds.width,
+        pointerdata.height / board_bounds.height
     );
 
     const pixel_bounds = new DOMRect();
@@ -154,12 +175,9 @@ function draw_board_highlight() {
     pixel_bounds.height = cell_size * 5;
     pixel_bounds.x = (board_canvas_size * pointer_uv_bounds.x) - pixel_bounds.width / 2;
     pixel_bounds.y = (board_canvas_size * pointer_uv_bounds.y) - pixel_bounds.height / 2;
+    pixel_bounds.x = Math.round(rangeMapNumber(pixel_bounds.x, 0, board_canvas_size, 0, 8)) * cell_size;
+    pixel_bounds.y = Math.round(rangeMapNumber(pixel_bounds.y, 0, board_canvas_size, 0, 8)) * cell_size;
 
-    const col = Math.round(rangeMapNumber(pixel_bounds.x, 0, board_canvas_size, 0, 8));
-    const row = Math.round(rangeMapNumber(pixel_bounds.y, 0, board_canvas_size, 0, 8));
-    pixel_bounds.x = col * cell_size;
-    pixel_bounds.y = row * cell_size;
-    
     const shapeId = game_state.selectedShapeId;
     const shapeImg = renderShape(
         shapeId, // shapeId
@@ -175,14 +193,22 @@ function draw_board_highlight() {
         pixel_bounds.width,
         pixel_bounds.height
     );
+
+    ctx.fillStyle = "rgba(255,0,255,.1)"
+    ctx.fillRect(
+        pixel_bounds.x,
+        pixel_bounds.y,
+        pixel_bounds.width,
+        pixel_bounds.height
+    );
 }
 function draw_board_state() {
     const ctx = board_borders.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
-    for (let i = 0; i < cellBounds.length; i++) {
+    for (let i = 0; i < cellPixelBounds.length; i++) {
         if (!game_state.getCellState(i)) { continue }
 
-        const cell = cellBounds[i];
+        const cell = cellPixelBounds[i];
         ctx.drawImage(
             block_img,
             Math.floor(cell.x),
@@ -223,10 +249,10 @@ function draw_piecedrag() {
 
     // convert pointer position from viewport coordinates to drag canvas coordinates
     const pointer_uv_bounds = new DOMRect(
-        (pointer_data.bounds.x - piecedrag_bounds.left) / piecedrag_bounds.width,
-        (pointer_data.bounds.y - piecedrag_bounds.top) / piecedrag_bounds.height,
-        pointer_data.width / piecedrag_bounds.width,
-        pointer_data.height / piecedrag_bounds.height
+        (pointerdata.bounds.x - piecedrag_bounds.left) / piecedrag_bounds.width,
+        (pointerdata.bounds.y - piecedrag_bounds.top) / piecedrag_bounds.height,
+        pointerdata.width / piecedrag_bounds.width,
+        pointerdata.height / piecedrag_bounds.height
     );
 
     const pixel_bounds = new DOMRect();
@@ -253,13 +279,13 @@ function draw_piecedrag() {
         pixel_bounds.height
     );
 
-    // ctx.fillStyle = "rgba(255,0,0,.1)"
-    // ctx.fillRect(
-    //     pixel_bounds.x,
-    //     pixel_bounds.y,
-    //     pixel_bounds.width,
-    //     pixel_bounds.height
-    // );
+    ctx.fillStyle = "rgba(255,0,0,.1)"
+    ctx.fillRect(
+        pixel_bounds.x,
+        pixel_bounds.y,
+        pixel_bounds.width,
+        pixel_bounds.height
+    );
 
 
 }
@@ -269,6 +295,7 @@ function draw_score() {
 
 // Game
 let game_state = new GameState();
+
 /**Updates and redraws the board. Intended to be run via. requestAnimationFrame */
 function update_board(timestamp = -1) {
     draw_board_highlight();
@@ -278,8 +305,46 @@ function update_board(timestamp = -1) {
 function update_piecebuffer(timestamp = -1) {
     draw_piecebuffer();
 }
-/**Updates and redraws the piece drag canvas. Intended to be run via. requestAnimationFrame */
+/**
+Details which cell indexes the player is currently hovedering.
+Updated by update_hovering_cells() 
+ */
+const hovering_cells = new Uint8Array(81);
+/**Updates the currently hovered cells info in hovering_cells */
+function update_hovering_cells() {
+    hovering_cells.fill(0);
+    if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
+
+    const cell_index1D = getPointerCellIndex();
+    if (cell_index1D === null) { return }
+
+    const cell_index2D = indexTo2D(cell_index1D, true);
+    // TODO cache this somehow
+    const shape = getShape(
+        game_state.selectedShapeId,
+        true,
+        true
+    );
+
+    for (let i = 0; i < shape.length; i++) {
+        const row = shape[i].r + cell_index2D.row - 2;
+        if (row < 0 || row > 8) { continue }
+        const col = shape[i].c + cell_index2D.col - 2;
+        if (col < 0 || col > 8) { continue }
+        const idx = indexTo1D(row, col, true);
+        hovering_cells[idx] = 1;
+    }
+    // console.debug(arguments.callee.name,
+    //     "\n\tcell_index1D:", cell_index1D,
+    //     "\n\tcell_index2D:", cell_index2D,
+    //     "\n\tshape:", shape,
+    //     "\n\thovering_cells:", hovering_cells
+    // )
+
+}
+/**Updates and redraws the piece drag canvas and board highlight canvas. Intended to be run via. requestAnimationFrame */
 function update_piecedrag(timestamp = -1) {
+    update_hovering_cells();
     draw_board_highlight();
     draw_piecedrag();
 }
@@ -294,7 +359,6 @@ function gameUpdate(timestamp = -1) {
     update_piecedrag(timestamp);
     update_score(timestamp);
 }
-
 
 // init
 async function init() {
@@ -332,7 +396,7 @@ async function initCellBounds() {
     let i = 0;
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
-            cellBounds[i] = {
+            cellPixelBounds[i] = {
                 x: c * s,
                 y: r * s,
                 w: s,
@@ -361,7 +425,7 @@ async function initGameState() {
 }
 
 // resize event
-function updateBoundsData() {
+function updateViewPortBoundsData() {
     console.debug(arguments.callee.name)
     const c_board_bounds = board_background.getBoundingClientRect();
     board_bounds.x = c_board_bounds.x;
@@ -392,6 +456,19 @@ function updateBoundsData() {
     piecedrag_bounds.y = c_piecedrag_bounds.y;
     piecedrag_bounds.width = c_piecedrag_bounds.width;
     piecedrag_bounds.height = c_piecedrag_bounds.height;
+
+    cellViewPortBounds.length = 81;
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+            const idx = indexTo1D(r, c, true);
+            cellViewPortBounds[idx] = new DOMRect(
+                rangeMapNumber(c, 0, 8, board_bounds.left, board_bounds.right),
+                rangeMapNumber(r, 0, 8, board_bounds.top, board_bounds.bottom),
+                board_bounds.width / 9,
+                board_bounds.height / 9
+            )
+        }
+    }
 }
 function update_piecedrag_size() {
     console.debug(arguments.callee.name)
@@ -401,39 +478,49 @@ function update_piecedrag_size() {
     piecedrag_canvas.height = board_canvas_size * scaleH;
 }
 async function resizeHandler() {
-    updateBoundsData();
+    updateViewPortBoundsData();
     update_piecedrag_size();
 }
 
 // pointer events
-const pointer_data = new PointerData();
+const pointerdata = new PointerData();
 async function pointermoveHandler(event) {
-    if (!pointer_data.update(event)) { return }
+    if (!pointerdata.update(event)) { return }
     if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
     requestAnimationFrame(update_piecedrag);
 }
 function pointerdownHandler(event) {
-    if (!pointer_data.update(event)) { return }
+    if (!pointerdata.update(event)) { return }
     console.debug("pointerdown");
-    if (game_state.pieces[0] >= 0 && pointer_data.bounds.intersects(piece0_bounds)) {
+    if (game_state.pieces[0] >= 0 && pointerdata.bounds.intersects(piece0_bounds)) {
         game_state.selectPiece(0);
         console.log("game_state.selectedPieceId:", game_state.selectedPieceId)
         gameUpdate();
-    } else if (game_state.pieces[1] >= 0 && pointer_data.bounds.intersects(piece1_bounds)) {
+    } else if (game_state.pieces[1] >= 0 && pointerdata.bounds.intersects(piece1_bounds)) {
         game_state.selectPiece(1);
         requestAnimationFrame(gameUpdate);
-    } else if (game_state.pieces[2] >= 0 && pointer_data.bounds.intersects(piece2_bounds)) {
+    } else if (game_state.pieces[2] >= 0 && pointerdata.bounds.intersects(piece2_bounds)) {
         game_state.selectPiece(2);
         requestAnimationFrame(gameUpdate);
     }
 }
 function pointerupHandler(event) {
-    if (!pointer_data.update(event)) { return }
+    if (!pointerdata.update(event)) { return }
     console.debug("pointerup");
     // TODO Check if i can place the currently selected piece
 
     game_state.clearSelectedPiece();
-    gameUpdate();
+    requestAnimationFrame(gameUpdate)
 }
+function getPointerCellIndex() {
+    if (!pointerdata.bounds.intersects(board_bounds)) { return null }
 
-
+    // TODO this could be much much faster
+    const pCenter = pointerdata.bounds.center();
+    for (let i = 0; i < cellViewPortBounds.length; i++) {
+        if (pCenter.intersects(cellViewPortBounds[i])) {
+            return i;
+        }
+    }
+    return null;
+}
