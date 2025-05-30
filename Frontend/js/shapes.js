@@ -37,6 +37,19 @@ function isValidShapeId(shapeId) {
 
     return true;
 }
+function assertIsValidShapeId(shapeId) {
+    if (typeof shapeId !== "number") {
+        throw Error("shapeId must be a number");
+    }
+
+    if (!Number.isInteger(shapeId)) {
+        throw Error("shapeId must be an integer");
+    }
+
+    if (shapeIds.indexOf(shapeId) < 0) {
+        throw Error("no shape has the shapeId " + shapeId);
+    }
+}
 /**Used to save on GC while rendering shapes */
 const temp_canvas = document.createElement("canvas");
 function renderShape(shapeId, cellSize, blockimg) {

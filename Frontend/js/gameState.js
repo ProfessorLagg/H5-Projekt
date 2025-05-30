@@ -2,26 +2,37 @@
 class GameState {
     prng = new sfc32(new Uint32Array(4));
     buffer = new ArrayBuffer(
-        +81 // boardState
+        + 81 // boardState
         + 6 // pieces
         + 4 // score
     );
+
+    boardState = new Uint8Array(this.buffer.slice(0, 81));
+
+    pieces = new Int16Array(this.buffer.slice(81, 87));
+    selectedPiece = -1;
+
+    scoreState = new Uint32Array(this.buffer.slice(87));
 
     get score() { return this.scoreState[0]; }
     set score(v) {
         TypeChecker.assertIsInteger(v);
         this.scoreState[0] = v;
+        this.scoreChangedCallback();
     }
 
-    boardStateChangedCallback = () => {}
-    pieceBufferChangedCallback = () => {}
-    scoreChangedCallback = () => {}
+    boardStateChangedCallback = () => { }
+    pieceBufferChangedCallback = () => { }
+    scoreChangedCallback = () => { }
 
-
-    getCellState(cellId) {
-        TypeChecker.assertIsInteger(cellId);
-        if (cellId < 0 || cellId > 80) { throw Error("Invalid Cell ID: " + cellId); }
-        return this.buffer[cellId] > 0;
+    /**
+     * Gets the filled state of a board cell by it's index
+     * @param {Number} cellIndex 
+     * @returns true if the cell is filled or false if it is empty
+     */
+    getCellState(cellIndex) {
+        TypeChecker.assertIsIntegerInRange(cellIndex, 0, 80);
+        return this.buffer[cellIndex] > 0;
     }
 
     generatePieces() {
@@ -31,16 +42,37 @@ class GameState {
         this.pieces[2] = this.prng.nextInt() % shapeIds.length;
         this.pieceBufferChangedCallback();
     }
+    selectPiece(pieceId) {
+        TypeChecker.assertIsIntegerInRange(pieceId, 0, 2);
+        assertIsValidShapeId(this.pieces[pieceId]);
+        this.selectedPiece = pieceId;
+        console.debug("Selected piece " + pieceId);
+    }
+    placeSelectedPiece(cellIndex){
+        throw Error("Not yet implemented");
+
+        this.pieceBufferChangedCallback();
+    }
+    clearSelectedPiece(){
+        this.selectedPiece = -1;
+    }
+
     restart() {
         this.prng.reset(sfc32.generateSeed());
-        this.score = 0;
-        this.boardState.fill(0)
+        this.scoreState[0] = 0;
+        this.boardState.fill(0);
+        this.pieces.fill(-1);
+
         this.generatePieces();
+
+        /* Debug */
+        this.boardState[40] == 1;
+        this.boardStateChangedCallback();
     }
     constructor() {
-        this.boardState = new Uint8Array(this.buffer.slice(0, 81));
-        this.pieces = new Uint16Array(this.buffer.slice(81, 87));
-        this.scoreState = new Uint32Array(this.buffer.slice(87));
-        this.restart();
+        // this.boardState = new Uint8Array(this.buffer.slice(0, 81));
+        // this.pieces = new Int16Array(this.buffer.slice(81, 87));
+        // this.scoreState = new Uint32Array(this.buffer.slice(87));
+        // this.restart();
     }
 }

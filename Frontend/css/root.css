@@ -109,11 +109,22 @@ body {
     /* Debug */
     /* outline: 1px solid rgba(255, 255, 255, 25%); */
     /* border: 1px solid magenta; */
-    background-color: rgba(255, 0, 0, 33%)
-        /* visibility: hidden; */
+    background-color: rgba(255, 0, 0, 33%);
+    /* visibility: hidden; */
 }
 
 .score-display {
     font-size: calc(3 * var(--rh));
     font-weight: bold;
+}
+
+#piece-drag-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+
+    /* Debug */
+    /* background-color: rgba(255, 0, 255, 10%); */
 }

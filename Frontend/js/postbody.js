@@ -8,12 +8,9 @@ const board_highlight = document.getElementById('board-highlight');
 const board_borders = document.getElementById('board-borders');
 const board_bounds = new DOMRect();
 
-
-
 const block_img = document.getElementById('blck-img');
 const cell_img = document.getElementById('cell-img');
 const highlight_img = document.getElementById('highlight-img');
-
 
 const board_canvas_size = 990;
 const group_size = board_canvas_size / 3;
@@ -21,12 +18,14 @@ const cell_size = board_canvas_size / 9;
 const cellBounds = new Array(81);
 
 const piece_canvas_size = (board_canvas_size / 9) * 5;
+const piece0 = document.getElementById('piece0');
 const piece1 = document.getElementById('piece1');
 const piece2 = document.getElementById('piece2');
-const piece3 = document.getElementById('piece3');
+const piece0_bounds = new DOMRect();
 const piece1_bounds = new DOMRect();
 const piece2_bounds = new DOMRect();
-const piece3_bounds = new DOMRect();
+
+const piece_drag_canvas = document.getElementById('piece-drag-canvas');
 
 // utils
 /**
@@ -175,30 +174,62 @@ function draw_board_state() {
     }
 }
 function draw_piecebuffer() {
-    console.debug(arguments.callee.name);
-
-    const ctx1 = piece1.getContext("2d");
+    const ctx1 = piece0.getContext("2d");
     ctx1.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
-    const img1 = renderShape(game_state.pieces[0], cell_size, block_img);
-    ctx1.drawImage(img1, 0, 0, piece_canvas_size, piece_canvas_size);
+    if (game_state.pieces[0] >= 0 && game_state.selectedPiece != 0) {
+        const img1 = renderShape(game_state.pieces[0], cell_size, block_img);
+        ctx1.drawImage(img1, 0, 0, piece_canvas_size, piece_canvas_size);
+    }
 
-    const ctx2 = piece2.getContext("2d");
+    const ctx2 = piece1.getContext("2d");
     ctx2.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
-    const img2 = renderShape(game_state.pieces[1], cell_size, block_img);
-    ctx2.drawImage(img2, 0, 0, piece_canvas_size, piece_canvas_size);
+    if (game_state.pieces[1] >= 0 && game_state.selectedPiece != 1) {
+        const img2 = renderShape(game_state.pieces[1], cell_size, block_img);
+        ctx2.drawImage(img2, 0, 0, piece_canvas_size, piece_canvas_size);
+    }
 
-    const ctx3 = piece3.getContext("2d");
+    const ctx3 = piece2.getContext("2d");
     ctx3.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
-    const img3 = renderShape(game_state.pieces[2], cell_size, block_img);
-    ctx3.drawImage(img3, 0, 0, piece_canvas_size, piece_canvas_size);
+    if (game_state.pieces[2] >= 0 && game_state.selectedPiece != 2) {
+        const img3 = renderShape(game_state.pieces[2], cell_size, block_img);
+        ctx3.drawImage(img3, 0, 0, piece_canvas_size, piece_canvas_size);
+    }
 }
+function draw_piecedrag() {
+    if (game_state.selectedPiece < 0 || game_state.selectedPiece > 2) { return }
+    const ctx = piece_drag_canvas.getContext("2d");
+    ctx.clearRect(0, 0, piece_drag_canvas.width, piece_drag_canvas.height);
+    // TODO convert pointer position from viewport coordinates to drag canvas coordinates
 
+}
+function draw_score() {
+    game_score.innerText = game_state.score;
+}
 
 // Game
 let game_state = new GameState();
-function gameUpdate(timestamp = -1) {
+/**Updates and redraws the board. Intended to be run via. requestAnimationFrame */
+function update_board(timestamp = -1) {
     draw_board_highlight();
-    game_score.innerText = game_state.score;
+    draw_board_state();
+}
+/**Updates and redraws the piece buffer. Intended to be run via. requestAnimationFrame */
+function update_piecebuffer(timestamp = -1) {
+    draw_piecebuffer();
+}
+/**Updates and redraws the piece drag canvas. Intended to be run via. requestAnimationFrame */
+function update_piecedrag(timestamp = -1) {
+    draw_piecedrag();
+}
+/**Updates and redraws the score. Intended to be run via. requestAnimationFrame */
+function update_score(timestamp = -1) {
+    draw_score();
+}
+/**Full, expensive, game update. Intended to be run via. requestAnimationFrame */
+function gameUpdate(timestamp = -1) {
+    update_board(timestamp);
+    update_piecebuffer(timestamp);
+    update_score(timestamp);
 }
 
 
@@ -225,12 +256,12 @@ async function initBoardCanvas() {
     draw_board_state();
 }
 async function initPieceCanvas() {
+    piece0.width = piece_canvas_size;
+    piece0.height = piece_canvas_size;
     piece1.width = piece_canvas_size;
     piece1.height = piece_canvas_size;
     piece2.width = piece_canvas_size;
     piece2.height = piece_canvas_size;
-    piece3.width = piece_canvas_size;
-    piece3.height = piece_canvas_size;
 }
 async function initCellBounds() {
     console.log(arguments.callee.name);
@@ -259,43 +290,51 @@ async function initResizeEvent() {
     window.addEventListener("resize", resizeHandler)
 }
 async function initGameState() {
-    game_state.pieceBufferChangedCallback = draw_piecebuffer;
-    game_state.boardStateChangedCallback = draw_board_state;
+    game_state.boardStateChangedCallback = () => requestAnimationFrame(update_board);
+    game_state.pieceBufferChangedCallback = () => requestAnimationFrame(update_piecebuffer);
+    game_state.scoreChangedCallback = () => requestAnimationFrame(update_score);
     game_state.restart();
-    gameUpdate();
+    // requestAnimationFrame(gameUpdate);
 }
 
 // resize event
-function updateBoardRect() {
+function updateBoundsData() {
     console.debug(arguments.callee.name)
-    const curr_bounds = board_background.getBoundingClientRect();
-    board_bounds.x = curr_bounds.x;
-    board_bounds.y = curr_bounds.y;
-    board_bounds.width = curr_bounds.width;
-    board_bounds.height = curr_bounds.height;
+    const c_board_bounds = board_background.getBoundingClientRect();
+    board_bounds.x = c_board_bounds.x;
+    board_bounds.y = c_board_bounds.y;
+    board_bounds.width = c_board_bounds.width;
+    board_bounds.height = c_board_bounds.height;
+
+    const c_piece0_bounds = piece0.getBoundingClientRect();
+    piece0_bounds.x = c_piece0_bounds.x;
+    piece0_bounds.y = c_piece0_bounds.y;
+    piece0_bounds.width = c_piece0_bounds.width;
+    piece0_bounds.height = c_piece0_bounds.height;
+
+    const c_piece1_bounds = piece1.getBoundingClientRect();
+    piece1_bounds.x = c_piece1_bounds.x;
+    piece1_bounds.y = c_piece1_bounds.y;
+    piece1_bounds.width = c_piece1_bounds.width;
+    piece1_bounds.height = c_piece1_bounds.height;
+
+    const c_piece2_bounds = piece2.getBoundingClientRect();
+    piece2_bounds.x = c_piece2_bounds.x;
+    piece2_bounds.y = c_piece2_bounds.y;
+    piece2_bounds.width = c_piece2_bounds.width;
+    piece2_bounds.height = c_piece2_bounds.height;
 }
-function updatePieceRects() {
-    const bounds1 = piece1.getBoundingClientRect();
-    piece1_bounds.x = bounds1.x;
-    piece1_bounds.y = bounds1.y;
-    piece1_bounds.width = bounds1.width;
-    piece1_bounds.height = bounds1.height;
-
-    const bounds2 = piece2.getBoundingClientRect();
-    piece2_bounds.x = bounds2.x;
-    piece2_bounds.y = bounds2.y;
-    piece2_bounds.width = bounds2.width;
-    piece2_bounds.height = bounds2.height;
-
-    const bounds3 = piece3.getBoundingClientRect();
-    piece3_bounds.x = bounds3.x;
-    piece3_bounds.y = bounds3.y;
-    piece3_bounds.width = bounds3.width;
-    piece3_bounds.height = bounds3.height;
+function update_piecedrag_size() {
+    console.debug(arguments.callee.name)
+    const piece_drag_bounds = piece_drag_canvas.getBoundingClientRect();
+    const scaleW = piece_drag_bounds.width / board_bounds.width;
+    const scaleH = piece_drag_bounds.height / board_bounds.height;
+    piece_drag_canvas.width = board_canvas_size * scaleW;
+    piece_drag_canvas.height = board_canvas_size * scaleH;
 }
 async function resizeHandler() {
-    updateBoardRect();
-    updatePieceRects();
+    updateBoundsData();
+    update_piecedrag_size();
 }
 
 // pointer events
@@ -303,22 +342,33 @@ const pointermove_data = new PointerData();
 const pointerdown_data = new PointerData();
 const pointerup_data = new PointerData();
 async function pointermoveHandler(event) {
-    if (pointermove_data.update(event)) {
-        // requestAnimationFrame(update);
-        gameUpdate();
-    }
+    if (!pointermove_data.update(event)) { return }
+    if (game_state.selectedPiece < 0 || game_state.selectedPiece > 2) { return }
+    requestAnimationFrame(() => {
+        update_piecedrag();
+        update_board();
+    });
 }
 async function pointerdownHandler(event) {
-    if (pointerdown_data.update(event)) {
-        console.debug("pointerdown");
-        requestAnimationFrame(gameUpdate);
+    if (!pointerdown_data.update(event)) { return }
+    console.debug("pointerdown");
+    if (game_state.pieces[0] >= 0 && pointerdown_data.bounds.intersects(piece0_bounds)) {
+        game_state.selectPiece(0);
+    } else if (game_state.pieces[1] >= 0 && pointerdown_data.bounds.intersects(piece1_bounds)) {
+        game_state.selectPiece(1);
+    } else if (game_state.pieces[2] >= 0 && pointerdown_data.bounds.intersects(piece2_bounds)) {
+        game_state.selectPiece(2);
     }
+    requestAnimationFrame(gameUpdate);
 }
 async function pointerupHandler(event) {
-    if (pointerup_data.update(event)) {
-        console.debug("pointerup");
-        requestAnimationFrame(gameUpdate);
-    }
+    if (!pointerup_data.update(event)) { return }
+    _ = pointermove_data.update(event);
+    console.debug("pointerup");
+    // TODO Check if i can place the currently selected piece
+
+    game_state.clearSelectedPiece();
+    requestAnimationFrame(gameUpdate);
 }
 
 
