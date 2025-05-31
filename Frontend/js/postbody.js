@@ -48,6 +48,7 @@ const piecedrag_bounds = new DOMRect();
 
 // draw functions
 var selectedPieceImageData = null;
+var selectedPieceShape = null;
 var piecedrag_prev_draw_bounds = null;
 function updateSelectedPieceImageData() {
     console.timeStamp("TOP: draw_piecebuffer")
@@ -56,6 +57,7 @@ function updateSelectedPieceImageData() {
         selectedPieceImageData = null;
         return;
     }
+    selectedPieceShape = getShape(shapeId);
     selectedPieceImageData = renderShape(
         shapeId, // shapeId
         cell_size, // cellSize
@@ -227,14 +229,13 @@ function update_hovering_cells() {
 
     // TODO cache this somehow
     const shapeId = game_state.selectedShapeId;
-    const shape = getShape(shapeId);
-    for (let i = 0; i < shape.length; i++) {
-        const row = shape[i].r + cell_index2D.row - Math.round(shapeOffsetBounds[shapeId].height / 2);
+    for (let i = 0; i < selectedPieceShape.length; i++) {
+        const row = selectedPieceShape[i].r + cell_index2D.row - Math.round(shapeOffsetBounds[shapeId].height / 2);
         if (row < 0 || row > 8) {
             hovering_cells.fill(0);
             return;
         }
-        const col = shape[i].c + cell_index2D.col - Math.round(shapeOffsetBounds[shapeId].width / 2);
+        const col = selectedPieceShape[i].c + cell_index2D.col - Math.round(shapeOffsetBounds[shapeId].width / 2);
         if (col < 0 || col > 8) {
             hovering_cells.fill(0);
             return;
@@ -499,16 +500,10 @@ async function pointerdownHandler(event) {
     game_state.selectPiece(clicked_pieceId);
 }
 async function pointerupHandler(event) {
-    const prev_bounds = new DOMRect(
-        pointerdata.bounds.x,
-        pointerdata.bounds.y,
-        pointerdata.bounds.width,
-        pointerdata.bounds.height,
-    );
-    if (!pointerdata.update(event)) { return }
+    // if (!pointerdata.update(event)) { return }
     console.debug("pointerup");
 
-    const pointerInsersectsBoard = prev_bounds.intersects(board_bounds);
+    const pointerInsersectsBoard = pointerdata.bounds.intersects(board_bounds);
     const canTryPlace = game_state.hasSelectedPiece() && hovering_cells.sum() > 0 && pointerInsersectsBoard;
 
     if (canTryPlace) {

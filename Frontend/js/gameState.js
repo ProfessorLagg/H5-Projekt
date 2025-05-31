@@ -178,7 +178,10 @@ class GameState {
      */
     forcePlaceSelectedPiece(cell_states) {
         for (let i = 0; i < cell_states.length; i++) {
-            if (cell_states[i] === 1) { this.boardState[i] = 1; }
+            if (cell_states[i] === 1) {
+                this.boardState[i] = 1;
+                this.score += 1;
+            }
         }
 
         this.boardStateChangedCallback();
