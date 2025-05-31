@@ -2,35 +2,15 @@ const shapes = {};
 const shapeIds = [];
 const shapeOffsetBounds = {}
 function isValidShapeId(shapeId) {
-    if (typeof shapeId !== "number") {
-        console.error("shapeId must be a number");
-        return false;
-    }
-
-    if (!Number.isInteger(shapeId)) {
-        console.error("shapeId must be an integer");
-        return false;
-    }
-
-    if (shapeIds.indexOf(shapeId) < 0) {
-        console.error("no shape has the shapeId " + shapeId);
-        return false;
-    }
-
+    if (typeof shapeId !== "number") { return false }
+    if (!Number.isInteger(shapeId)) { return false }
+    if (shapeIds.indexOf(shapeId) < 0) { return false }
     return true;
 }
 function assertIsValidShapeId(shapeId) {
-    if (typeof shapeId !== "number") {
-        throw Error("shapeId must be a number");
-    }
-
-    if (!Number.isInteger(shapeId)) {
-        throw Error("shapeId must be an integer");
-    }
-
-    if (shapeIds.indexOf(shapeId) < 0) {
-        throw Error("no shape has the shapeId " + shapeId);
-    }
+    if (typeof shapeId !== "number") { throw Error("shapeId must be a number"); }
+    if (!Number.isInteger(shapeId)) { throw Error("shapeId must be an integer"); }
+    if (shapeIds.indexOf(shapeId) < 0) { throw Error("no shape has the shapeId " + shapeId); }
 }
 const centerOffsetLookup = [
     2, // 1
@@ -112,7 +92,7 @@ function renderShape(shapeId, cellSize, blockimg, centerX = false, centerY = fal
     const shape = getShape(shapeId, centerX, centerY);
     shape_canvas.width = cellSize * 5;
     shape_canvas.height = cellSize * 5;
-    
+
     shape_ctx2d.imageSmoothingEnabled = false;
     for (let i = 0; i < shape.length; i++) {
         shape_ctx2d.drawImage(
@@ -123,10 +103,11 @@ function renderShape(shapeId, cellSize, blockimg, centerX = false, centerY = fal
             cellSize
         );
     }
-    return shape_ctx2d.getImageData(0,0,shape_canvas.width, shape_canvas.height);
+    return shape_ctx2d.getImageData(0, 0, shape_canvas.width, shape_canvas.height);
 }
 
 async function loadShapes() {
+    console.time(arguments.callee.name);
     // Update shapes
     const req = fetch("data/shapes.json");
     for (key in shapes) { delete shapes[key]; }
@@ -149,4 +130,6 @@ async function loadShapes() {
     for (let i = 0; i < shapeIds.length; i++) {
         _ = getShapeOffsetBounds(shapeIds[i]);
     }
+    console.timeEnd(arguments.callee.name);
+    console.log("shapes:", shapes);
 }

@@ -1,5 +1,8 @@
 // Game State
 class GameState {
+    static isValidPieceId(pieceId) { return TypeChecker.isIntegerInRange(pieceId, 0, 2); }
+    static assertIsValidPieceId(pieceId) { if (!GameState.isValidPieceId(pieceId)) { throw Error(pieceId + " is not a valid pieceId") } }
+
     prng = new sfc32(new Uint32Array(4));
     buffer = new ArrayBuffer(
         + 81 // boardState
@@ -28,28 +31,43 @@ class GameState {
     pieceBufferChangedCallback = () => { }
     scoreChangedCallback = () => { }
     selectionChangedCallback = () => { }
+    gameoverCallback = () => { }
 
     canPlaceShape(cellIndex1D, shapeId, shape) {
         if (TypeChecker.isNullOrUndefined(shape)) {
-            assertIsValidShapeId(shapeId);
             return this.canPlaceShape(cellIndex1D, shapeId, getShape(shape));
         }
 
         const cellIndex2D = indexTo2D(cellIndex1D);
         for (let i = 0; i < shape.length; i++) {
-            const row = shape.r + cellIndex2D.row;
-            const col = shape.r + cellIndex2D.row;
-            const idx = indexTo1D(row, col);
-            if (this.boardState[idx] === 1) { return false; }
+            const row = shape[i].r + cellIndex2D.row;
+            if (!TypeChecker.isIntegerInRange(row, 0, 8)) { return false }
+            const col = shape[i].r + cellIndex2D.row;
+            if (!TypeChecker.isIntegerInRange(col, 0, 8)) { return false }
+            const idx = indexTo1D(row, col, false);
+            if (!TypeChecker.isIntegerInRange(idx, 0, 80)) { return false }
+            if (this.boardState[idx] === 1) { return false }
         }
         return true;
     }
     canPlaceShapeAnywhere(shapeId) {
-        const shape = getShape(shape);
+        const shape = getShape(shapeId)
         for (let i = 0; i < 81; i++) {
             if (this.canPlaceShape(i, shapeId, shape)) { return true }
         }
         return false;
+    }
+    canPlacePieceAnywhere(pieceId) {
+        if (!GameState.isValidPieceId(pieceId)) { return false }
+        const shapeId = this.pieces[pieceId];
+        if (!isValidShapeId(shapeId)) { return false }
+        return this.canPlaceShapeAnywhere(shapeId);
+    }
+    isGameover() {
+        if (this.canPlacePieceAnywhere(0)) { return false }
+        if (this.canPlacePieceAnywhere(1)) { return false }
+        if (this.canPlacePieceAnywhere(2)) { return false }
+        return true;
     }
 
     /**
@@ -58,7 +76,6 @@ class GameState {
      * @returns true if the cell is filled or false if it is empty
      */
     getCellState(cellIndex1D) { return this.boardState[cellIndex1D] > 0; }
-
     getClearableSections() {
         const result = [];
         for (let I = 0; I < 9; I++) {
@@ -102,21 +119,26 @@ class GameState {
         }
     }
     generatePieces() {
-        let can_place_anything = false;
+        let can_place = false;
         this.pieces[0] = this.prng.nextInt() % shapeIds.length;
-        can_place_anything ||= this.canPlaceShapeAnywhere(this.pieces[0]);
+        can_place ||= this.canPlacePieceAnywhere(0);
         this.pieces[1] = this.prng.nextInt() % shapeIds.length;
-        can_place_anything ||= this.canPlaceShapeAnywhere(this.pieces[1]);
+        can_place ||= this.canPlacePieceAnywhere(1);
         this.pieces[2] = this.prng.nextInt() % shapeIds.length;
-        can_place_anything ||= this.canPlaceShapeAnywhere(this.pieces[2]);
-        while (!can_place_anything) {
+        can_place ||= this.canPlacePieceAnywhere(2);
+
+        const max_retries = 80;
+        let retries = 0;
+        while (!can_place) {
+            retries += 1;
+            if (retries > max_retries) { throw Error("Could not generate placeable piece in " + max_retries + " attempts") }
             this.pieces[2] = this.prng.nextInt() % shapeIds.length;
-            can_place_anything ||= this.canPlaceShapeAnywhere(this.pieces[2]);
+            can_place ||= this.canPlacePieceAnywhere(2);
         }
         this.pieceBufferChangedCallback();
     }
     selectPiece(pieceId) {
-        TypeChecker.assertIsIntegerInRange(pieceId, 0, 2);
+        GameState.assertIsValidPieceId(pieceId);
         assertIsValidShapeId(this.pieces[pieceId]);
         this.selectedPieceId = pieceId;
         console.debug("Selected piece " + this.selectedPieceId);
@@ -136,11 +158,11 @@ class GameState {
 
         for (let i = 0; i < shape.length; i++) {
             const row = shape[i].r + cell_index2D.row - Math.round(shapeOffsetBounds[shapeId].height / 2);
-            if (row < 0 || row > 8) { return false; }
+            if (row < 0 || row > 8) { return false }
             const col = shape[i].c + cell_index2D.col - Math.round(shapeOffsetBounds[shapeId].width / 2);
-            if (col < 0 || col > 8) { return false; }
+            if (col < 0 || col > 8) { return false }
             const idx = indexTo1D(row, col, true);
-            if (game_state.boardState[idx] > 0) { return false; }
+            if (game_state.boardState[idx] > 0) { return false }
             cell_states[idx] = 1;
         }
 
@@ -164,6 +186,9 @@ class GameState {
         this.clearSelectedPiece();
         this.clearSections();
         this.tryGeneratePieces();
+        if (this.isGameover()) {
+            this.gameoverCallback();
+        }
     }
     hasSelectedPiece() { return this.selectedPieceId >= 0 && this.selectedPieceId <= 2; }
 
