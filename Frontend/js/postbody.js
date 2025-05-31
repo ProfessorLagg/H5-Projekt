@@ -142,7 +142,7 @@ function draw_board_state() {
 function draw_piecebuffer() {
     console.timeStamp("TOP: draw_piecebuffer")
     piece0_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
-    
+
     if (game_state.pieces[0] >= 0 && game_state.selectedPieceId != 0) {
         // TODO Gray out if not placeable
         const img0 = renderShape(game_state.pieces[0], cell_size, block_img, true);
@@ -229,7 +229,6 @@ function update_hovering_cells() {
 
     const cell_index2D = indexTo2D(cell_index1D, true);
 
-    // TODO cache this somehow
     const shapeId = game_state.selectedShapeId;
     for (let i = 0; i < selectedPieceShape.length; i++) {
         const row = selectedPieceShape[i].r + cell_index2D.row - Math.round(shapeOffsetBounds[shapeId].height / 2);
@@ -251,6 +250,33 @@ function update_hovering_cells() {
     }
 }
 
+const shapevers_key = 'shapes-version';
+const highscore_key = 'high-score';
+const lastscore_key = 'last-score';
+function getShapevers() {
+    const result = parseInt(localStorage[shapevers_key]);
+    return result * Number(TypeChecker.isInteger(result));
+}
+function getHighscore() {
+    const result = parseInt(localStorage[highscore_key]);
+    return result * Number(TypeChecker.isInteger(result));
+}
+function getLastscore() {
+    const result = parseInt(localStorage[lastscore_key]);
+    return result * Number(TypeChecker.isInteger(result));
+}
+function updateStoredScores() {
+    if (getShapevers() !== shapes.version) {
+        console.log("Differing shapes version, overwriting localstorage data")
+        localStorage[shapevers_key] = shapes.version;
+        localStorage[highscore_key] = game_state.score;
+        localStorage[lastscore_key] = game_state.score;
+    } else {
+        localStorage[highscore_key] = Math.max(getHighscore(), game_state.score);
+        localStorage[lastscore_key] = game_state.score;
+    }
+}
+
 var redraw_background = true;
 var redraw_boardstate = true;
 var redraw_highlights = true;
@@ -260,7 +286,7 @@ var redraw_score = true;
 var lastGameUpdate = 0;
 function gameLoop(timestamp = -1) {
     const fps = Math.round(1000 / (timestamp - lastGameUpdate));
-    const fps_str = fps.toString().padStart(3,' ') + " FPS | "
+    const fps_str = fps.toString().padStart(3, ' ') + " FPS | "
     console.timeStamp(fps_str + "gameLoop BEGIN");
     if (redraw_background) {
         redraw_background = false;
@@ -400,7 +426,7 @@ async function initGameState() {
     game_state.boardStateChangedCallback = () => redraw_boardstate = true;
     game_state.pieceBufferChangedCallback = () => redraw_piecebuffer = true;
     game_state.scoreChangedCallback = () => {
-        // TODO update locastorage with high-score and last-score
+        updateStoredScores();
         redraw_score = true;
     }
     game_state.selectionChangedCallback = () => {
