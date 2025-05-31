@@ -11,10 +11,6 @@ class GameState {
     pieces = new Int16Array(this.buffer.slice(81, 87));
     selectedPieceId = -1;
     get selectedShapeId() {
-        if (this.selectedPieceId < 0 || this.selectedPieceId > 2) {
-            console.error("No shape selected")
-            return null;
-        }
         const shapeId = this.pieces[this.selectedPieceId];
         assertIsValidShapeId(shapeId);
         return shapeId;

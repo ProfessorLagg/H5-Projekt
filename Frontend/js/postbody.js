@@ -1,62 +1,79 @@
-const game_wrap = document.getElementById('game-wrap');
+// Settings
+const board_canvas_size = 990;
+const group_size = board_canvas_size / 3;
+const cell_size = board_canvas_size / 9;
+const piece_canvas_size = (board_canvas_size / 9) * 5;
 
-const game_score = document.getElementById('game-score');
-
-const board_background = document.getElementById('board-background');
-const board_cells = document.getElementById('board-cells');
-const board_highlight = document.getElementById('board-highlight');
-const board_borders = document.getElementById('board-borders');
-const board_bounds = new DOMRect();
-
+// HTML Element Constants
 const block_img = document.getElementById('blck-img');
 const cell_img = document.getElementById('cell-img');
 const highlight_img = document.getElementById('highlight-img');
 
-const board_canvas_size = 990;
-const group_size = board_canvas_size / 3;
-const cell_size = board_canvas_size / 9;
-const cellPixelBounds = new Array(81);
-const cellViewPortBounds = new Array(0);
+const game_wrap = document.getElementById('game-wrap');
+const game_score = document.getElementById('game-score');
 
-const piece_canvas_size = (board_canvas_size / 9) * 5;
+const board_background_canvas = document.getElementById('board-background');
+const board_cells_canvas = document.getElementById('board-cells');
+const board_highlight_canvas = document.getElementById('board-highlight');
+const board_borders_canvas = document.getElementById('board-borders');
+const piecedrag_canvas = document.getElementById('piecedrag');
 const piece0 = document.getElementById('piece0');
 const piece1 = document.getElementById('piece1');
 const piece2 = document.getElementById('piece2');
+
+// Static Image Datas
+var block_imgdata_cellsize = undefined;
+var cell_img_data_cellsize = undefined;
+var highlight_img_data_cellsize = undefined;
+
+// Canvas Render Contexts
+const board_background_ctx2d = board_background_canvas.getContext("2d");
+const board_cells_ctx2d = board_cells_canvas.getContext("2d")
+const board_highlight_ctx2d = board_highlight_canvas.getContext("2d");
+const board_borders_ctx2d = board_borders_canvas.getContext("2d");
+const piecedrag_ctx2d = piecedrag_canvas.getContext("2d");
+const piece0_ctx2d = piece0.getContext("2d");
+const piece1_ctx2d = piece1.getContext("2d");
+const piece2_ctx2d = piece2.getContext("2d");
+
+// Bounds
+const board_bounds = new DOMRect();
+const cellPixelBounds = new Array(0);
+const cellViewPortBounds = new Array(0);
 const piece0_bounds = new DOMRect();
 const piece1_bounds = new DOMRect();
 const piece2_bounds = new DOMRect();
-
-const piecedrag_canvas = document.getElementById('piecedrag');
 const piecedrag_bounds = new DOMRect();
 
 
 // draw functions
 function draw_board_background() {
-    const ctx = board_background.getContext("2d");
-    ctx.fillStyle = "rgba(100,45,0,100%)";
-    ctx.fillRect(0, 0, board_canvas_size, board_canvas_size);
+    console.timeStamp("TOP: draw_board_background")
+    board_background_ctx2d.fillStyle = "rgba(100,45,0,100%)";
+    board_background_ctx2d.fillRect(0, 0, board_canvas_size, board_canvas_size);
 
     // Dark Groups
-    ctx.fillStyle = "rgba(255,255,255,33%)";
-    ctx.fillRect(0, 0, group_size, group_size);
-    ctx.fillRect(group_size * 2, 0, group_size, group_size);
-    ctx.fillRect(group_size, group_size, group_size, group_size);
-    ctx.fillRect(0, group_size * 2, group_size, group_size);
-    ctx.fillRect(group_size * 2, group_size * 2, group_size, group_size);
+    board_background_ctx2d.fillStyle = "rgba(255,255,255,33%)";
+    board_background_ctx2d.fillRect(0, 0, group_size, group_size);
+    board_background_ctx2d.fillRect(group_size * 2, 0, group_size, group_size);
+    board_background_ctx2d.fillRect(group_size, group_size, group_size, group_size);
+    board_background_ctx2d.fillRect(0, group_size * 2, group_size, group_size);
+    board_background_ctx2d.fillRect(group_size * 2, group_size * 2, group_size, group_size);
 
     // Light Groups
-    ctx.fillStyle = "rgba(255,255,255,50%)";
-    ctx.fillRect(group_size, 0, group_size, group_size);
-    ctx.fillRect(0, group_size, group_size, group_size);
-    ctx.fillRect(group_size * 2, group_size, group_size, group_size);
-    ctx.fillRect(group_size, group_size * 2, group_size, group_size);
+    board_background_ctx2d.fillStyle = "rgba(255,255,255,50%)";
+    board_background_ctx2d.fillRect(group_size, 0, group_size, group_size);
+    board_background_ctx2d.fillRect(0, group_size, group_size, group_size);
+    board_background_ctx2d.fillRect(group_size * 2, group_size, group_size, group_size);
+    board_background_ctx2d.fillRect(group_size, group_size * 2, group_size, group_size);
+    console.timeStamp("BOT: draw_board_background")
 }
 function draw_board_cells() {
-    const ctx = board_cells.getContext("2d");
-    ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
+    console.timeStamp("TOP: draw_board_cells")
+    board_cells_ctx2d.clearRect(0, 0, board_canvas_size, board_canvas_size);
     for (let i = 0; i < cellPixelBounds.length; i++) {
         const cell = cellPixelBounds[i];
-        ctx.drawImage(
+        board_cells_ctx2d.drawImage(
             cell_img,
             Math.floor(cell.x),
             Math.floor(cell.y),
@@ -64,26 +81,34 @@ function draw_board_cells() {
             Math.floor(cell.h)
         );
     }
+    console.timeStamp("BOT: draw_board_cells")
 }
 function draw_board_highlight() {
-    const ctx = board_highlight.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
-    if (TypeChecker.isNullOrUndefined(hovering_cells)) { return }
+    console.timeStamp("TOP: draw_board_highlight")
+    board_highlight_ctx2d.clearRect(0, 0, board_canvas_size, board_canvas_size);
+    if (!pointerdata.bounds.intersects(board_bounds)) { return }
+    if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
     for (let i = 0; i < hovering_cells.length; i++) {
         if (hovering_cells[i] > 0) {
-            ctx.drawImage(
-                highlight_img,
+            // board_highlight_ctx2d.drawImage(
+            //     highlight_img,
+            //     cellPixelBounds[i].x,
+            //     cellPixelBounds[i].y,
+            //     cellPixelBounds[i].w,
+            //     cellPixelBounds[i].h,
+            // )
+            board_highlight_ctx2d.putImageData(
+                highlight_img_data_cellsize,
                 cellPixelBounds[i].x,
-                cellPixelBounds[i].y,
-                cellPixelBounds[i].w,
-                cellPixelBounds[i].h,
+                cellPixelBounds[i].y
             )
         }
     }
+    console.timeStamp("BOT: draw_board_highlight")
 }
 function draw_board_state() {
-    const ctx = board_borders.getContext("2d");
+    console.timeStamp("TOP: draw_board_state")
+    const ctx = board_borders_canvas.getContext("2d");
     ctx.clearRect(0, 0, board_canvas_size, board_canvas_size);
     for (let i = 0; i < cellPixelBounds.length; i++) {
         if (!game_state.getCellState(i)) { continue }
@@ -97,33 +122,65 @@ function draw_board_state() {
             Math.floor(cell.h)
         );
     }
+    console.timeStamp("BOT: draw_board_state")
 }
 function draw_piecebuffer() {
-    const ctx1 = piece0.getContext("2d");
-    ctx1.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
+    console.timeStamp("TOP: draw_piecebuffer")
+    piece0_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
     if (game_state.pieces[0] >= 0 && game_state.selectedPieceId != 0) {
-        const img1 = renderShape(game_state.pieces[0], cell_size, block_img, true);
-        ctx1.drawImage(img1, 0, 0, piece_canvas_size, piece_canvas_size);
+        const img0 = renderShape(game_state.pieces[0], cell_size, block_img, true);
+        // piece0_ctx2d.drawImage(img0, 0, 0, piece_canvas_size, piece_canvas_size);
+        piece0_ctx2d.putImageData(img0, 0, 0);
     }
 
-    const ctx2 = piece1.getContext("2d");
-    ctx2.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
+    piece1_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
     if (game_state.pieces[1] >= 0 && game_state.selectedPieceId != 1) {
-        const img2 = renderShape(game_state.pieces[1], cell_size, block_img, true);
-        ctx2.drawImage(img2, 0, 0, piece_canvas_size, piece_canvas_size);
+        const img1 = renderShape(game_state.pieces[1], cell_size, block_img, true);
+        // piece1_ctx2d.drawImage(img2, 0, 0, piece_canvas_size, piece_canvas_size);
+        piece1_ctx2d.putImageData(img1, 0, 0);
     }
 
-    const ctx3 = piece2.getContext("2d");
-    ctx3.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
+    piece2_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
     if (game_state.pieces[2] >= 0 && game_state.selectedPieceId != 2) {
-        const img3 = renderShape(game_state.pieces[2], cell_size, block_img, true);
-        ctx3.drawImage(img3, 0, 0, piece_canvas_size, piece_canvas_size);
+        const img2 = renderShape(game_state.pieces[2], cell_size, block_img, true);
+        piece2_ctx2d.putImageData(img2, 0, 0);
     }
+    console.timeStamp("BOT: draw_piecebuffer")
+}
+
+var selectedPieceImageData = null;
+var piecedrag_prev_draw_bounds = null;
+function updateSelectedPieceImageData() {
+    console.timeStamp("TOP: draw_piecebuffer")
+    const shapeId = game_state.selectedShapeId;
+    if (shapeId === -1) {
+        selectedPieceImageData = null;
+        return;
+    }
+    selectedPieceImageData = renderShape(
+        shapeId, // shapeId
+        cell_size, // cellSize
+        block_img, // blockimg
+        true, // centerX
+        true // centerY
+    );
+    piecedrag_prev_draw_bounds = null;
+    console.timeStamp("BOT: draw_piecebuffer")
 }
 function draw_piecedrag() {
-    const ctx = piecedrag_canvas.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, piecedrag_canvas.width, piecedrag_canvas.height);
+    console.timeStamp("TOP: draw_piecedrag")
+    const piecedrag_ctx2d = piecedrag_canvas.getContext("2d");
+    if (piecedrag_prev_draw_bounds === null) {
+        piecedrag_ctx2d.clearRect(0, 0, piecedrag_canvas.width, piecedrag_canvas.height);
+    } else {
+        piecedrag_ctx2d.clearRect(
+            piecedrag_prev_draw_bounds.x,
+            piecedrag_prev_draw_bounds.y,
+            piecedrag_prev_draw_bounds.width,
+            piecedrag_prev_draw_bounds.height
+        );
+    }
+
 
     if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
 
@@ -140,36 +197,22 @@ function draw_piecedrag() {
     pixel_bounds.height = cell_size * 5;
     pixel_bounds.x = (piecedrag_canvas.width * pointer_uv_bounds.x) - pixel_bounds.width / 2;
     pixel_bounds.y = (piecedrag_canvas.height * pointer_uv_bounds.y) - pixel_bounds.height / 2;
-    // pixel_bounds.x = (piecedrag_canvas.width * pointer_uv_bounds.x) - cell_size / 2;
-    // pixel_bounds.y = (piecedrag_canvas.height * pointer_uv_bounds.y) - cell_size / 2;
-
-    const shapeId = game_state.selectedShapeId;
-    const shapeImg = renderShape(
-        shapeId, // shapeId
-        cell_size, // cellSize
-        block_img, // blockimg
-        true, // centerX
-        true // centerY
-    );
-
-    ctx.drawImage(
-        shapeImg,
+    piecedrag_ctx2d.putImageData(
+        selectedPieceImageData,
         pixel_bounds.x,
         pixel_bounds.y,
+        0,
+        0,
         pixel_bounds.width,
         pixel_bounds.height
     );
-
-    // ctx.fillStyle = "rgba(255,0,0,.1)"
-    // ctx.fillRect(
-    //     pixel_bounds.x,
-    //     pixel_bounds.y,
-    //     pixel_bounds.width,
-    //     pixel_bounds.height
-    // );
+    piecedrag_prev_draw_bounds = pixel_bounds;
+    console.timeStamp("BOT: draw_piecedrag")
 }
 function draw_score() {
+    console.timeStamp("TOP: draw_score")
     game_score.innerText = game_state.score;
+    console.timeStamp("BOT: draw_score")
 }
 
 
@@ -193,6 +236,7 @@ const hovering_cells = new Uint8Array(81);
 /**Updates the currently hovered cells info in hovering_cells */
 function update_hovering_cells() {
     hovering_cells.fill(0);
+    if (!pointerdata.bounds.intersects(board_bounds)) { return }
     if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
 
     const cell_index1D = pointer_cell_index;
@@ -242,36 +286,20 @@ function gameUpdate(timestamp = -1) {
 
 // init
 async function init() {
-    console.log(arguments.callee.name);
+    console.time(arguments.callee.name);
     await loadShapes();
+    await initImageDatas();
     await initCellBounds();
     await initBoardCanvas();
     await initPieceCanvas();
+    await initPieceDragCanvas();
     await initGameState(); // MUST BE RUN AFTER initPieceCanvas()
     await initPointerEvents();
     await initResizeEvent();
-}
-async function initBoardCanvas() {
-    console.log(arguments.callee.name);
-    Array.from(document.querySelectorAll(".board-canvas")).forEach(board_canvas => {
-        board_canvas.width = board_canvas_size;
-        board_canvas.height = board_canvas_size;
-    });
-    draw_board_background();
-    draw_board_cells();
-    draw_board_highlight();
-    draw_board_state();
-}
-async function initPieceCanvas() {
-    piece0.width = piece_canvas_size;
-    piece0.height = piece_canvas_size;
-    piece1.width = piece_canvas_size;
-    piece1.height = piece_canvas_size;
-    piece2.width = piece_canvas_size;
-    piece2.height = piece_canvas_size;
+    console.timeEnd(arguments.callee.name)
 }
 async function initCellBounds() {
-    console.log(arguments.callee.name);
+    console.time(arguments.callee.name);
     const s = board_canvas_size / 9;
     let i = 0;
     for (let r = 0; r < 9; r++) {
@@ -285,29 +313,84 @@ async function initCellBounds() {
             i++;
         }
     }
+    console.timeEnd(arguments.callee.name);
+}
+async function initImageDatas() {
+    console.time(arguments.callee.name);
+
+    const canvas = new OffscreenCanvas(cell_size, cell_size);
+    const ctx = canvas.getContext("2d", { aplha: true, willReadFrequently: false });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    ctx.clearRect(0, 0, cell_size, cell_size);
+    ctx.drawImage(block_img, 0, 0, cell_size, cell_size);
+    block_imgdata_cellsize = ctx.getImageData(0, 0, cell_size, cell_size);
+
+    ctx.clearRect(0, 0, cell_size, cell_size);
+    ctx.drawImage(cell_img, 0, 0, cell_size, cell_size);
+    cell_img_data_cellsize = ctx.getImageData(0, 0, cell_size, cell_size);
+
+    ctx.clearRect(0, 0, cell_size, cell_size);
+    ctx.drawImage(highlight_img, 0, 0, cell_size, cell_size);
+    highlight_img_data_cellsize = ctx.getImageData(0, 0, cell_size, cell_size);
+
+    console.timeEnd(arguments.callee.name);
+}
+async function initBoardCanvas() {
+    console.time(arguments.callee.name);
+    Array.from(document.querySelectorAll(".board-canvas")).forEach(board_canvas => {
+        board_canvas.width = board_canvas_size;
+        board_canvas.height = board_canvas_size;
+    });
+    board_background_ctx2d.imageSmoothingEnabled = false;
+    board_cells_ctx2d.imageSmoothingEnabled = false;
+    board_highlight_ctx2d.imageSmoothingEnabled = false;
+    draw_board_background();
+    draw_board_cells();
+    console.timeEnd(arguments.callee.name);
+}
+async function initPieceCanvas() {
+    console.time(arguments.callee.name);
+    piece0.width = piece_canvas_size;
+    piece0.height = piece_canvas_size;
+    piece1.width = piece_canvas_size;
+    piece1.height = piece_canvas_size;
+    piece2.width = piece_canvas_size;
+    piece2.height = piece_canvas_size;
+    console.timeEnd(arguments.callee.name);
+}
+async function initPieceDragCanvas() {
+    console.time(arguments.callee.name);
+    updatePiecedragSize();
+    piecedrag_ctx2d.imageSmoothingEnabled = false;
+    console.timeEnd(arguments.callee.name);
 }
 async function initPointerEvents() {
-    console.log(arguments.callee.name);
+    console.time(arguments.callee.name);
     window.addEventListener("pointermove", pointermoveHandler);
     window.addEventListener("pointerdown", pointerdownHandler);
     window.addEventListener("pointerup", pointerupHandler);
+    console.timeEnd(arguments.callee.name);
 }
 async function initResizeEvent() {
+    console.time(arguments.callee.name);
     resizeHandler();
-    window.addEventListener("resize", resizeHandler)
+    window.addEventListener("resize", resizeHandler);
+    console.timeEnd(arguments.callee.name);
 }
 async function initGameState() {
+    console.time(arguments.callee.name);
     game_state.boardStateChangedCallback = () => requestAnimationFrame(update_board);
     game_state.pieceBufferChangedCallback = () => requestAnimationFrame(update_piecebuffer);
     game_state.scoreChangedCallback = () => requestAnimationFrame(update_score);
     game_state.restart();
-    // requestAnimationFrame(gameUpdate);
+    console.timeEnd(arguments.callee.name);
 }
 
 // resize event
 function updateViewPortBoundsData() {
-    console.debug(arguments.callee.name)
-    const c_board_bounds = board_background.getBoundingClientRect();
+    const c_board_bounds = board_background_canvas.getBoundingClientRect();
     board_bounds.x = c_board_bounds.x;
     board_bounds.y = c_board_bounds.y;
     board_bounds.width = c_board_bounds.width;
@@ -350,8 +433,7 @@ function updateViewPortBoundsData() {
         }
     }
 }
-function update_piecedrag_size() {
-    console.debug(arguments.callee.name)
+function updatePiecedragSize() {
     const scaleW = piecedrag_bounds.width / board_bounds.width;
     const scaleH = piecedrag_bounds.height / board_bounds.height;
     piecedrag_canvas.width = board_canvas_size * scaleW;
@@ -359,35 +441,38 @@ function update_piecedrag_size() {
 }
 async function resizeHandler() {
     updateViewPortBoundsData();
-    update_piecedrag_size();
+    updatePiecedragSize();
 }
 
 // pointer
 const pointerdata = new PointerData();
-let pointer_cell_index = -1;
+var pointer_cell_index = -1;
+var pointermoveFrameRequested = false;
 async function pointermoveHandler(event) {
     if (!pointerdata.update(event)) { return }
     if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
     pointer_cell_index = getPointerCellIndex();
-    requestAnimationFrame(update_piecedrag);
+    // requestAnimationFrame(update_piecedrag);
+    update_piecedrag();
 }
-function pointerdownHandler(event) {
+async function pointerdownHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerdown");
     pointer_cell_index = getPointerCellIndex();
     if (game_state.pieces[0] >= 0 && pointerdata.bounds.intersects(piece0_bounds)) {
         game_state.selectPiece(0);
-        console.log("game_state.selectedPieceId:", game_state.selectedPieceId)
-        gameUpdate();
     } else if (game_state.pieces[1] >= 0 && pointerdata.bounds.intersects(piece1_bounds)) {
         game_state.selectPiece(1);
-        requestAnimationFrame(gameUpdate);
     } else if (game_state.pieces[2] >= 0 && pointerdata.bounds.intersects(piece2_bounds)) {
         game_state.selectPiece(2);
-        requestAnimationFrame(gameUpdate);
-    }
+    } else { return }
+
+
+    updateSelectedPieceImageData();
+    requestAnimationFrame(update_piecebuffer);
+    requestAnimationFrame(update_piecedrag);
 }
-function pointerupHandler(event) {
+async function pointerupHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerup");
 
@@ -402,9 +487,11 @@ function pointerupHandler(event) {
         game_state.clearSelectedPiece();
     }
 
-    requestAnimationFrame(gameUpdate)
+    requestAnimationFrame(() => {
+        update_piecedrag();
+        update_piecebuffer();
+    })
 }
-
 function getPointerCellIndex() {
     if (!pointerdata.bounds.intersects(board_bounds)) { return null }
 

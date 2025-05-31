@@ -95,19 +95,27 @@ function getShape(shapeId, centerX = false, centerY = false) {
 }
 
 /**Used to save on GC while rendering shapes */
-const temp_canvas = new OffscreenCanvas(0, 0);
+const shape_canvas = new OffscreenCanvas(0, 0);
+const shape_ctx2d = shape_canvas.getContext("2d", { aplha: true, willReadFrequently: true });
+/**
+ * Renders a shape to ImageData
+ * @param {Number} shapeId 
+ * @param {Number} cellSize 
+ * @param {Object} blockimg 
+ * @param {Boolean} [centerX]
+ * @param {Boolean} [centerY]
+ */
 function renderShape(shapeId, cellSize, blockimg, centerX = false, centerY = false) {
     TypeChecker.assertIsInteger(cellSize);
     if (!isValidShapeId(shapeId)) { throw Error(shapeId + " is not a valid shapeId"); }
 
     const shape = getShape(shapeId, centerX, centerY);
-    const bounds = getShapeOffsetBounds(shapeId);
-    temp_canvas.width = cellSize * 5;
-    temp_canvas.height = cellSize * 5;
-    const ctx = temp_canvas.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
+    shape_canvas.width = cellSize * 5;
+    shape_canvas.height = cellSize * 5;
+    
+    shape_ctx2d.imageSmoothingEnabled = false;
     for (let i = 0; i < shape.length; i++) {
-        ctx.drawImage(
+        shape_ctx2d.drawImage(
             blockimg,
             shape[i].c * cellSize,
             shape[i].r * cellSize,
@@ -115,7 +123,7 @@ function renderShape(shapeId, cellSize, blockimg, centerX = false, centerY = fal
             cellSize
         );
     }
-    return temp_canvas;
+    return shape_ctx2d.getImageData(0,0,shape_canvas.width, shape_canvas.height);
 }
 
 async function loadShapes() {

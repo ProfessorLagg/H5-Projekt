@@ -61,9 +61,8 @@ class PointerData {
      * @returns true if event was newer than this, otherwise false
      */
     update(event) {
-        if (!(event instanceof PointerEvent)) { throw Error("Can only update from PointerEvents"); }
+        // if (!(event instanceof PointerEvent)) { throw Error("Can only update from PointerEvents"); }
         if (event.timeStamp <= this.timeStamp) { return false; }
-        // console.debug("PointerData.update", "\n\tevent:", event)
         this.isPrimary = event.isPrimary;
         this.altitudeAngle = event.altitudeAngle;
         this.azimuthAngle = event.azimuthAngle;
