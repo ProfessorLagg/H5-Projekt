@@ -611,14 +611,15 @@ async function pointerupHandler(event) {
 }
 function getPointerCellIndex() {
     if (!pointerdata.bounds.intersects(board_bounds)) { return null }
-
     const pCenter = pointerdata.bounds.center();
-    const uvX = (pCenter.x - board_bounds.left) / board_bounds.width;
-    const uvY = (pCenter.y - board_bounds.top) / board_bounds.height
 
-    const row = Math.round(rangeMapNumber(uvY, 0, 1, 0, 8));
-    if (row < 0 || row > 8) { return null }
-    const col = Math.round(rangeMapNumber(uvX, 0, 1, 0, 8));
+    const uvX = rangeMapNumber(pCenter.x, board_bounds.left, board_bounds.right, 0, 1);
+    let col = Math.floor(uvX * 9)
     if (col < 0 || col > 8) { return null }
+
+    const uvY = rangeMapNumber(pCenter.y, board_bounds.top, board_bounds.bottom, 0, 1);
+    let row = Math.floor(uvY * 9);
+    if (row < 0 || row > 8) { return null }
+
     return indexTo1D(row, col, true);
 }
