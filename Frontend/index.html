@@ -40,18 +40,13 @@
             </div>
             <canvas id="piecedrag" class="piecedrag-canvas"></canvas>
         </div>
+        <div id="menu-screen" class="hidden">
+            <h1 id="menu-title">Laggdoku</h1>
+            <button id="btn-new-game" class="menu-button" onclick="btn_new_game_click()">New Game</button>
+            <button id="btn-resume-game" class="menu-button" onclick="btn_resume_game_click()">Resume Game</button>
+        </div>
         <script src="js/postbody.js"></script>
         <script>init()</script>
-        <!-- <script>
-            toggleFPS()
-            function temp() {
-                const fps_display = document.getElementById("fps-display");
-                fps_display.style.top = pointerdata.clientY + "px";
-                fps_display.style.left = pointerdata.clientX + "px";
-                console.log("pointerdata:", pointerdata)
-                console.log("fps_display", fps_display)
-            }
-        </script> -->
     </body>
 
 </html>

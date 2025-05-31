@@ -137,3 +137,42 @@ body {
     text-align: right;
     width: 100%;
 }
+
+#menu-screen{
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center ;
+    gap: var(--rh) 0;
+
+    text-align: center;
+    font-size: 4vh;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.menu-button {
+    all:unset;
+    font-size: 2vh;
+    
+    padding: 1vh;
+    border-radius: 6px;
+    width: fit-content;
+    height: fit-content;
+    background-color: hsl(0, 0%, 15%);
+    border: .25vh solid white;
+}
+.menu-button:hover{
+    background-color: hsl(0, 0%, 80%);
+    color: black;
+    border-color: black;
+}

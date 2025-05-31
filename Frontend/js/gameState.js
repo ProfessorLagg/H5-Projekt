@@ -1,4 +1,13 @@
 // Game State
+class GameStateSaveFile {
+    prng_seed = null;
+    prng_count = 0;
+    prng_state = null;
+    score = 0;
+    board = null;
+    pieces = null;
+}
+
 class GameState {
     static isValidPieceId(pieceId) { return TypeChecker.isIntegerInRange(pieceId, 0, 2); }
     static assertIsValidPieceId(pieceId) { if (!GameState.isValidPieceId(pieceId)) { throw Error(pieceId + " is not a valid pieceId") } }
@@ -120,7 +129,7 @@ class GameState {
 
     /**Runs this.generatePieces() if this.pieces is empty */
     tryGeneratePieces() {
-        if (this.pieces[0] + this.pieces[1] + this.pieces[2] === -3) {
+        if (this.pieces.sum() === -3) {
             this.generatePieces();
         }
     }
@@ -193,6 +202,7 @@ class GameState {
         this.boardStateChangedCallback();
 
         this.pieces[this.selectedPieceId] = -1;
+        this.pieceBufferChangedCallback();
         this.clearSelectedPiece();
         this.tryGeneratePieces();
 
@@ -202,18 +212,48 @@ class GameState {
     }
     hasSelectedPiece() { return this.selectedPieceId >= 0 && this.selectedPieceId <= 2; }
 
-    restart() {
+    restart(trigger_callbacks = true) {
         this.prng.reset(sfc32.generateSeed());
         this.scoreState[0] = 0;
         this.boardState.fill(0);
         this.pieces.fill(-1);
-
         this.generatePieces();
 
-        /* Debug */
-        this.boardState[40] == 1;
         this.boardStateChangedCallback();
     }
     constructor() {
+    }
+
+    getSaveFile() {
+        const result = new GameStateSaveFile();
+        result.prng_seed = Array.from(this.prng.seed);
+        result.prng_count = this.prng.count;
+        result.prng_state = Array.from(this.prng.state);
+
+        result.score = this.score;
+        result.board = Array.from(this.boardState);
+        result.pieces = Array.from(this.pieces);
+        return result;
+    }
+    loadSaveFile(saveFile) {
+        if (!saveFile instanceof GameStateSaveFile) {
+            throw Error("expected GameStateSaveFile, but found: " + saveFile);
+        }
+
+        this.prng.seed[0] = saveFile.prng_seed[0];
+        this.prng.seed[1] = saveFile.prng_seed[1];
+        this.prng.seed[2] = saveFile.prng_seed[2];
+        this.prng.seed[3] = saveFile.prng_seed[3];
+        this.prng.count = saveFile.prng_count;
+        this.prng.state[0] = saveFile.prng_state[0];
+        this.prng.state[1] = saveFile.prng_state[1];
+        this.prng.state[2] = saveFile.prng_state[2];
+        this.prng.state[3] = saveFile.prng_state[3];
+
+        this.score = saveFile.score;
+        for (let i = 0; i < 81; i++) { this.boardState[i] = saveFile.board[i]; }
+        this.pieces[0] = saveFile.pieces[0];
+        this.pieces[1] = saveFile.pieces[1];
+        this.pieces[2] = saveFile.pieces[2];
     }
 }

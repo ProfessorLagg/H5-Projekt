@@ -251,35 +251,6 @@ function update_hovering_cells() {
         hovering_cells[idx] = 1;
     }
 }
-
-const shapevers_key = 'shapes-version';
-const highscore_key = 'high-score';
-const lastscore_key = 'last-score';
-function getShapevers() {
-    const result = parseInt(localStorage[shapevers_key]);
-    return result * Number(TypeChecker.isInteger(result));
-}
-function getHighscore() {
-    const result = parseInt(localStorage[highscore_key]);
-    return result * Number(TypeChecker.isInteger(result));
-}
-function getLastscore() {
-    const result = parseInt(localStorage[lastscore_key]);
-    return result * Number(TypeChecker.isInteger(result));
-}
-function updateStoredScores() {
-    if (getShapevers() !== shapes.version) {
-        console.log("Differing shapes version, overwriting localstorage data")
-        localStorage[shapevers_key] = shapes.version;
-        localStorage[highscore_key] = game_state.score;
-        localStorage[lastscore_key] = game_state.score;
-    } else {
-        // TODO Fanfare when highscore was beaten
-        localStorage[highscore_key] = Math.max(getHighscore(), game_state.score);
-        localStorage[lastscore_key] = game_state.score;
-    }
-}
-
 var redraw_background = true;
 var redraw_boardstate = true;
 var redraw_highlights = true;
@@ -328,6 +299,60 @@ function gameLoop(timestamp = -1) {
     requestAnimationFrame(gameLoop);
 }
 
+
+// Storage
+const shapevers_key = 'shapes-version';
+const highscore_key = 'high-score';
+const lastscore_key = 'last-score';
+const savestate_key = 'save-state';
+function getShapevers() {
+    const result = parseInt(localStorage[shapevers_key]);
+    return result * Number(TypeChecker.isInteger(result));
+}
+function getHighscore() {
+    const result = parseInt(localStorage[highscore_key]);
+    return result * Number(TypeChecker.isInteger(result));
+}
+function getLastscore() {
+    const result = parseInt(localStorage[lastscore_key]);
+    return result * Number(TypeChecker.isInteger(result));
+}
+function updateStoredScores() {
+    if (getShapevers() !== shapes.version) {
+        console.log("Differing shapes version, overwriting localstorage data")
+        localStorage[shapevers_key] = shapes.version;
+        localStorage[highscore_key] = game_state.score;
+        localStorage[lastscore_key] = game_state.score;
+    } else {
+        // TODO Fanfare when highscore was beaten
+        localStorage[highscore_key] = Math.max(getHighscore(), game_state.score);
+        localStorage[lastscore_key] = game_state.score;
+    }
+}
+
+function clearSave() {
+    localStorage.removeItem(savestate_key);
+}
+/**
+ * Saves the input gamestate to localstorage.
+ * Overrides previous save
+ * @param {GameState} state 
+ */
+function saveGave(state) {
+    localStorage[savestate_key] = JSON.stringify(state.getSaveFile());
+}
+/**Checks if there exists a saved GameStateSaveFile */
+function loadGamePossible() { return !TypeChecker.isNullOrUndefined(localStorage[savestate_key]) }
+/**
+ * Loads a game from localstorage.
+ * @returns A GameStateSaveFile if a save was found, otherwise null
+ */
+function loadGame() {
+    if (!loadGamePossible()) { return null }
+    const result = JSON.parse(localStorage[savestate_key]);
+    return Object.assign(new GameStateSaveFile, result)
+}
+
 // init
 async function init() {
     console.time(arguments.callee.name);
@@ -340,6 +365,7 @@ async function init() {
     await initGameState(); // MUST BE RUN AFTER initPieceCanvas()
     await initPointerEvents();
     await initResizeEvent();
+    showMenu();
     requestAnimationFrame(gameLoop);
     console.timeEnd(arguments.callee.name)
 }
@@ -426,11 +452,18 @@ async function initResizeEvent() {
 }
 async function initGameState() {
     console.time(arguments.callee.name);
-    game_state.boardStateChangedCallback = () => redraw_boardstate = true;
-    game_state.pieceBufferChangedCallback = () => redraw_piecebuffer = true;
+    game_state.boardStateChangedCallback = () => {
+        redraw_boardstate = true;
+        saveGave(game_state);
+    };
+    game_state.pieceBufferChangedCallback = () => {
+        redraw_piecebuffer = true;
+        saveGave(game_state);
+    };
     game_state.scoreChangedCallback = () => {
         updateStoredScores();
         redraw_score = true;
+        saveGave(game_state);
     }
     game_state.selectionChangedCallback = () => {
         if (game_state.hasSelectedPiece()) {
@@ -441,12 +474,37 @@ async function initGameState() {
         redraw_piecebuffer = true;
     };
     game_state.gameoverCallback = () => {
-        console.warn("GAME OVER!");
-        game_state.restart();
+        clearSave();
+        showMenu();
         // TODO actually make gameover screen
     }
-    game_state.restart();
     console.timeEnd(arguments.callee.name);
+}
+
+// Menu
+const menuScreen = document.getElementById('menu-screen');
+const btn_resume_game = document.getElementById('btn-resume-game');
+
+async function hideMenu() { menuScreen.classList.add('hidden'); }
+async function showMenu() {
+    if (!loadGamePossible()) {
+        btn_resume_game.classList.add('hidden');
+    }
+    menuScreen.classList.remove('hidden');
+}
+async function btn_new_game_click(event) {
+    game_state.restart();
+    hideMenu();
+}
+async function btn_resume_game_click(event) {
+    const saveFile = loadGame();
+    game_state.restart();
+    if (TypeChecker.isNullOrUndefined(saveFile)) {
+        console.error("Save File was null or undefined!")
+        return
+    }
+    game_state.loadSaveFile(saveFile);
+    hideMenu();
 }
 
 // resize event
