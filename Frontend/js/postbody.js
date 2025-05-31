@@ -390,13 +390,18 @@ function pointerdownHandler(event) {
 function pointerupHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerup");
-    if (!game_state.hasSelectedPiece()) {
-        game_state.clearSelectedPiece();
-    } else if (!pointerdata.bounds.intersects(board_bounds)) {
-        game_state.clearSelectedPiece();
-    } else if (!game_state.tryPlaceSelectedPiece(pointer_cell_index)) {
+
+    const hasSelectedPiece = game_state.hasSelectedPiece();
+    const hovering_cells_sum = hovering_cells.sum();
+    const pointerInsersectsBoard = pointerdata.bounds.intersects(board_bounds);
+    const canTryPlace = hasSelectedPiece && hovering_cells_sum > 0 && pointerInsersectsBoard;
+
+    if (canTryPlace) {
+        game_state.forcePlaceSelectedPiece(hovering_cells);
+    } else {
         game_state.clearSelectedPiece();
     }
+
     requestAnimationFrame(gameUpdate)
 }
 

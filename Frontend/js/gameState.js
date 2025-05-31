@@ -80,6 +80,12 @@ class GameState {
         }
     }
 
+    /**Runs this.generatePieces() if this.pieces is empty */
+    tryGeneratePieces() {
+        if (this.pieces[0] + this.pieces[1] + this.pieces[2] === -3) {
+            this.generatePieces();
+        }
+    }
     generatePieces() {
         this.pieces[0] = this.prng.nextInt() % shapeIds.length;
         this.pieces[1] = this.prng.nextInt() % shapeIds.length;
@@ -102,40 +108,40 @@ class GameState {
     tryPlaceSelectedPiece(cell_index1D) {
         console.debug("GameState.tryPlaceSelectedPiece", "cellIndex:", cell_index1D);
         const cell_index2D = indexTo2D(cell_index1D, true);
-
-        // TODO cache this somehow
         const shapeId = this.selectedShapeId;
         const shape = getShape(shapeId);
-        const cellIndexes = new Array();
+        const cell_states = new Uint8Array(81);
+
         for (let i = 0; i < shape.length; i++) {
             const row = shape[i].r + cell_index2D.row - Math.round(shapeOffsetBounds[shapeId].height / 2);
-            if (row < 0 || row > 8) { return false }
+            if (row < 0 || row > 8) { return false; }
             const col = shape[i].c + cell_index2D.col - Math.round(shapeOffsetBounds[shapeId].width / 2);
-            if (col < 0 || col > 8) { return false }
+            if (col < 0 || col > 8) { return false; }
             const idx = indexTo1D(row, col, true);
-            if (this.boardState[idx] > 0) { return false }
-            cellIndexes.push(idx);
+            if (game_state.boardState[idx] > 0) { return false; }
+            cell_states[idx] = 1;
         }
 
-        for (let i = 0; i < cellIndexes.length; i++) {
-            this.boardState[cellIndexes[i]] = 1;
-            this.score += 1;
-        }
-        this.boardStateChangedCallback();
-
-        this.pieces[this.selectedPieceId] = -1;
-        this.clearSelectedPiece();
-
-        // clear rows/cols/grps
-        this.clearSections();
-
-        // regen piece buffer if needed
-        if (this.pieces[0] + this.pieces[1] + this.pieces[2] === -3) {
-            this.generatePieces();
-        }
-
+        forcePlaceSelectedPiece(cell_states);
 
         return true;
+    }
+    /**
+     * Places the currently selected piece.
+     * Accepting the input length 81 Uint8Array as the placed blocks.
+     * Warning! Does not check that the input is correct in ANY WAY
+     * @param {Uint8Array} cell_states 
+     */
+    forcePlaceSelectedPiece(cell_states) {
+        for (let i = 0; i < cell_states.length; i++) {
+            if (cell_states[i] === 1) { this.boardState[i] = 1; }
+        }
+
+        this.boardStateChangedCallback();
+        this.pieces[this.selectedPieceId] = -1;
+        this.clearSelectedPiece();
+        this.clearSections();
+        this.tryGeneratePieces();
     }
     hasSelectedPiece() {
         return this.selectedPieceId >= 0 && this.selectedPieceId <= 2;

@@ -95,12 +95,10 @@ function getShape(shapeId, centerX = false, centerY = false) {
 }
 
 /**Used to save on GC while rendering shapes */
-const temp_canvas = document.createElement("canvas");
+const temp_canvas = new OffscreenCanvas(0, 0);
 function renderShape(shapeId, cellSize, blockimg, centerX = false, centerY = false) {
     TypeChecker.assertIsInteger(cellSize);
     if (!isValidShapeId(shapeId)) { throw Error(shapeId + " is not a valid shapeId"); }
-
-    // TODO allow offsetting to center of mass for x/y individually
 
     const shape = getShape(shapeId, centerX, centerY);
     const bounds = getShapeOffsetBounds(shapeId);

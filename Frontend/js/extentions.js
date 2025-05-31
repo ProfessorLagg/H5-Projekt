@@ -32,3 +32,13 @@ DOMRect.prototype.center = function () {
         0
     );
 }
+
+/**
+ * Sums the array
+ * @returns sum as a Number
+ */
+Uint8Array.prototype.sum = function () {
+    let result = 0;
+    for (let i = 0; i < this.length; i++) { result += this[i]; }
+    return result;
+}
