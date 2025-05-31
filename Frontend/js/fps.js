@@ -1,4 +1,5 @@
 // FPS
+{
 let fps = -1;
 let dt = -1;
 let lastFrameTimestamp = 0;
@@ -31,4 +32,5 @@ function toggleFPS() {
         showFps = true;
         requestAnimationFrame(fpsUpdate);
     }
+}
 }
