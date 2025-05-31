@@ -70,7 +70,6 @@ class GameState {
         return this.canPlaceShapeAnywhere(shapeId);
     }
     isGameover() {
-        // TODO This is not working correctly
         if (this.canPlacePieceAnywhere(0)) { return false }
         if (this.canPlacePieceAnywhere(1)) { return false }
         if (this.canPlacePieceAnywhere(2)) { return false }
