@@ -256,7 +256,9 @@ var redraw_piecebuffer = true;
 var redraw_score = true;
 var lastGameUpdate = 0;
 function gameLoop(timestamp = -1) {
-    console.timeStamp("gameLoop BEGIN");
+    const fps = Math.round(1000 / (timestamp - lastGameUpdate));
+    const fps_str = fps.toString().padStart(3,' ') + " FPS | "
+    console.timeStamp(fps_str + "gameLoop BEGIN");
     if (redraw_background) {
         redraw_background = false;
         draw_board_background();
@@ -287,8 +289,10 @@ function gameLoop(timestamp = -1) {
         draw_score();
     }
 
+
+
     lastGameUpdate = timestamp;
-    console.timeStamp("gameLoop END");
+    console.timeStamp(fps_str + "gameLoop END");
     requestAnimationFrame(gameLoop);
 }
 
