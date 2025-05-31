@@ -90,8 +90,9 @@ body {
 }
 
 .score-display {
-    font-size: calc(3 * var(--rh));
+    font-size: calc(4 * var(--rh));
     font-weight: bold;
+    text-align: center;
 }
 
 .piecedrag-canvas {
@@ -100,4 +101,39 @@ body {
     top: 0;
     width: 100vw;
     height: 100vh;
+}
+
+#game-score-wrap {
+    display: grid;
+    grid-auto-flow: row dense;
+    grid-auto-columns: 1fr;
+    grid-auto-rows: 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 0em 0em;
+
+    align-items: flex-end;
+
+    height: fit-content;
+    width: 100%;
+}
+
+#game-score {
+    grid-column-start: 3;
+    grid-column-end: 3;
+}
+
+#game-highscore::before {
+    content: 'Highscore ';
+    font-size: calc(1.618 * var(--rh));
+    grid-column-end: 4;
+}
+
+#game-highscore {
+    font-size: calc(3 * var(--rh));
+    color: hsl(0, 0%, 66%);
+    align-self: flex-end;
+    grid-column-start: 5;
+    grid-column-end: 5;
+    text-align: right;
+    width: 100%;
 }

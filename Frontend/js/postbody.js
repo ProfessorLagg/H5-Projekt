@@ -11,6 +11,7 @@ const highlight_img = document.getElementById('highlight-img');
 
 const game_wrap = document.getElementById('game-wrap');
 const game_score = document.getElementById('game-score');
+const game_highscore = document.getElementById('game-highscore');
 
 const board_background_canvas = document.getElementById('board-background');
 const board_cells_canvas = document.getElementById('board-cells');
@@ -208,6 +209,7 @@ function draw_piecedrag() {
 function draw_score() {
     console.timeStamp("TOP: draw_score")
     game_score.innerText = game_state.score;
+    game_highscore.innerText = getHighscore();
     console.timeStamp("BOT: draw_score")
 }
 
@@ -272,6 +274,7 @@ function updateStoredScores() {
         localStorage[highscore_key] = game_state.score;
         localStorage[lastscore_key] = game_state.score;
     } else {
+        // TODO Fanfare when highscore was beaten
         localStorage[highscore_key] = Math.max(getHighscore(), game_state.score);
         localStorage[lastscore_key] = game_state.score;
     }
