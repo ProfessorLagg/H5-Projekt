@@ -29,15 +29,35 @@ class GameState {
     scoreChangedCallback = () => { }
     selectionChangedCallback = () => { }
 
+    canPlaceShape(cellIndex1D, shapeId, shape) {
+        if (TypeChecker.isNullOrUndefined(shape)) {
+            assertIsValidShapeId(shapeId);
+            return this.canPlaceShape(cellIndex1D, shapeId, getShape(shape));
+        }
+
+        const cellIndex2D = indexTo2D(cellIndex1D);
+        for (let i = 0; i < shape.length; i++) {
+            const row = shape.r + cellIndex2D.row;
+            const col = shape.r + cellIndex2D.row;
+            const idx = indexTo1D(row, col);
+            if (this.boardState[idx] === 1) { return false; }
+        }
+        return true;
+    }
+    canPlaceShapeAnywhere(shapeId) {
+        const shape = getShape(shape);
+        for (let i = 0; i < 81; i++) {
+            if (this.canPlaceShape(i, shapeId, shape)) { return true }
+        }
+        return false;
+    }
+
     /**
      * Gets the filled state of a board cell by it's index
-     * @param {Number} cellIndex 
+     * @param {Number} cellIndex1D 
      * @returns true if the cell is filled or false if it is empty
      */
-    getCellState(cellIndex) {
-        TypeChecker.assertIsIntegerInRange(cellIndex, 0, 80);
-        return this.boardState[cellIndex] > 0;
-    }
+    getCellState(cellIndex1D) { return this.boardState[cellIndex1D] > 0; }
 
     getClearableSections() {
         const result = [];
@@ -63,7 +83,6 @@ class GameState {
         }
         return result;
     }
-
     clearSections() {
         const clearable_sections = this.getClearableSections();
         for (let I = 0; I < clearable_sections.length; I++) {
@@ -83,10 +102,17 @@ class GameState {
         }
     }
     generatePieces() {
+        let can_place_anything = false;
         this.pieces[0] = this.prng.nextInt() % shapeIds.length;
+        can_place_anything ||= this.canPlaceShapeAnywhere(this.pieces[0]);
         this.pieces[1] = this.prng.nextInt() % shapeIds.length;
-        // TODO NO KILL PLZ
+        can_place_anything ||= this.canPlaceShapeAnywhere(this.pieces[1]);
         this.pieces[2] = this.prng.nextInt() % shapeIds.length;
+        can_place_anything ||= this.canPlaceShapeAnywhere(this.pieces[2]);
+        while (!can_place_anything) {
+            this.pieces[2] = this.prng.nextInt() % shapeIds.length;
+            can_place_anything ||= this.canPlaceShapeAnywhere(this.pieces[2]);
+        }
         this.pieceBufferChangedCallback();
     }
     selectPiece(pieceId) {
@@ -101,9 +127,9 @@ class GameState {
         console.debug("Selected piece " + this.selectedPieceId);
         this.selectionChangedCallback();
     }
-    tryPlaceSelectedPiece(cell_index1D) {
-        console.debug("GameState.tryPlaceSelectedPiece", "cellIndex:", cell_index1D);
-        const cell_index2D = indexTo2D(cell_index1D, true);
+    tryPlaceSelectedPiece(cellIndex1D) {
+        console.debug("GameState.tryPlaceSelectedPiece", "cellIndex:", cellIndex1D);
+        const cell_index2D = indexTo2D(cellIndex1D, true);
         const shapeId = this.selectedShapeId;
         const shape = getShape(shapeId);
         const cell_states = new Uint8Array(81);
