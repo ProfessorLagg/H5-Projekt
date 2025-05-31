@@ -162,7 +162,6 @@ function draw_piecebuffer() {
 }
 function draw_piecedrag() {
     console.timeStamp("TOP: draw_piecedrag")
-    const piecedrag_ctx2d = piecedrag_canvas.getContext("2d");
     if (piecedrag_prev_draw_bounds === null) {
         piecedrag_ctx2d.clearRect(0, 0, piecedrag_canvas.width, piecedrag_canvas.height);
     } else {
@@ -174,15 +173,15 @@ function draw_piecedrag() {
         );
     }
 
-
-    if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
+    if (!game_state.hasSelectedPiece()) { return }
 
     // convert pointer position from viewport coordinates to drag canvas coordinates
+    const pCenter = pointerdata.bounds.center();
     const pointer_uv_bounds = new DOMRect(
-        (pointerdata.bounds.x - piecedrag_bounds.left) / piecedrag_bounds.width,
-        (pointerdata.bounds.y - piecedrag_bounds.top) / piecedrag_bounds.height,
-        pointerdata.width / piecedrag_bounds.width,
-        pointerdata.height / piecedrag_bounds.height
+        (pCenter.x - piecedrag_bounds.left) / piecedrag_bounds.width,
+        (pCenter.y - piecedrag_bounds.top) / piecedrag_bounds.height,
+        pCenter.width / piecedrag_bounds.width,
+        pCenter.height / piecedrag_bounds.height
     );
 
     const pixel_bounds = new DOMRect();
@@ -397,10 +396,10 @@ async function initGameState() {
     game_state.selectionChangedCallback = () => {
         if (game_state.hasSelectedPiece()) {
             updateSelectedPieceImageData();
-            redraw_piecebuffer = true;
             redraw_highlights = true;
             redraw_drag = true;
         }
+        redraw_piecebuffer = true;
     };
     game_state.restart();
     console.timeEnd(arguments.callee.name);
@@ -506,13 +505,11 @@ async function pointerupHandler(event) {
 
     if (canTryPlace) {
         game_state.forcePlaceSelectedPiece(hovering_cells);
-
     } else {
         game_state.clearSelectedPiece();
     }
 
-    redraw_boardstate = true;
-    redraw_piecebuffer = true;
+    selectedPieceImageData = null;
     redraw_highlights = true;
     redraw_drag = true;
 }
