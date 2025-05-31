@@ -8,15 +8,15 @@
 
 @media (min-aspect-ratio: 1/2) {
     :root {
-        --rootWidth: 50vh;
-        --rootHeight: 100vh;
+        --rootWidth: 50dvh;
+        --rootHeight: 100dvh;
     }
 }
 
 @media (max-aspect-ratio: 1/2) {
     :root {
-        --rootWidth: 100vw;
-        --rootHeight: 200vw;
+        --rootWidth: 100dvw;
+        --rootHeight: 200dvw;
     }
 }
 
@@ -34,8 +34,8 @@
 body {
     background-color: black;
     z-index: -9999;
-    height: 100vh !important;
-    width: 100vw !important;
+    height: 100dvh !important;
+    width: 100dvw !important;
 
     display: flex;
     flex-direction: column;
@@ -104,8 +104,8 @@ body {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
 }
 
 #game-score-wrap {
@@ -147,8 +147,8 @@ body {
     position: absolute;
     left: 0;
     right: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
     background-color: black;
 
     display: flex;
@@ -158,7 +158,7 @@ body {
     gap: var(--rh) 0;
 
     text-align: center;
-    font-size: 4vh;
+    font-size: 4dvh;
 }
 
 .hidden {
@@ -167,14 +167,14 @@ body {
 
 .menu-button {
     all: unset;
-    font-size: 2vh;
+    font-size: 2dvh;
 
-    padding: 1vh;
+    padding: 1dvh;
     border-radius: 6px;
     width: fit-content;
     height: fit-content;
     background-color: hsl(0, 0%, 15%);
-    border: .25vh solid white;
+    border: .25dvh solid white;
 }
 
 .menu-button:hover {
@@ -184,7 +184,7 @@ body {
 }
 
 .menu-score-display {
-    font-size: 3vh;
+    font-size: 3dvh;
     color: white;
     height: fit-content;
 }

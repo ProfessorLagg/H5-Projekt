@@ -596,11 +596,10 @@ var pointermoveFrameRequested = false;
 async function pointermoveHandler(event) {
     if (!pointerdata.update(event)) { return }
     if (!game_state.hasSelectedPiece()) { return }
-    if (pointerdata.bounds.intersects(board_bounds)) {
-        pointer_cell_index = getPointerCellIndex();
-        update_hovering_cells();
-        redraw_highlights = true;
-    }
+
+    pointer_cell_index = getPointerCellIndex();
+    update_hovering_cells();
+    redraw_highlights = true;
     redraw_drag = true;
 }
 async function pointerdownHandler(event) {
