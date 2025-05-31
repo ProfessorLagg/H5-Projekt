@@ -188,7 +188,7 @@ function draw_piecedrag() {
     if (!game_state.hasSelectedPiece()) { return }
 
     // convert pointer position from viewport coordinates to drag canvas coordinates
-    const pCenter = pointerdata.bounds.center();
+    const pCenter = pointerdata.bounds;
     const pointer_uv_bounds = new DOMRect(
         (pCenter.x - piecedrag_bounds.left) / piecedrag_bounds.width,
         (pCenter.y - piecedrag_bounds.top) / piecedrag_bounds.height,
@@ -332,8 +332,6 @@ function updateStoredScores() {
     if (getShapevers() !== shapes.version) {
         console.log("Differing shapes version, overwriting localstorage data")
         localStorage[shapevers_key] = shapes.version;
-        localStorage[highscore_key] = 0;
-        localStorage[lastscore_key] = 0;
     }
     // TODO Fanfare when highscore was beaten
     localStorage[highscore_key] = Math.max(getHighscore(), game_state.score);
@@ -639,7 +637,7 @@ async function pointerupHandler(event) {
 }
 function getPointerCellIndex() {
     if (!pointerdata.bounds.intersects(board_bounds)) { return null }
-    const pCenter = pointerdata.bounds.center();
+    const pCenter = pointerdata.bounds;
 
     const uvX = rangeMapNumber(pCenter.x, board_bounds.left, board_bounds.right, 0, 1);
     let col = Math.floor(uvX * 9)
