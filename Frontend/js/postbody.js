@@ -90,13 +90,6 @@ function draw_board_highlight() {
     if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
     for (let i = 0; i < hovering_cells.length; i++) {
         if (hovering_cells[i] > 0) {
-            // board_highlight_ctx2d.drawImage(
-            //     highlight_img,
-            //     cellPixelBounds[i].x,
-            //     cellPixelBounds[i].y,
-            //     cellPixelBounds[i].w,
-            //     cellPixelBounds[i].h,
-            // )
             board_highlight_ctx2d.putImageData(
                 highlight_img_data_cellsize,
                 cellPixelBounds[i].x,
@@ -218,16 +211,6 @@ function draw_score() {
 
 // Game
 let game_state = new GameState();
-
-/**Updates and redraws the board. Intended to be run via. requestAnimationFrame */
-function update_board(timestamp = -1) {
-    draw_board_highlight();
-    draw_board_state();
-}
-/**Updates and redraws the piece buffer. Intended to be run via. requestAnimationFrame */
-function update_piecebuffer(timestamp = -1) {
-    draw_piecebuffer();
-}
 /**
 Details which cell indexes the player is currently hovedering.
 Updated by update_hovering_cells() 
@@ -266,22 +249,49 @@ function update_hovering_cells() {
         hovering_cells[idx] = 1;
     }
 }
-/**Updates and redraws the piece drag canvas and board highlight canvas. Intended to be run via. requestAnimationFrame */
-function update_piecedrag(timestamp = -1) {
-    update_hovering_cells();
-    draw_board_highlight();
-    draw_piecedrag();
-}
-/**Updates and redraws the score. Intended to be run via. requestAnimationFrame */
-function update_score(timestamp = -1) {
-    draw_score();
-}
-/**Full, expensive, game update. Intended to be run via. requestAnimationFrame */
-function gameUpdate(timestamp = -1) {
-    update_board(timestamp);
-    update_piecebuffer(timestamp);
-    update_piecedrag(timestamp);
-    update_score(timestamp);
+
+var redraw_background = true;
+var redraw_boardstate = true;
+var redraw_highlights = true;
+var redraw_drag = true;
+var redraw_piecebuffer = true;
+var redraw_score = true;
+var lastGameUpdate = 0;
+function gameLoop(timestamp = -1) {
+    console.timeStamp("gameLoop BEGIN");
+    if (redraw_background) {
+        redraw_background = false;
+        draw_board_background();
+        draw_board_cells();
+    }
+    if (redraw_boardstate) {
+        redraw_boardstate = false;
+        draw_board_state();
+    }
+
+    if (redraw_highlights) {
+        redraw_highlights = false;
+        draw_board_highlight();
+    }
+
+    if (redraw_drag) {
+        redraw_drag = false;
+        draw_piecedrag();
+    }
+
+    if (redraw_piecebuffer) {
+        redraw_piecebuffer = false;
+        draw_piecebuffer();
+    }
+
+    if (redraw_score) {
+        redraw_score = false;
+        draw_score();
+    }
+
+    lastGameUpdate = timestamp;
+    console.timeStamp("gameLoop END");
+    requestAnimationFrame(gameLoop);
 }
 
 // init
@@ -296,6 +306,7 @@ async function init() {
     await initGameState(); // MUST BE RUN AFTER initPieceCanvas()
     await initPointerEvents();
     await initResizeEvent();
+    requestAnimationFrame(gameLoop);
     console.timeEnd(arguments.callee.name)
 }
 async function initCellBounds() {
@@ -381,9 +392,17 @@ async function initResizeEvent() {
 }
 async function initGameState() {
     console.time(arguments.callee.name);
-    game_state.boardStateChangedCallback = () => requestAnimationFrame(update_board);
-    game_state.pieceBufferChangedCallback = () => requestAnimationFrame(update_piecebuffer);
-    game_state.scoreChangedCallback = () => requestAnimationFrame(update_score);
+    game_state.boardStateChangedCallback = () => redraw_boardstate = true;
+    game_state.pieceBufferChangedCallback = () => redraw_piecebuffer = true;
+    game_state.scoreChangedCallback = () => redraw_score = true;
+    game_state.selectionChangedCallback = () => {
+        if (game_state.hasSelectedPiece()) {
+            updateSelectedPieceImageData();
+            redraw_piecebuffer = true;
+            redraw_highlights = true;
+            redraw_drag = true;
+        }
+    };
     game_state.restart();
     console.timeEnd(arguments.callee.name);
 }
@@ -450,47 +469,53 @@ var pointer_cell_index = -1;
 var pointermoveFrameRequested = false;
 async function pointermoveHandler(event) {
     if (!pointerdata.update(event)) { return }
-    if (game_state.selectedPieceId < 0 || game_state.selectedPieceId > 2) { return }
-    pointer_cell_index = getPointerCellIndex();
-    // requestAnimationFrame(update_piecedrag);
-    update_piecedrag();
+    if (!game_state.hasSelectedPiece()) { return }
+    if (pointerdata.bounds.intersects(board_bounds)) {
+        pointer_cell_index = getPointerCellIndex();
+        update_hovering_cells();
+        redraw_highlights = true;
+    }
+    redraw_drag = true;
 }
-async function pointerdownHandler(event) {
+function pointerdownHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerdown");
-    pointer_cell_index = getPointerCellIndex();
-    if (game_state.pieces[0] >= 0 && pointerdata.bounds.intersects(piece0_bounds)) {
-        game_state.selectPiece(0);
-    } else if (game_state.pieces[1] >= 0 && pointerdata.bounds.intersects(piece1_bounds)) {
-        game_state.selectPiece(1);
-    } else if (game_state.pieces[2] >= 0 && pointerdata.bounds.intersects(piece2_bounds)) {
-        game_state.selectPiece(2);
-    } else { return }
 
+    const clicked0 = game_state.pieces[0] >= 0 && pointerdata.bounds.intersects(piece0_bounds);
+    const clicked1 = game_state.pieces[1] >= 0 && pointerdata.bounds.intersects(piece1_bounds);
+    const clicked2 = game_state.pieces[2] >= 0 && pointerdata.bounds.intersects(piece2_bounds);
+    const clicked_pieceId = -1
+        + (1 * Number(clicked0))
+        + (2 * Number(clicked1))
+        + (3 * Number(clicked2));
 
-    updateSelectedPieceImageData();
-    requestAnimationFrame(update_piecebuffer);
-    requestAnimationFrame(update_piecedrag);
+    if (clicked_pieceId === -1) { return }
+    game_state.selectPiece(clicked_pieceId);
 }
-async function pointerupHandler(event) {
+function pointerupHandler(event) {
+    const prev_bounds = new DOMRect(
+        pointerdata.bounds.x,
+        pointerdata.bounds.y,
+        pointerdata.bounds.width,
+        pointerdata.bounds.height,
+    );
     if (!pointerdata.update(event)) { return }
     console.debug("pointerup");
 
-    const hasSelectedPiece = game_state.hasSelectedPiece();
-    const hovering_cells_sum = hovering_cells.sum();
-    const pointerInsersectsBoard = pointerdata.bounds.intersects(board_bounds);
-    const canTryPlace = hasSelectedPiece && hovering_cells_sum > 0 && pointerInsersectsBoard;
+    const pointerInsersectsBoard = prev_bounds.intersects(board_bounds);
+    const canTryPlace = game_state.hasSelectedPiece() && hovering_cells.sum() > 0 && pointerInsersectsBoard;
 
     if (canTryPlace) {
         game_state.forcePlaceSelectedPiece(hovering_cells);
+
     } else {
         game_state.clearSelectedPiece();
     }
 
-    requestAnimationFrame(() => {
-        update_piecedrag();
-        update_piecebuffer();
-    })
+    redraw_boardstate = true;
+    redraw_piecebuffer = true;
+    redraw_highlights = true;
+    redraw_drag = true;
 }
 function getPointerCellIndex() {
     if (!pointerdata.bounds.intersects(board_bounds)) { return null }
@@ -504,26 +529,4 @@ function getPointerCellIndex() {
     const col = Math.round(rangeMapNumber(uvX, 0, 1, 0, 8));
     if (col < 0 || col > 8) { return null }
     return indexTo1D(row, col, true);
-}
-
-
-// DEBUGGING
-function enableCheats() {
-    let cheatsShapeIndex = 0;
-    document.body.onkeyup = function (e) {
-        const magicNumber = 0
-            + Number(e.key == "ArrowRight")
-            + (-1 * Number(e.key == "ArrowLeft"));
-        if (magicNumber !== 0) {
-            cheatsShapeIndex = cheatsShapeIndex + magicNumber;
-            if (cheatsShapeIndex > 0) { cheatsShapeIndex = cheatsShapeIndex % shapeIds.length }
-            else if (cheatsShapeIndex < 0) { cheatsShapeIndex = shapeIds.length + cheatsShapeIndex }
-            game_state.pieces[0] = shapeIds[cheatsShapeIndex];
-            game_state.pieceBufferChangedCallback();
-            requestAnimationFrame(gameUpdate);
-        }
-    }
-    game_state.pieces[0] = shapeIds[cheatsShapeIndex];
-    game_state.pieceBufferChangedCallback();
-    requestAnimationFrame(gameUpdate);
 }

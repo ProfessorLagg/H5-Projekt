@@ -139,9 +139,7 @@ class GameState {
         this.clearSections();
         this.tryGeneratePieces();
     }
-    hasSelectedPiece() {
-        return this.selectedPieceId >= 0 && this.selectedPieceId <= 2;
-    }
+    hasSelectedPiece() { return this.selectedPieceId >= 0 && this.selectedPieceId <= 2; }
 
     restart() {
         this.prng.reset(sfc32.generateSeed());
