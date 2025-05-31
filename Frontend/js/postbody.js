@@ -317,17 +317,20 @@ function getLastscore() {
     const result = parseInt(localStorage[lastscore_key]);
     return result * Number(TypeChecker.isInteger(result));
 }
+function setLastscore(v) {
+    TypeChecker.assertIsInteger(v);
+    localStorage[lastscore_key] = v;
+}
 function updateStoredScores() {
     if (getShapevers() !== shapes.version) {
         console.log("Differing shapes version, overwriting localstorage data")
         localStorage[shapevers_key] = shapes.version;
-        localStorage[highscore_key] = game_state.score;
-        localStorage[lastscore_key] = game_state.score;
-    } else {
-        // TODO Fanfare when highscore was beaten
-        localStorage[highscore_key] = Math.max(getHighscore(), game_state.score);
-        localStorage[lastscore_key] = game_state.score;
+        localStorage[highscore_key] = 0;
+        localStorage[lastscore_key] = 0;
     }
+    // TODO Fanfare when highscore was beaten
+    localStorage[highscore_key] = Math.max(getHighscore(), game_state.score);
+    setLastscore(game_state.score);
 }
 
 function clearSave() {
@@ -365,6 +368,7 @@ async function init() {
     await initGameState(); // MUST BE RUN AFTER initPieceCanvas()
     await initPointerEvents();
     await initResizeEvent();
+    setLastscore(0);
     showMenu();
     requestAnimationFrame(gameLoop);
     console.timeEnd(arguments.callee.name)
@@ -475,22 +479,39 @@ async function initGameState() {
     };
     game_state.gameoverCallback = () => {
         clearSave();
+        menu_title.innerText = "Gameover!"
         showMenu();
-        // TODO actually make gameover screen
     }
     console.timeEnd(arguments.callee.name);
 }
 
 // Menu
-const menuScreen = document.getElementById('menu-screen');
+const menu_screen = document.getElementById('menu-screen');
+const menu_title = document.getElementById('menu-title');
+const menu_highscore = document.getElementById('menu-highscore');
+const menu_lastscore = document.getElementById('menu-lastscore');
 const btn_resume_game = document.getElementById('btn-resume-game');
 
-async function hideMenu() { menuScreen.classList.add('hidden'); }
+async function hideMenu() { menu_screen.classList.add('hidden'); }
 async function showMenu() {
-    if (!loadGamePossible()) {
-        btn_resume_game.classList.add('hidden');
+    if (!loadGamePossible()) { btn_resume_game.classList.add('hidden'); }
+    else { btn_resume_game.classList.remove('hidden'); }
+
+    const highscore = getHighscore();
+    if (highscore <= 0) { menu_highscore.classList.add('hidden') }
+    else {
+        menu_highscore.classList.remove('hidden');
+        menu_highscore.querySelector('.value').textContent = highscore;
     }
-    menuScreen.classList.remove('hidden');
+
+    const lastscore = getLastscore();
+    if (lastscore <= 0) { menu_lastscore.classList.add('hidden') }
+    else {
+        menu_lastscore.classList.remove('hidden');
+        menu_lastscore.querySelector('.value').textContent = lastscore;
+    }
+
+    menu_screen.classList.remove('hidden');
 }
 async function btn_new_game_click(event) {
     game_state.restart();

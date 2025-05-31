@@ -138,7 +138,7 @@ body {
     width: 100%;
 }
 
-#menu-screen{
+#menu-screen {
     position: absolute;
     left: 0;
     right: 0;
@@ -149,7 +149,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: start;
-    align-items: center ;
+    align-items: center;
     gap: var(--rh) 0;
 
     text-align: center;
@@ -161,9 +161,9 @@ body {
 }
 
 .menu-button {
-    all:unset;
+    all: unset;
     font-size: 2vh;
-    
+
     padding: 1vh;
     border-radius: 6px;
     width: fit-content;
@@ -171,8 +171,19 @@ body {
     background-color: hsl(0, 0%, 15%);
     border: .25vh solid white;
 }
-.menu-button:hover{
+
+.menu-button:hover {
     background-color: hsl(0, 0%, 80%);
     color: black;
     border-color: black;
+}
+
+.menu-score-display {
+    font-size: 3vh;
+    color: white;
+    height: fit-content;
+}
+
+.menu-score-display > .value {
+    font-weight: bold;
 }
