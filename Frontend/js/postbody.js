@@ -142,21 +142,23 @@ function draw_board_state() {
 function draw_piecebuffer() {
     console.timeStamp("TOP: draw_piecebuffer")
     piece0_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
+    
     if (game_state.pieces[0] >= 0 && game_state.selectedPieceId != 0) {
+        // TODO Gray out if not placeable
         const img0 = renderShape(game_state.pieces[0], cell_size, block_img, true);
-        // piece0_ctx2d.drawImage(img0, 0, 0, piece_canvas_size, piece_canvas_size);
         piece0_ctx2d.putImageData(img0, 0, 0);
     }
 
     piece1_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
     if (game_state.pieces[1] >= 0 && game_state.selectedPieceId != 1) {
+        // TODO Gray out if not placeable
         const img1 = renderShape(game_state.pieces[1], cell_size, block_img, true);
-        // piece1_ctx2d.drawImage(img2, 0, 0, piece_canvas_size, piece_canvas_size);
         piece1_ctx2d.putImageData(img1, 0, 0);
     }
 
     piece2_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
     if (game_state.pieces[2] >= 0 && game_state.selectedPieceId != 2) {
+        // TODO Gray out if not placeable
         const img2 = renderShape(game_state.pieces[2], cell_size, block_img, true);
         piece2_ctx2d.putImageData(img2, 0, 0);
     }
@@ -397,7 +399,10 @@ async function initGameState() {
     console.time(arguments.callee.name);
     game_state.boardStateChangedCallback = () => redraw_boardstate = true;
     game_state.pieceBufferChangedCallback = () => redraw_piecebuffer = true;
-    game_state.scoreChangedCallback = () => redraw_score = true;
+    game_state.scoreChangedCallback = () => {
+        // TODO update locastorage with high-score and last-score
+        redraw_score = true;
+    }
     game_state.selectionChangedCallback = () => {
         if (game_state.hasSelectedPiece()) {
             updateSelectedPieceImageData();
@@ -408,7 +413,8 @@ async function initGameState() {
     };
     game_state.gameoverCallback = () => {
         console.warn("GAME OVER!");
-        // game_state.restart();
+        game_state.restart();
+        // TODO actually make gameover screen
     }
     game_state.restart();
     console.timeEnd(arguments.callee.name);
