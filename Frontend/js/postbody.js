@@ -144,22 +144,36 @@ function draw_piecebuffer() {
     console.timeStamp("TOP: draw_piecebuffer")
     piece0_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
 
-    if (game_state.pieces[0] >= 0 && game_state.selectedPieceId != 0) {
-        // TODO Gray out if not placeable
+    console.log(
+        arguments.callee.name,
+        "\n\tgame_state.pieces:", game_state.pieces,
+        "\n\tgame_state.selectedPieceId:", game_state.selectedPieceId,
+    );
+
+    // TODO Gray out if not placeable
+    const unspent0 = game_state.pieces[0] >= 0;
+    const placeable0 = unspent0 && game_state.canPlacePieceAnywhere(0);
+    piece0.setAttribute("placeable", Number(placeable0));
+    piece0_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
+    if (unspent0 && game_state.selectedPieceId != 0) {
         const img0 = renderShape(game_state.pieces[0], cell_size, block_img, true);
         piece0_ctx2d.putImageData(img0, 0, 0);
     }
 
+    const unspent1 = game_state.pieces[1] >= 0;
+    const placeable1 = game_state.canPlacePieceAnywhere(1);
+    piece1.setAttribute("placeable", Number(placeable1));
     piece1_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
-    if (game_state.pieces[1] >= 0 && game_state.selectedPieceId != 1) {
-        // TODO Gray out if not placeable
+    if (unspent1 && game_state.selectedPieceId != 1) {
         const img1 = renderShape(game_state.pieces[1], cell_size, block_img, true);
         piece1_ctx2d.putImageData(img1, 0, 0);
     }
 
+    const unspent2 = isValidShapeId(game_state.pieces[2]);
+    const placeable2 = unspent2 && game_state.canPlacePieceAnywhere(2);
+    piece2.setAttribute("placeable", Number(placeable2));
     piece2_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
-    if (game_state.pieces[2] >= 0 && game_state.selectedPieceId != 2) {
-        // TODO Gray out if not placeable
+    if (unspent2 && game_state.selectedPieceId != 2) {
         const img2 = renderShape(game_state.pieces[2], cell_size, block_img, true);
         piece2_ctx2d.putImageData(img2, 0, 0);
     }
