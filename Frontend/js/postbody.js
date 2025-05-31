@@ -408,7 +408,7 @@ async function initGameState() {
     };
     game_state.gameoverCallback = () => {
         console.warn("GAME OVER!");
-        game_state.restart();
+        // game_state.restart();
     }
     game_state.restart();
     console.timeEnd(arguments.callee.name);

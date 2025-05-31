@@ -41,12 +41,17 @@ class GameState {
         const cellIndex2D = indexTo2D(cellIndex1D);
         for (let i = 0; i < shape.length; i++) {
             const row = shape[i].r + cellIndex2D.row;
-            if (!TypeChecker.isIntegerInRange(row, 0, 8)) { return false }
-            const col = shape[i].r + cellIndex2D.row;
-            if (!TypeChecker.isIntegerInRange(col, 0, 8)) { return false }
+            if (!TypeChecker.isIntegerInRange(row, 0, 8)) {
+                return false
+            }
+            const col = shape[i].c + cellIndex2D.col;
+            if (!TypeChecker.isIntegerInRange(col, 0, 8)) {
+                return false
+            }
             const idx = indexTo1D(row, col, false);
-            if (!TypeChecker.isIntegerInRange(idx, 0, 80)) { return false }
-            if (this.boardState[idx] === 1) { return false }
+            if (this.boardState[idx] === 1) {
+                return false
+            }
         }
         return true;
     }
@@ -58,12 +63,14 @@ class GameState {
         return false;
     }
     canPlacePieceAnywhere(pieceId) {
-        if (!GameState.isValidPieceId(pieceId)) { return false }
+        GameState.assertIsValidPieceId(pieceId);
         const shapeId = this.pieces[pieceId];
-        if (!isValidShapeId(shapeId)) { return false }
+        if (shapeId === -1) { return false }
+        assertIsValidShapeId(shapeId)
         return this.canPlaceShapeAnywhere(shapeId);
     }
     isGameover() {
+        // TODO This is not working correctly
         if (this.canPlacePieceAnywhere(0)) { return false }
         if (this.canPlacePieceAnywhere(1)) { return false }
         if (this.canPlacePieceAnywhere(2)) { return false }
@@ -183,12 +190,13 @@ class GameState {
                 this.score += 1;
             }
         }
-
+        this.clearSections();
         this.boardStateChangedCallback();
+
         this.pieces[this.selectedPieceId] = -1;
         this.clearSelectedPiece();
-        this.clearSections();
         this.tryGeneratePieces();
+
         if (this.isGameover()) {
             this.gameoverCallback();
         }
