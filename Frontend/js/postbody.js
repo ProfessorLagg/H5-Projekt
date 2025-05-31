@@ -144,13 +144,6 @@ function draw_piecebuffer() {
     console.timeStamp("TOP: draw_piecebuffer")
     piece0_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
 
-    console.log(
-        arguments.callee.name,
-        "\n\tgame_state.pieces:", game_state.pieces,
-        "\n\tgame_state.selectedPieceId:", game_state.selectedPieceId,
-    );
-
-    // TODO Gray out if not placeable
     const unspent0 = game_state.pieces[0] >= 0;
     const placeable0 = unspent0 && game_state.canPlacePieceAnywhere(0);
     piece0.setAttribute("placeable", Number(placeable0));

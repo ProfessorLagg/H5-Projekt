@@ -251,9 +251,14 @@ class GameState {
         this.prng.state[3] = saveFile.prng_state[3];
 
         this.score = saveFile.score;
+        this.scoreChangedCallback();
+
         for (let i = 0; i < 81; i++) { this.boardState[i] = saveFile.board[i]; }
+        this.boardStateChangedCallback();
+
         this.pieces[0] = saveFile.pieces[0];
         this.pieces[1] = saveFile.pieces[1];
         this.pieces[2] = saveFile.pieces[2];
+        this.pieceBufferChangedCallback();
     }
 }
