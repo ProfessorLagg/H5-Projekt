@@ -47,6 +47,26 @@ const piecedrag_bounds = new DOMRect();
 
 
 // draw functions
+var selectedPieceImageData = null;
+var piecedrag_prev_draw_bounds = null;
+function updateSelectedPieceImageData() {
+    console.timeStamp("TOP: draw_piecebuffer")
+    const shapeId = game_state.selectedShapeId;
+    if (shapeId === -1) {
+        selectedPieceImageData = null;
+        return;
+    }
+    selectedPieceImageData = renderShape(
+        shapeId, // shapeId
+        cell_size, // cellSize
+        block_img, // blockimg
+        true, // centerX
+        true // centerY
+    );
+    piecedrag_prev_draw_bounds = null;
+    console.timeStamp("BOT: draw_piecebuffer")
+}
+
 function draw_board_background() {
     console.timeStamp("TOP: draw_board_background")
     board_background_ctx2d.fillStyle = "rgba(100,45,0,100%)";
@@ -140,26 +160,6 @@ function draw_piecebuffer() {
     }
     console.timeStamp("BOT: draw_piecebuffer")
 }
-
-var selectedPieceImageData = null;
-var piecedrag_prev_draw_bounds = null;
-function updateSelectedPieceImageData() {
-    console.timeStamp("TOP: draw_piecebuffer")
-    const shapeId = game_state.selectedShapeId;
-    if (shapeId === -1) {
-        selectedPieceImageData = null;
-        return;
-    }
-    selectedPieceImageData = renderShape(
-        shapeId, // shapeId
-        cell_size, // cellSize
-        block_img, // blockimg
-        true, // centerX
-        true // centerY
-    );
-    piecedrag_prev_draw_bounds = null;
-    console.timeStamp("BOT: draw_piecebuffer")
-}
 function draw_piecedrag() {
     console.timeStamp("TOP: draw_piecedrag")
     const piecedrag_ctx2d = piecedrag_canvas.getContext("2d");
@@ -207,7 +207,6 @@ function draw_score() {
     game_score.innerText = game_state.score;
     console.timeStamp("BOT: draw_score")
 }
-
 
 // Game
 let game_state = new GameState();
@@ -477,7 +476,7 @@ async function pointermoveHandler(event) {
     }
     redraw_drag = true;
 }
-function pointerdownHandler(event) {
+async function pointerdownHandler(event) {
     if (!pointerdata.update(event)) { return }
     console.debug("pointerdown");
 
@@ -492,7 +491,7 @@ function pointerdownHandler(event) {
     if (clicked_pieceId === -1) { return }
     game_state.selectPiece(clicked_pieceId);
 }
-function pointerupHandler(event) {
+async function pointerupHandler(event) {
     const prev_bounds = new DOMRect(
         pointerdata.bounds.x,
         pointerdata.bounds.y,
