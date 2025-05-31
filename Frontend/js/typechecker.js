@@ -2,7 +2,7 @@ class TypeChecker {
     constructor() { throw new Error(TypeChecker.name, " is a static class"); }
 
     // === Basic typeof checks ===
-    static isUndefined(v) { return typeof (v) === "undefined"; }
+    static isUndefined(v) { return v === undefined; }
     static isBoolean(v) { return typeof (v) === "boolean"; }
     static isNumber(v) { return typeof (v) === "number"; }
     static isBigint(v) { return typeof (v) === "bigint"; }
@@ -63,11 +63,11 @@ class TypeChecker {
     static assertIsFunction(v) { if (!TypeChecker.isFunction(v)) { throw Error("Expected function, but found " + v) } }
 
     static assertIsNull(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected null, but found " + v) } }
-    static assertIsNullOrUndefined(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected null or undefined, but found " + v) } }
+    static assertIsNullOrUndefined(v) { if (!TypeChecker.isNullOrUndefined(v)) { throw Error("Expected null or undefined, but found " + v) } }
 
     static assertIsInteger(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected integer, but found " + v) } }
-    static assertIsFloat(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected float, but found " + v) } }
-    static assertIsFinite(v) { if (!TypeChecker.isInteger(v)) { throw Error("Expected finite number, but found " + v) } }
+    static assertIsFloat(v) { if (!TypeChecker.isFloat(v)) { throw Error("Expected float, but found " + v) } }
+    static assertIsFinite(v) { if (!TypeChecker.isFinite(v)) { throw Error("Expected finite number, but found " + v) } }
 
     /**
      * Throws if v is not a number in the range min <= v <= max
