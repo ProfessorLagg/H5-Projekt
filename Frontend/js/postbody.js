@@ -47,11 +47,11 @@ const piece2_bounds = new DOMRect();
 const piecedrag_bounds = new DOMRect();
 
 // Colors
-const color_board_dark = 'hsl(25, 50%, 15%)';
-const color_board_light = 'hsl(25, 50%, 30%)';
+const color_board_dark = '#977254';
+const color_board_light = '#b29680';
 const color_cell_border = 'white'; // 'rgb(100,45,0)'
 const color_cell_highlight = 'hsl(50, 100%, 50%)'; // 'hsl(50, 100%, 50%)'
-const color_block = "black";//'hsl(25, 50%, 40%)';
+const color_block = '#653200';
 // draw functions
 var selectedPieceImageData = null;
 var selectedPieceShape = null;
@@ -64,14 +64,28 @@ function updateSelectedPieceImageData() {
         return;
     }
     selectedPieceShape = getShape(shapeId);
-    selectedPieceImageData = renderShape(
-        shapeId, // shapeId
-        cell_size, // cellSize
-        block_img, // blockimg
-        true, // centerX
-        true // centerY
-    );
+
+    const cShape = getShape(shapeId, true, true);
+    const canvas = new OffscreenCanvas(cell_size * 5, cell_size * 5);
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    for (let i = 0; i < cShape.length; i++) {
+        ctx.putImageData(
+            block_imgdata_cellsize,
+            cShape[i].c * cell_size,
+            cShape[i].r * cell_size
+        )
+    }
+    selectedPieceImageData = ctx.getImageData(0, 0, cell_size * 5, cell_size * 5);
     piecedrag_prev_draw_bounds = null;
+    // selectedPieceImageData = renderShape(
+    //     shapeId, // shapeId
+    //     cell_size, // cellSize
+    //     block_img, // blockimg
+    //     true, // centerX
+    //     true // centerY
+    // );
     console.timeStamp("BOT: draw_piecebuffer")
 }
 
@@ -108,8 +122,6 @@ function draw_board_cells() {
             cellPixelBounds[i].y
         );
     }
-
-
     console.timeStamp("BOT: draw_board_cells")
 }
 function draw_board_highlight() {
@@ -136,12 +148,11 @@ function draw_board_state() {
         if (!game_state.getCellState(i)) { continue }
 
         const cell = cellPixelBounds[i];
-        ctx.drawImage(
-            block_img,
-            Math.floor(cell.x),
-            Math.floor(cell.y),
-            Math.floor(cell.w),
-            Math.floor(cell.h)
+        ctx.putImageData(
+            block_imgdata_cellsize,
+            cell.x,
+            cell.y
+
         );
     }
     console.timeStamp("BOT: draw_board_state")
@@ -155,8 +166,14 @@ function draw_piecebuffer() {
     piece0.setAttribute("placeable", Number(placeable0));
     piece0_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
     if (unspent0 && game_state.selectedPieceId != 0) {
-        const img0 = renderShape(game_state.pieces[0], cell_size, block_img, true);
-        piece0_ctx2d.putImageData(img0, 0, 0);
+        const shape = getShape(game_state.pieces[0], true)
+        for (let i = 0; i < shape.length; i++) {
+            piece0_ctx2d.putImageData(
+                block_imgdata_cellsize,
+                cell_size * shape[i].c,
+                cell_size * shape[i].r,
+            )
+        }
     }
 
     const unspent1 = game_state.pieces[1] >= 0;
@@ -164,8 +181,14 @@ function draw_piecebuffer() {
     piece1.setAttribute("placeable", Number(placeable1));
     piece1_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
     if (unspent1 && game_state.selectedPieceId != 1) {
-        const img1 = renderShape(game_state.pieces[1], cell_size, block_img, true);
-        piece1_ctx2d.putImageData(img1, 0, 0);
+        const shape = getShape(game_state.pieces[1], true)
+        for (let i = 0; i < shape.length; i++) {
+            piece1_ctx2d.putImageData(
+                block_imgdata_cellsize,
+                cell_size * shape[i].c,
+                cell_size * shape[i].r,
+            )
+        }
     }
 
     const unspent2 = isValidShapeId(game_state.pieces[2]);
@@ -173,8 +196,14 @@ function draw_piecebuffer() {
     piece2.setAttribute("placeable", Number(placeable2));
     piece2_ctx2d.clearRect(0, 0, piece_canvas_size, piece_canvas_size);
     if (unspent2 && game_state.selectedPieceId != 2) {
-        const img2 = renderShape(game_state.pieces[2], cell_size, block_img, true);
-        piece2_ctx2d.putImageData(img2, 0, 0);
+        const shape = getShape(game_state.pieces[2], true)
+        for (let i = 0; i < shape.length; i++) {
+            piece2_ctx2d.putImageData(
+                block_imgdata_cellsize,
+                cell_size * shape[i].c,
+                cell_size * shape[i].r,
+            )
+        }
     }
     console.timeStamp("BOT: draw_piecebuffer")
 }
@@ -425,15 +454,16 @@ async function initImageDatas() {
     tmp_img_data = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
     const color_block_srgb = tmp_img_data.data.slice(0, 4);
     for (let i = 0; i < block_imgdata_cellsize.data.length; i += 4) {
-        const r0 = Number(color_block_srgb[0]);
-        const g0 = Number(color_block_srgb[1]);
-        const b0 = Number(color_block_srgb[2]);
         const r1 = Number(block_imgdata_cellsize.data[i + 0]);
         const g1 = Number(block_imgdata_cellsize.data[i + 1]);
         const b1 = Number(block_imgdata_cellsize.data[i + 2]);
-        block_imgdata_cellsize.data[i + 0] = Math.round(lerp(r0, r1, 0.1));
-        block_imgdata_cellsize.data[i + 1] = Math.round(lerp(g0, g1, 0.1));
-        block_imgdata_cellsize.data[i + 2] = Math.round(lerp(b0, b1, 0.1));
+        const l1 = (r1 + g1 + b1) / 765;
+        block_imgdata_cellsize.data[i + 0] = Math.round(Number(color_block_srgb[0]) * l1);
+        block_imgdata_cellsize.data[i + 1] = Math.round(Number(color_block_srgb[1]) * l1);
+        block_imgdata_cellsize.data[i + 2] = Math.round(Number(color_block_srgb[2]) * l1);
+        // block_imgdata_cellsize.data[i + 0] = color_block_srgb[0];
+        // block_imgdata_cellsize.data[i + 1] = color_block_srgb[1];
+        // block_imgdata_cellsize.data[i + 2] = color_block_srgb[2];
     }
 
     // cell
@@ -445,7 +475,6 @@ async function initImageDatas() {
     ctx.fillRect(0, 0, cell_size, cell_size);
     tmp_img_data = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
     const color_cell_border_srgb = tmp_img_data.data.slice(0, 4);
-
     for (let i = 0; i < cell_img_data_cellsize.data.length; i += 4) {
         cell_img_data_cellsize.data[i + 0] = color_cell_border_srgb[0]
         cell_img_data_cellsize.data[i + 1] = color_cell_border_srgb[1]
