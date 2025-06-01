@@ -47,6 +47,24 @@ Uint8Array.prototype.sum = function () {
  * Sums the array
  * @returns sum as a Number
  */
+Uint8ClampedArray.prototype.sum = function () {
+    let result = 0;
+    for (let i = 0; i < this.length; i++) { result += this[i]; }
+    return result;
+}
+
+/**
+ * Sums the array
+ * @returns sum as a Number
+ */
+Uint8ClampedArray.prototype.mean = function () {
+    return this.sum() / Number(this.length);
+}
+
+/**
+ * Sums the array
+ * @returns sum as a Number
+ */
 Int16Array.prototype.sum = function () {
     let result = 0;
     for (let i = 0; i < this.length; i++) { result += this[i]; }

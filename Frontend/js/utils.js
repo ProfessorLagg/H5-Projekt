@@ -133,18 +133,49 @@ function rgb_to_hsv(R, G, B) {
     const cmin = Math.min(r, Math.min(g, b));
     const diff = cmax - cmin;
     let h = 0;
-    switch(cmax){
+    switch (cmax) {
         case r: h = (60 * ((g - b) / diff) + 360) % 360; break;
         case g: h = (60 * ((b - r) / diff) + 120) % 360; break;
         case b: h = (60 * ((r - g) / diff) + 240) % 360; break;
         default: break;
     }
-    return { 
+    return {
         h: h,
         s: cmax === 0 ? 0 : (diff / cmax),
         v: cmax
     };
 }
+
+// Blending Functions
 function lerp(v0, v1, t) {
     return (1 - t) * v0 + t * v1;
+}
+function screen(a, b) {
+    return 1.0 - (1.0 - a) * (1.0 - b);
+}
+function overlay(a, b) {
+    if (a < 0.5) {
+        return 2.0 * a * b;
+    } else {
+        return 1.0 - 2.0 * (1.0 - a) * (1.0 - b);
+    }
+}
+function hardlight(a, b) {
+    if (b < 0.5) {
+        return 2.0 * a * b;
+    } else {
+        return 1.0 - 2.0 * (1.0 - a) * (1.0 - b);
+    }
+}
+function softlight(a, b) {
+    const _2b = 2 * b;
+    const a2 = a * a;
+    const _2ba = 2 * (b * a);
+    return (1 - _2b) * a2 + _2ba;
+}
+function darken_only(a, b){
+    return Math.min(a,b);
+}
+function lighten_only(a, b){
+    return Math.max(a,b);
 }

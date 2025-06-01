@@ -46,12 +46,7 @@ const piece1_bounds = new DOMRect();
 const piece2_bounds = new DOMRect();
 const piecedrag_bounds = new DOMRect();
 
-// Colors
-const color_board_dark = '#977254';
-const color_board_light = '#b29680';
-const color_cell_border = 'white'; // 'rgb(100,45,0)'
-const color_cell_highlight = 'hsl(50, 100%, 50%)'; // 'hsl(50, 100%, 50%)'
-const color_block = '#653200';
+
 // draw functions
 var selectedPieceImageData = null;
 var selectedPieceShape = null;
@@ -435,6 +430,14 @@ async function initCellBounds() {
     console.timeEnd(arguments.callee.name);
 }
 
+// Colors
+// const color_board_dark = ;
+const color_board_dark = 'hsl(25, 50%, 20%)';
+const color_board_light = 'hsl(25, 50%, 80%)';
+const color_cell_border = 'hsl(15, 50%, 10%)';//'#977254'; // 'rgb(100,45,0)'
+const color_cell_highlight = 'hsl(50, 100%, 50%)'; // 'hsl(50, 100%, 50%)'
+const color_block = 'hsl(35, 50%, 50%)';//'#653200'; // 'magenta'
+// const color_block = 'magenta';
 async function initImageDatas() {
     console.time(arguments.callee.name);
 
@@ -453,17 +456,20 @@ async function initImageDatas() {
     ctx.fillRect(0, 0, cell_size, cell_size);
     tmp_img_data = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
     const color_block_srgb = tmp_img_data.data.slice(0, 4);
+    let r0 = Number(color_block_srgb[0]) / 255
+    let g0 = Number(color_block_srgb[1]) / 255
+    let b0 = Number(color_block_srgb[2]) / 255
     for (let i = 0; i < block_imgdata_cellsize.data.length; i += 4) {
-        const r1 = Number(block_imgdata_cellsize.data[i + 0]);
-        const g1 = Number(block_imgdata_cellsize.data[i + 1]);
-        const b1 = Number(block_imgdata_cellsize.data[i + 2]);
-        const l1 = (r1 + g1 + b1) / 765;
-        block_imgdata_cellsize.data[i + 0] = Math.round(Number(color_block_srgb[0]) * l1);
-        block_imgdata_cellsize.data[i + 1] = Math.round(Number(color_block_srgb[1]) * l1);
-        block_imgdata_cellsize.data[i + 2] = Math.round(Number(color_block_srgb[2]) * l1);
-        // block_imgdata_cellsize.data[i + 0] = color_block_srgb[0];
-        // block_imgdata_cellsize.data[i + 1] = color_block_srgb[1];
-        // block_imgdata_cellsize.data[i + 2] = color_block_srgb[2];
+        const r1 = Number(block_imgdata_cellsize.data[i + 0]) / 255;
+        const g1 = Number(block_imgdata_cellsize.data[i + 1]) / 255;
+        const b1 = Number(block_imgdata_cellsize.data[i + 2]) / 255;
+        const r = overlay(r0, r1);
+        const g = overlay(g0, g1);
+        const b = overlay(b0, b1);
+        block_imgdata_cellsize.data[i + 0] = Math.round(255 * r);
+        block_imgdata_cellsize.data[i + 1] = Math.round(255 * g);
+        block_imgdata_cellsize.data[i + 2] = Math.round(255 * b);
+        block_imgdata_cellsize.data[i + 3] = 255 * Number(block_imgdata_cellsize.data[i + 3] > 0);
     }
 
     // cell
@@ -475,10 +481,13 @@ async function initImageDatas() {
     ctx.fillRect(0, 0, cell_size, cell_size);
     tmp_img_data = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
     const color_cell_border_srgb = tmp_img_data.data.slice(0, 4);
+    r0 = Number(color_cell_border_srgb[0]) / 255
+    g0 = Number(color_cell_border_srgb[1]) / 255
+    b0 = Number(color_cell_border_srgb[2]) / 255
     for (let i = 0; i < cell_img_data_cellsize.data.length; i += 4) {
-        cell_img_data_cellsize.data[i + 0] = color_cell_border_srgb[0]
-        cell_img_data_cellsize.data[i + 1] = color_cell_border_srgb[1]
-        cell_img_data_cellsize.data[i + 2] = color_cell_border_srgb[2]
+        cell_img_data_cellsize.data[i + 0] = color_cell_border_srgb[0];
+        cell_img_data_cellsize.data[i + 1] = color_cell_border_srgb[1];
+        cell_img_data_cellsize.data[i + 2] = color_cell_border_srgb[2];
     }
 
     // highlight
