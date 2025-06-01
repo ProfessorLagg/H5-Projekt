@@ -317,12 +317,16 @@ function getShapevers() {
     return result * Number(TypeChecker.isInteger(result));
 }
 function getHighscore() {
+    if (TypeChecker.isNullOrUndefined(localStorage[highscore_key])) { localStorage[highscore_key] = '0'; }
     const result = parseInt(localStorage[highscore_key]);
-    return result * Number(TypeChecker.isInteger(result));
+    if (!TypeChecker.isIntegerInRange(result, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)) { return 0 }
+    return result;
 }
 function getLastscore() {
+    if (TypeChecker.isNullOrUndefined(localStorage[lastscore_key])) { localStorage[lastscore_key] = '0'; }
     const result = parseInt(localStorage[lastscore_key]);
-    return result * Number(TypeChecker.isInteger(result));
+    if (!TypeChecker.isIntegerInRange(result, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)) { return 0 }
+    return result;
 }
 function setLastscore(v) {
     TypeChecker.assertIsInteger(v);
