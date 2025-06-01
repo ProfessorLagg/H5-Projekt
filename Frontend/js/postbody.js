@@ -46,6 +46,12 @@ const piece1_bounds = new DOMRect();
 const piece2_bounds = new DOMRect();
 const piecedrag_bounds = new DOMRect();
 
+// Colors
+const color_board_dark = '#000000';
+const color_board_light = '#ffffff';
+// const color_cell_border = 'rgb(100,45,0)';
+const color_cell_border = 'rgb(127,127,127)';
+const color_cell_highlight = 'hsl(50, 100%, 50%)';
 
 // draw functions
 var selectedPieceImageData = null;
@@ -76,7 +82,8 @@ function draw_board_background() {
     board_background_ctx2d.fillRect(0, 0, board_canvas_size, board_canvas_size);
 
     // Dark Groups
-    board_background_ctx2d.fillStyle = "rgba(255,255,255,33%)";
+    // board_background_ctx2d.fillStyle = "rgba(255,255,255,20%)";
+    board_background_ctx2d.fillStyle = color_board_dark;
     board_background_ctx2d.fillRect(0, 0, group_size, group_size);
     board_background_ctx2d.fillRect(group_size * 2, 0, group_size, group_size);
     board_background_ctx2d.fillRect(group_size, group_size, group_size, group_size);
@@ -84,7 +91,8 @@ function draw_board_background() {
     board_background_ctx2d.fillRect(group_size * 2, group_size * 2, group_size, group_size);
 
     // Light Groups
-    board_background_ctx2d.fillStyle = "rgba(255,255,255,50%)";
+    // board_background_ctx2d.fillStyle = "rgba(255,255,255,50%)";
+    board_background_ctx2d.fillStyle = color_board_light;
     board_background_ctx2d.fillRect(group_size, 0, group_size, group_size);
     board_background_ctx2d.fillRect(0, group_size, group_size, group_size);
     board_background_ctx2d.fillRect(group_size * 2, group_size, group_size, group_size);
@@ -95,15 +103,14 @@ function draw_board_cells() {
     console.timeStamp("TOP: draw_board_cells")
     board_cells_ctx2d.clearRect(0, 0, board_canvas_size, board_canvas_size);
     for (let i = 0; i < cellPixelBounds.length; i++) {
-        const cell = cellPixelBounds[i];
-        board_cells_ctx2d.drawImage(
-            cell_img,
-            Math.floor(cell.x),
-            Math.floor(cell.y),
-            Math.floor(cell.w),
-            Math.floor(cell.h)
+        board_cells_ctx2d.putImageData(
+            cell_img_data_cellsize,
+            cellPixelBounds[i].x,
+            cellPixelBounds[i].y
         );
     }
+
+
     console.timeStamp("BOT: draw_board_cells")
 }
 function draw_board_highlight() {
@@ -399,25 +406,53 @@ async function initCellBounds() {
     }
     console.timeEnd(arguments.callee.name);
 }
+
 async function initImageDatas() {
     console.time(arguments.callee.name);
 
+    let tmp_img_data = undefined;
     const canvas = new OffscreenCanvas(cell_size, cell_size);
     const ctx = canvas.getContext("2d", { aplha: true, willReadFrequently: false });
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
+    // block
     ctx.clearRect(0, 0, cell_size, cell_size);
     ctx.drawImage(block_img, 0, 0, cell_size, cell_size);
     block_imgdata_cellsize = ctx.getImageData(0, 0, cell_size, cell_size);
 
+    // cell
+    ctx.fillStyle = color_cell_border;
+    ctx.fillRect(0, 0, cell_size, cell_size);
+    tmp_img_data = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
+    const color_cell_border_srgb = tmp_img_data.data.slice(0, 4);
+
     ctx.clearRect(0, 0, cell_size, cell_size);
     ctx.drawImage(cell_img, 0, 0, cell_size, cell_size);
-    cell_img_data_cellsize = ctx.getImageData(0, 0, cell_size, cell_size);
+    cell_img_data_cellsize = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
+    for (let i = 0; i < cell_img_data_cellsize.data.length; i += 4) {
+        cell_img_data_cellsize.data[i + 0] = color_cell_border_srgb[0];
+        cell_img_data_cellsize.data[i + 1] = color_cell_border_srgb[1];
+        cell_img_data_cellsize.data[i + 2] = color_cell_border_srgb[2];
+    }
+
+
+
+    // highlight
+    ctx.fillStyle = color_cell_highlight;
+    ctx.fillRect(0, 0, cell_size, cell_size);
+    tmp_img_data = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
+    const color_cell_highlight_srgb = tmp_img_data.data.slice(0, 4);
 
     ctx.clearRect(0, 0, cell_size, cell_size);
     ctx.drawImage(highlight_img, 0, 0, cell_size, cell_size);
     highlight_img_data_cellsize = ctx.getImageData(0, 0, cell_size, cell_size);
+    for (let i = 0; i < cell_img_data_cellsize.data.length; i += 4) {
+        highlight_img_data_cellsize.data[i + 0] = color_cell_highlight_srgb[0];
+        highlight_img_data_cellsize.data[i + 1] = color_cell_highlight_srgb[1];
+        highlight_img_data_cellsize.data[i + 2] = color_cell_highlight_srgb[2];
+    }
+
 
     console.timeEnd(arguments.callee.name);
 }
