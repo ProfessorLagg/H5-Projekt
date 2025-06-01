@@ -435,7 +435,7 @@ async function initCellBounds() {
 const color_board_dark = 'hsl(25, 50%, 20%)';
 const color_board_light = 'hsl(25, 50%, 80%)';
 const color_cell_border = 'hsl(15, 50%, 10%)';//'#977254'; // 'rgb(100,45,0)'
-const color_cell_highlight = 'hsl(50, 100%, 50%)'; // 'hsl(50, 100%, 50%)'
+const color_cell_highlight = 'hsl(205, 100%, 50%)'; // 'hsl(50, 100%, 50%)'
 const color_block = 'hsl(35, 50%, 50%)';//'#653200'; // 'magenta'
 // const color_block = 'magenta';
 async function initImageDatas() {
