@@ -47,12 +47,11 @@ const piece2_bounds = new DOMRect();
 const piecedrag_bounds = new DOMRect();
 
 // Colors
-const color_board_dark = '#000000';
-const color_board_light = '#ffffff';
-// const color_cell_border = 'rgb(100,45,0)';
-const color_cell_border = 'rgb(127,127,127)';
-const color_cell_highlight = 'hsl(50, 100%, 50%)';
-
+const color_board_dark = 'hsl(25, 50%, 15%)';
+const color_board_light = 'hsl(25, 50%, 30%)';
+const color_cell_border = 'white'; // 'rgb(100,45,0)'
+const color_cell_highlight = 'hsl(50, 100%, 50%)'; // 'hsl(50, 100%, 50%)'
+const color_block = "black";//'hsl(25, 50%, 40%)';
 // draw functions
 var selectedPieceImageData = null;
 var selectedPieceShape = null;
@@ -421,36 +420,51 @@ async function initImageDatas() {
     ctx.drawImage(block_img, 0, 0, cell_size, cell_size);
     block_imgdata_cellsize = ctx.getImageData(0, 0, cell_size, cell_size);
 
+    ctx.fillStyle = color_block;
+    ctx.fillRect(0, 0, cell_size, cell_size);
+    tmp_img_data = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
+    const color_block_srgb = tmp_img_data.data.slice(0, 4);
+    for (let i = 0; i < block_imgdata_cellsize.data.length; i += 4) {
+        const r0 = Number(color_block_srgb[0]);
+        const g0 = Number(color_block_srgb[1]);
+        const b0 = Number(color_block_srgb[2]);
+        const r1 = Number(block_imgdata_cellsize.data[i + 0]);
+        const g1 = Number(block_imgdata_cellsize.data[i + 1]);
+        const b1 = Number(block_imgdata_cellsize.data[i + 2]);
+        block_imgdata_cellsize.data[i + 0] = Math.round(lerp(r0, r1, 0.1));
+        block_imgdata_cellsize.data[i + 1] = Math.round(lerp(g0, g1, 0.1));
+        block_imgdata_cellsize.data[i + 2] = Math.round(lerp(b0, b1, 0.1));
+    }
+
     // cell
+    ctx.clearRect(0, 0, cell_size, cell_size);
+    ctx.drawImage(cell_img, 0, 0, cell_size, cell_size);
+    cell_img_data_cellsize = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
+
     ctx.fillStyle = color_cell_border;
     ctx.fillRect(0, 0, cell_size, cell_size);
     tmp_img_data = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
     const color_cell_border_srgb = tmp_img_data.data.slice(0, 4);
 
-    ctx.clearRect(0, 0, cell_size, cell_size);
-    ctx.drawImage(cell_img, 0, 0, cell_size, cell_size);
-    cell_img_data_cellsize = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
     for (let i = 0; i < cell_img_data_cellsize.data.length; i += 4) {
-        cell_img_data_cellsize.data[i + 0] = color_cell_border_srgb[0];
-        cell_img_data_cellsize.data[i + 1] = color_cell_border_srgb[1];
-        cell_img_data_cellsize.data[i + 2] = color_cell_border_srgb[2];
+        cell_img_data_cellsize.data[i + 0] = color_cell_border_srgb[0]
+        cell_img_data_cellsize.data[i + 1] = color_cell_border_srgb[1]
+        cell_img_data_cellsize.data[i + 2] = color_cell_border_srgb[2]
     }
 
-
-
     // highlight
+    ctx.clearRect(0, 0, cell_size, cell_size);
+    ctx.drawImage(highlight_img, 0, 0, cell_size, cell_size);
+    highlight_img_data_cellsize = ctx.getImageData(0, 0, cell_size, cell_size);
+
     ctx.fillStyle = color_cell_highlight;
     ctx.fillRect(0, 0, cell_size, cell_size);
     tmp_img_data = ctx.getImageData(0, 0, cell_size, cell_size, { colorSpace: "srgb" });
     const color_cell_highlight_srgb = tmp_img_data.data.slice(0, 4);
-
-    ctx.clearRect(0, 0, cell_size, cell_size);
-    ctx.drawImage(highlight_img, 0, 0, cell_size, cell_size);
-    highlight_img_data_cellsize = ctx.getImageData(0, 0, cell_size, cell_size);
-    for (let i = 0; i < cell_img_data_cellsize.data.length; i += 4) {
-        highlight_img_data_cellsize.data[i + 0] = color_cell_highlight_srgb[0];
-        highlight_img_data_cellsize.data[i + 1] = color_cell_highlight_srgb[1];
-        highlight_img_data_cellsize.data[i + 2] = color_cell_highlight_srgb[2];
+    for (let i = 0; i < highlight_img_data_cellsize.data.length; i += 4) {
+        highlight_img_data_cellsize.data[i + 0] = color_cell_highlight_srgb[0]
+        highlight_img_data_cellsize.data[i + 1] = color_cell_highlight_srgb[1]
+        highlight_img_data_cellsize.data[i + 2] = color_cell_highlight_srgb[2]
     }
 
 

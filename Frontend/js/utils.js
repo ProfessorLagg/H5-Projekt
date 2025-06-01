@@ -123,3 +123,33 @@ function getColumnCellIndexes(column) {
     }
     return result;
 }
+
+
+function rgb_to_hsv(r, g, b) {
+    r = r / 255.0;
+    g = g / 255.0;
+    b = b / 255.0;
+    const cmax = Math.max(r, Math.max(g, b));
+    const cmin = Math.min(r, Math.min(g, b));
+    const diff = cmax - cmin;
+    let h = -1;
+    let s = -1;
+
+    // if cmax and cmax are equal then h = 0
+    if (cmax == cmin) { h = 0; }
+    else if (cmax == r) { h = (60 * ((g - b) / diff) + 360) % 360; }
+    else if (cmax == g) { h = (60 * ((b - r) / diff) + 120) % 360; }
+    else if (cmax == b) { h = (60 * ((r - g) / diff) + 240) % 360; }
+
+    // if cmax equal zero
+    if (cmax == 0) { s = 0; }
+    else { s = (diff / cmax) * 100; }
+
+    // compute v
+    var v = cmax * 100;
+    document.write("(" + h.toFixed(1) + ", " + s + ", " + v + ")");
+
+}
+function lerp(v0, v1, t) {
+    return (1 - t) * v0 + t * v1;
+}
