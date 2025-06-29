@@ -86,7 +86,7 @@ body {
     aspect-ratio: 1/1;
     margin: var(--rw);
     /**/
-    background-color: hsl(240, 50%, 20%);
+    background-color: hsla(240, 50%, 20%, 0%);
 }
 
 .piece-canvas[placeable="0"] {
@@ -122,14 +122,18 @@ body {
 }
 
 #game-score {
+    position: relative;
+    top: calc(0.5 * var(--rh));
     grid-column-start: 3;
     grid-column-end: 3;
+    vertical-align: text-bottom;
 }
 
 #game-highscore::before {
     content: 'Highscore ';
     font-size: calc(1.618 * var(--rh));
     grid-column-end: 4;
+    vertical-align: text-bottom;
 }
 
 #game-highscore {
