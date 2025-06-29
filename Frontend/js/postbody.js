@@ -434,10 +434,9 @@ async function initCellBounds() {
 // const color_board_dark = ;
 const color_board_dark = 'hsl(25, 50%, 20%)';
 const color_board_light = 'hsl(25, 50%, 80%)';
-const color_cell_border = 'hsl(15, 50%, 10%)';//'#977254'; // 'rgb(100,45,0)'
+const color_cell_border = 'hsl(15, 20%, 20%)';
 const color_cell_highlight = 'hsl(205, 100%, 50%)'; // 'hsl(50, 100%, 50%)'
-const color_block = 'hsl(35, 50%, 50%)';//'#653200'; // 'magenta'
-// const color_block = 'magenta';
+const color_block = 'hsl(35, 50%, 50%)'; // '#653200';
 async function initImageDatas() {
     console.time(arguments.callee.name);
 
@@ -463,9 +462,9 @@ async function initImageDatas() {
         const r1 = Number(block_imgdata_cellsize.data[i + 0]) / 255;
         const g1 = Number(block_imgdata_cellsize.data[i + 1]) / 255;
         const b1 = Number(block_imgdata_cellsize.data[i + 2]) / 255;
-        const r = overlay(r0, r1);
-        const g = overlay(g0, g1);
-        const b = overlay(b0, b1);
+        const r = blendOverlay(r0, r1);
+        const g = blendOverlay(g0, g1);
+        const b = blendOverlay(b0, b1);
         block_imgdata_cellsize.data[i + 0] = Math.round(255 * r);
         block_imgdata_cellsize.data[i + 1] = Math.round(255 * g);
         block_imgdata_cellsize.data[i + 2] = Math.round(255 * b);
@@ -485,9 +484,15 @@ async function initImageDatas() {
     g0 = Number(color_cell_border_srgb[1]) / 255
     b0 = Number(color_cell_border_srgb[2]) / 255
     for (let i = 0; i < cell_img_data_cellsize.data.length; i += 4) {
-        cell_img_data_cellsize.data[i + 0] = color_cell_border_srgb[0];
-        cell_img_data_cellsize.data[i + 1] = color_cell_border_srgb[1];
-        cell_img_data_cellsize.data[i + 2] = color_cell_border_srgb[2];
+        const r1 = Number(cell_img_data_cellsize.data[i + 0]) / 255;
+        const g1 = Number(cell_img_data_cellsize.data[i + 1]) / 255;
+        const b1 = Number(cell_img_data_cellsize.data[i + 2]) / 255;
+        const r = blendOverlay(r0, r1);
+        const g = blendOverlay(g0, g1);
+        const b = blendOverlay(b0, b1);
+        cell_img_data_cellsize.data[i + 0] = Math.round(255 * r);
+        cell_img_data_cellsize.data[i + 1] = Math.round(255 * g);
+        cell_img_data_cellsize.data[i + 2] = Math.round(255 * b);
     }
 
     // highlight

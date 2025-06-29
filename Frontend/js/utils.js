@@ -147,35 +147,35 @@ function rgb_to_hsv(R, G, B) {
 }
 
 // Blending Functions
-function lerp(v0, v1, t) {
+function blendLerp(v0, v1, t) {
     return (1 - t) * v0 + t * v1;
 }
-function screen(a, b) {
+function blendScreen(a, b) {
     return 1.0 - (1.0 - a) * (1.0 - b);
 }
-function overlay(a, b) {
+function blendOverlay(a, b) {
     if (a < 0.5) {
         return 2.0 * a * b;
     } else {
         return 1.0 - 2.0 * (1.0 - a) * (1.0 - b);
     }
 }
-function hardlight(a, b) {
+function blendHardLight(a, b) {
     if (b < 0.5) {
         return 2.0 * a * b;
     } else {
         return 1.0 - 2.0 * (1.0 - a) * (1.0 - b);
     }
 }
-function softlight(a, b) {
+function blendSoftLight(a, b) {
     const _2b = 2 * b;
     const a2 = a * a;
     const _2ba = 2 * (b * a);
     return (1 - _2b) * a2 + _2ba;
 }
-function darken_only(a, b){
+function blendDarkeOnly(a, b){
     return Math.min(a,b);
 }
-function lighten_only(a, b){
+function blendLightenOnly(a, b){
     return Math.max(a,b);
 }
