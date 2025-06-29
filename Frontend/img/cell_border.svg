@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90">
-    <defs>
-        <mask id="m2">
-            <rect width="90" height="90" fill="white"/>
-            <rect width="80" height="80" transform="translate(5 5)" fill="black"/>
-        </mask>
-    </defs>
-    <rect width="100%" height="100%" fill="#FFF" mask="url(#m2)"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"><defs><mask id="prefix__a"><rect width="90" height="90" fill="#fff"/><rect width="80" height="80" transform="translate(5 5)"/></mask></defs><rect width="100%" height="100%" fill="#FFF" mask="url(#prefix__a)"/></svg>
