@@ -329,11 +329,9 @@ function gameLoop(timestamp = -1) {
         draw_score();
     }
 
-
-
     lastGameUpdate = timestamp;
     console.timeStamp(fps_str + "gameLoop END");
-    requestAnimationFrame(gameLoop);
+    window.requestAnimationFrame(gameLoop);
 }
 
 
@@ -409,7 +407,7 @@ async function init() {
     await initResizeEvent();
     setLastscore(0);
     showMenu();
-    requestAnimationFrame(gameLoop);
+    window.requestAnimationFrame(gameLoop);
     console.timeEnd(arguments.callee.name)
 }
 async function initCellBounds() {
