@@ -295,10 +295,52 @@ var redraw_drag = true;
 var redraw_piecebuffer = true;
 var redraw_score = true;
 var lastGameUpdate = 0;
-function gameLoop(timestamp = -1) {
+
+function gameLoopFrame(timestamp = -1) {
     const fps = Math.round(1000 / (timestamp - lastGameUpdate));
     const fps_str = fps.toString().padStart(3, ' ') + " FPS | "
     console.timeStamp(fps_str + "gameLoop BEGIN");
+
+    if (redraw_background) {
+        redraw_background = false;
+        draw_board_background();
+        draw_board_cells();
+    }
+    if (redraw_boardstate) {
+        redraw_boardstate = false;
+        draw_board_state();
+    }
+    if (redraw_highlights) {
+        redraw_highlights = false;
+        draw_board_highlight();
+    }
+    if (redraw_drag) {
+        redraw_drag = false;
+        draw_piecedrag();
+    }
+    if (redraw_piecebuffer) {
+        redraw_piecebuffer = false;
+        draw_piecebuffer();
+    }
+    if (redraw_score) {
+        redraw_score = false;
+        draw_score();
+    }
+
+    lastGameUpdate = timestamp;
+    console.timeStamp(fps_str + "gameLoop END");
+    window.requestAnimationFrame(gameLoopFrame);
+}
+
+
+function gameLoopInterval(timestamp = -1) {
+    const fps = Math.round(1000 / (timestamp - lastGameUpdate));
+    const fps_str = fps.toString().padStart(3, ' ') + " FPS | "
+    console.timeStamp(fps_str + "gameLoop BEGIN");
+
+
+    let render_funcs = []
+
     if (redraw_background) {
         redraw_background = false;
         draw_board_background();
@@ -311,12 +353,12 @@ function gameLoop(timestamp = -1) {
 
     if (redraw_highlights) {
         redraw_highlights = false;
-        draw_board_highlight();
+        draw_board_highlight()
     }
 
     if (redraw_drag) {
         redraw_drag = false;
-        draw_piecedrag();
+        draw_piecedrag()
     }
 
     if (redraw_piecebuffer) {
@@ -331,9 +373,7 @@ function gameLoop(timestamp = -1) {
 
     lastGameUpdate = timestamp;
     console.timeStamp(fps_str + "gameLoop END");
-    window.requestAnimationFrame(gameLoop);
 }
-
 
 // Storage
 const shapevers_key = 'shapes-version';
@@ -394,6 +434,16 @@ function loadGame() {
 }
 
 // init
+async function getRepaintInterval() {
+    return await new Promise((resolve) => {
+        requestAnimationFrame((t1) => {
+            requestAnimationFrame((t2) => {
+                resolve(t2 - t1);
+            });
+        });
+    });
+}
+
 async function init() {
     console.time(arguments.callee.name);
     await loadShapes();
@@ -407,7 +457,8 @@ async function init() {
     await initResizeEvent();
     setLastscore(0);
     showMenu();
-    window.requestAnimationFrame(gameLoop);
+    // window.setInterval(gameLoopInterval, Math.ceil(await getRepaintInterval()));
+    window.requestAnimationFrame(gameLoopFrame);
     console.timeEnd(arguments.callee.name)
 }
 async function initCellBounds() {
